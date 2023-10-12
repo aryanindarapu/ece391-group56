@@ -11,6 +11,7 @@ uint8_t slave_mask;  /* IRQs 8-15 */
 
 /* Initialize the 8259 PIC */
 void i8259_init(void) {
+    // TODO: initialize devices
 }
 
 /* Enable (unmask) the specified IRQ */
