@@ -24,8 +24,8 @@ _start:
     jmp     continue
 
 continue:
-    # Load the GDT
-
+    # TODO: Load the GDT
+    # INTEL IA-32 CALL 16-bit limit = 0xFFFF
     # Load CS with the new descriptor value
     ljmp    $KERNEL_CS, $keep_going
 

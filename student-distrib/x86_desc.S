@@ -27,13 +27,27 @@ ldt_desc:
     .long ldt
 
     .align 4
+
+# MP3.1: Created gdt_size and gdt_desc
+gdt_size:
+# <gdt size> the size is 8191 since the first adress is unused
+    .long gdt_bottom - gdt - 1 
+
+# TODO: is this call necessary for program?
+gdt_desc:
+# <gdt address>
+    .long gdt_ptr
+
+    .align 4
+
+# MP3.1: END
 tss:
 _tss:
     .rept 104
     .byte 0
     .endr
 tss_bottom:
-
+    # TODO: Ask for conceptually understanding of .align
     .align  16
 gdt:
 _gdt:
@@ -42,7 +56,7 @@ _gdt:
     .quad 0
 
     # NULL entry
-    .quad 0
+    .quad 0 
 
     # Segmentation will not be used
     # CS and DS both are 0-4GB r/w segments
@@ -61,6 +75,7 @@ _gdt:
     # |                                    |                                 |
     # |----------------------------------------------------------------------|
 
+# TODO: why is this 64 bits?
 gdt_ptr:
     # Set up an entry for kernel CS
     .quad 0x00CF9A000000FFFF
@@ -74,6 +89,8 @@ gdt_ptr:
     # Set up an entry for user DS
     .quad 0x00CFF2000000FFFF
 
+    # MP3.1 TODO: Create spaace between 5-20 for GDT (Lect 15, P5)
+    # for 64 bit register information... page 50 of IA-32 Intel docu
     # Set up an entry for TSS
 tss_desc_ptr:
     .quad 0
@@ -93,11 +110,14 @@ ldt_bottom:
 
 .align 4
     .word 0 # Padding
+
+# TODO: initialize IDT
 idt_desc_ptr:
     .word idt_bottom - idt - 1
     .long idt
-
-
+    # changed from FFFF to 00FF since we only need 256 entries in IDT
+    # .quad 0x00CF9A00000000FF # TODO: check if right
+    
     .align  16
 idt:
 _idt:
@@ -106,3 +126,4 @@ _idt:
     .endr
 
 idt_bottom:
+
