@@ -28,13 +28,13 @@ ldt_desc:
 
     .align 4
 
+
 # MP3.1: Created gdt_size and gdt_desc
+# TODO: is this call necessary for program?
+gdt_desc:
 gdt_size:
 # <gdt size> the size is 8191 since the first adress is unused
     .long gdt_bottom - gdt - 1 
-
-# TODO: is this call necessary for program?
-gdt_desc:
 # <gdt address>
     .long gdt_ptr
 
