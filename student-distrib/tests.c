@@ -54,8 +54,12 @@ int idt_test(){
 
 
 /* Test suite entry point */
-void launch_tests(){
+void launch_tests() {
+	// int a, b, c;
 	// TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
-	printf("please print");
+	printf("please print\n");
+	// a = 10;
+	// b = 0;
+	// c = a / b;
 }
