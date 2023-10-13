@@ -139,21 +139,6 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Construct IDT entries*/
     /* */
     // TODO: do we set the IDTR? 
-    {
-        seg_desc_t the_ldt_desc;
-        the_ldt_desc.granularity = 0x0;
-        the_ldt_desc.opsize      = 0x1;
-        the_ldt_desc.reserved    = 0x0;
-        the_ldt_desc.avail       = 0x0;
-        the_ldt_desc.present     = 0x1;
-        the_ldt_desc.dpl         = 0x0;
-        the_ldt_desc.sys         = 0x0;
-        the_ldt_desc.type        = 0x2;
-
-        SET_LDT_PARAMS(the_ldt_desc, &ldt, ldt_size);
-        ldt_desc_ptr = the_ldt_desc;
-        lldt(KERNEL_LDT);
-    }
     /* x80 sys call interupt */
     // TODO: set idt entries here with a function
     // call SET_IDT_ENTRY with the function that acts as the handler
@@ -162,12 +147,6 @@ void entry(unsigned long magic, unsigned long addr) {
 
     // fill out idt segment descriptor based on INT vs TRAP @ page 156
     // INT table @ page 145
-    {
-        // create an idt descriptor
-        idt_desc_t sys_call_test;
-        sys_call_test
-        idt[128] = sys_call_test;
-    }
 
     lidt(idt_desc_ptr);
 
