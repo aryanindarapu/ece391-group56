@@ -25,12 +25,9 @@ _start:
 
 continue:
     # TODO: Load the GDT
+    lgdt _gdt
     # INTEL IA-32 CALL 16-bit limit = 0xFFFF
     # Load CS with the new descriptor value
-    # KERNEL_CS   0x0010
-    # KERNEL_DS   0x0018
-    # USER_CS     0x0023
-    # USER_DS     0x002B
     ljmp    $KERNEL_CS, $keep_going
 
 keep_going:
