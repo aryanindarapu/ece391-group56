@@ -28,15 +28,6 @@ ldt_desc:
 
     .align 4
 
-
-# MP3.1: Created gdt_size and gdt_desc, set address to gdt_ptr
-
-gdt_desc:
-# <gdt size>
-   .word gdt_bottom - gdt - 1 
-# <gdt address>
-   .long gdt
-
 # MP3.1: END
 tss:
 _tss:
@@ -98,6 +89,14 @@ ldt_desc_ptr:
 
 gdt_bottom:
     .align 16
+    
+# MP3.1: Created gdt_size and gdt_desc, set address to gdt_ptr
+
+gdt_desc:
+# <gdt size>
+   .word gdt_bottom - gdt - 1 
+# <gdt address>
+   .long gdt
 
 ldt:
     .rept 4
@@ -107,10 +106,6 @@ ldt:
 ldt_bottom:
 .align 4
     .word 0 # Padding
-
-gdt_desc_ptr:
-    .word gdt_bottom - gdt - 1
-    .long gdt
 
 # TODO: initialize IDT
 idt_desc_ptr:
