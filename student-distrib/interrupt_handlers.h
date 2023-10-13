@@ -1,5 +1,7 @@
 #include "lib.h"
 
+int get_line_number();
+
 int divide_error();
 int nmi_interrupt();
 int breakpoint();
@@ -14,7 +16,7 @@ int segment_not_present();
 int stack_segment_fault();
 int general_protection();
 int page_fault();
-int x87_FPU_floating_point_error();
+int x87_fpu_floating_point_error();
 int alignment_check();
 int machine_alignment();
 int simd_floating_point_exception();
