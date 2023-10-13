@@ -216,5 +216,5 @@ do {                                    \
 } while (0)
 
 #endif /* ASM */
-
+    
 #endif /* _x86_DESC_H */

@@ -8,8 +8,9 @@
 #include "i8259.h"
 #include "debug.h"
 #include "tests.h"
+#include "idt.h"
 
-#define RUN_TESTS
+#define RUN_TESTS 1
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -147,6 +148,8 @@ void entry(unsigned long magic, unsigned long addr) {
 
     // fill out idt segment descriptor based on INT vs TRAP @ page 156
     // INT table @ page 145
+
+    idt_init();
 
     lidt(idt_desc_ptr);
 
