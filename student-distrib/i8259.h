@@ -16,11 +16,14 @@
 #define PIC2_COMMAND	SLAVE_8259_PORT
 #define PIC2_DATA	    (SLAVE_8259_PORT+1)
 
-#define
+/* keyboard and RTC port*/
+#define KEYBOARD_PORT       0x60
+
 
 /* Initialization control words to init each PIC.
  * See the Intel manuals for details on the meaning
  * of each word */
+#define ICW1_INIT           0x10
 #define ICW1                0x11
 #define ICW2_MASTER         0x20
 #define ICW2_SLAVE          0x28
@@ -44,14 +47,15 @@ void disable_irq(uint32_t irq_num);
 /* Send end-of-interrupt signal for the specified IRQ */
 void send_eoi(uint32_t irq_num);
 /* offset pic vector and set up primary/secondary cascade */ //TODO : check definition
-void PIC_remap(int offset1, int offset2)
+void PIC_remap(int offset1, int offset2);
 //int int handle_PIC_trash();
 
 //https://wiki.osdev.org/8259_PIC
 //https://forum.osdev.org/viewtopic.php?f=1&t=9746&sid=1847604ca981b6bbc22c6e8f9e97e7da&start=15
 //https://wiki.osdev.org/8259_PIC#The_IBM_PC_8259_PIC_Architecture
 //https://courses.engr.illinois.edu/ece391/fa2023/secure/references/IA32-ref-manual-vol-3.pdf
-//
+//https://stackoverflow.com/questions/37618111/keyboard-irq-within-an-x86-kernel ***********************************************************
+
 
 
 #endif /* _I8259_H */

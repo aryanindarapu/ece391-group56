@@ -77,7 +77,10 @@ int idt_init() { // TODO: change to init_idt
     SET_IDT_ENTRY(idt[0x12], machine_check);
     SET_IDT_ENTRY(idt[0x13], simd_floating_point_exception);
 
+    SET_IDT_ENTRY(idt[0x21], read_keyboard); // PIC INT call
+    
     SET_IDT_ENTRY(idt[0x80], system_call); // INT system call
+    
 
     int i;
     for (i = 0; i < NUM_VEC; i++) {
@@ -99,7 +102,7 @@ int idt_init() { // TODO: change to init_idt
             idt[i].reserved2 = 1;
             idt[i].reserved3 = 1;
             idt[i].seg_selector = KERNEL_CS;
-        } else if (i == 0x80) {
+        } else if (i == 0x80 || i == 0x21) {
             idt[i].present = 1;
             idt[i].dpl = 1; // set privilege level 1
             idt[i].reserved0 = 0;

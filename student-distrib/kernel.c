@@ -182,7 +182,7 @@ void entry(unsigned long magic, unsigned long addr) {
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
     // printf("Enabling Interrupts\n");
-    // sti();
+    sti();
 
 #ifdef RUN_TESTS
     /* Run tests */

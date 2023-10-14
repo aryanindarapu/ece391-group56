@@ -21,19 +21,22 @@ void i8259_init(void) {
     // TODO: initialize devices
     // look pg 795-796
     
-    master_mask = 0x00;
-    slave_mask = 0x00;
+    // master_mask = 0x00;
+    // slave_mask = 0x00;
 
-	for(i = 0; i<16; i++)
+    // Disable all IRQs while we initialize PIC
+	for(i = 0; i < 16; i++)
 	{
 		disable_irq(i);
 	}
     
     // Offset primary PIC to 0x20 on IDT, offset secondary PIC to 0x28 on IDT
 	PIC_remap(0x20, 0x28);
-   
 	
-    
+	// Enable IRQ for keyboard and for RTC
+    enable_irq(1);
+	printf("finished init pic\n");
+    //enable_irq(9);
 }
 
 
@@ -74,10 +77,11 @@ void disable_irq(uint32_t irq_num) {
 void send_eoi(uint32_t irq_num) {
     // TODO: Check the irq_num to see if it is greater than 8, that means we have to go to the second PIC
     //outb(EOI | irq_num, MASTER_8259_PORT); // TODO: Explain/check
-    if(irq_num >= 8)
-		outb(PIC_EOI, PIC2_COMMAND);
+    if(irq_num >= 8) {
+        outb(EOI|irq_num, PIC2_COMMAND);
+    }
  
-	outb(PIC_EOI, PIC1_COMMAND);
+	outb(EOI|irq_num, PIC1_COMMAND);
 }
 
 /*
@@ -93,9 +97,9 @@ void PIC_remap(int offset1, int offset2)
 	a1 = inb(PIC1_DATA);                        // save masks
 	a2 = inb(PIC2_DATA);
  
-	outb(ICW1_INIT | ICW1_ICW4, PIC1_COMMAND);  // starts the initialization sequence (in cascade mode)
-	io_wait();
-	outb(ICW1_INIT | ICW1_ICW4, PIC2_COMMAND);
+	outb(ICW1_INIT | ICW4, PIC1_COMMAND);  // starts the initialization sequence (in cascade mode)
+	io_wait(); // TODO: what is this?
+	outb(ICW1_INIT | ICW4, PIC2_COMMAND);
 	io_wait();
 	outb(offset1, PIC1_DATA);                 // ICW2: Master PIC vector offset
 	io_wait();
@@ -106,13 +110,14 @@ void PIC_remap(int offset1, int offset2)
 	outb(2, PIC2_DATA);                       // ICW3: tell Slave PIC its cascade identity (0000 0010)
 	io_wait();
  
-	outb(ICW4_8086, PIC1_DATA);               // ICW4: have the PICs use 8086 mode (and not 8080 mode)
+	outb(ICW4, PIC1_DATA);               // ICW4: have the PICs use 8086 mode (and not 8080 mode)
 	io_wait();
-	outb(ICW4_8086, PIC2_DATA);
+	outb(ICW4, PIC2_DATA);
 	io_wait();
  
 	outb(a1, PIC1_DATA);   // restore saved masks.
 	outb(a2, PIC2_DATA);
+	printf("remap done\n");
 }
 
 

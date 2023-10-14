@@ -110,3 +110,22 @@ void system_call() {
     printf("system call occurred\n");
     while (1);   
 }
+
+void read_keyboard() {
+    unsigned char status;
+    char keycode;
+    
+    int current_loc = 0;
+    status = inb(0x64);
+    /* Lowest bit of status will be set if buffer is not empty */
+    if (status & 0x01) {
+        keycode = read_port(0x60);
+        if(keycode < 0)
+            return;
+        vidptr[current_loc++] = keyboard_map[keycode];
+        vidptr[current_loc++] = 0x07;
+    }
+
+    write_port(0x20, 0x20);
+    printf("keyboard int occured\n");
+}
