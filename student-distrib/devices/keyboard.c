@@ -25,8 +25,9 @@ void keyboard_handler () {
 void read_keyboard () {
     
     //printf("keyboard int occured\n");
-    // unsigned char status;
+    unsigned char status;
     unsigned char keycode;
+    
     
     unsigned char keyboard_map[128] =
     {
@@ -68,8 +69,11 @@ void read_keyboard () {
         0,  /* All other keys are undefined */
     };
     
-    keycode = inb(0x60);
-    if(keycode > 0)
+    //keycode = inb(0x60);
+    status = inb(0x64);  
+    if(status & 0x01){
+        keycode = inb(0x60);  
+        if(keycode > 0)
         printf("%c", keyboard_map[keycode]);
-
+    }
 }
