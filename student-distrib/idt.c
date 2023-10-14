@@ -2,7 +2,7 @@
 #include "interrupt_handlers.h"
 #include "lib.h" // for printing
 
-int* FUNCTION_POINTERS[NUM_VEC];
+int (*FUNCTION_POINTERS[NUM_VEC])();
 
 
 /* NOTE: IDT DPL levels - @ page 113
