@@ -151,8 +151,6 @@ void entry(unsigned long magic, unsigned long addr) {
 
     idt_init();
 
-    lidt(idt_desc_ptr);
-
     /* Init the PIC */
     i8259_init();
 
@@ -163,8 +161,8 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
-    printf("Enabling Interrupts\n");
-    sti();
+    // printf("Enabling Interrupts\n");
+    // sti();
 
 #ifdef RUN_TESTS
     /* Run tests */
