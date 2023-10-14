@@ -13,8 +13,8 @@ uint8_t slave_mask;  /* IRQs 8-15 */
 void i8259_init(void) {
     // TODO: initialize devices
 
-    master_mask = 0x00;
-    slave_mask = 0x00;
+    // master_mask = 0x00;
+    // slave_mask = 0x00;
     /*
         idt_desc_t idt_descriptor;
         idt_descriptor.present = 1;
@@ -36,15 +36,15 @@ void i8259_init(void) {
 
 /* Enable (unmask) the specified IRQ */
 void enable_irq(uint32_t irq_num) {
-    master_mask = master_mask & (1<<irq_num);
+    // master_mask = master_mask & (1<<irq_num);
 }
 
 /* Disable (mask) the specified IRQ */
 void disable_irq(uint32_t irq_num) {
-    master_mask = master_mask & (0xffff-(1<<irq_num));
+    // master_mask = master_mask & (0xffff-(1<<irq_num));
 }
 
 /* Send end-of-interrupt signal for the specified IRQ */
 void send_eoi(uint32_t irq_num) {
-    outb(EOI | irq_num, MASTER_8259_PORT);
+    // outb(EOI | irq_num, MASTER_8259_PORT);
 }
