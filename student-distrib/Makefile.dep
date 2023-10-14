@@ -9,3 +9,4 @@ kernel.o: kernel.c multiboot.h types.h x86_desc.h lib.h i8259.h debug.h \
 keyboard.o: keyboard.c
 lib.o: lib.c lib.h types.h
 tests.o: tests.c tests.h x86_desc.h types.h lib.h
+keyboard_handler.o: devices/keyboard_handler.S

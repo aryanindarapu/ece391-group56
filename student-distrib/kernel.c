@@ -5,7 +5,7 @@
 #include "multiboot.h"
 #include "x86_desc.h"
 #include "lib.h"
-#include "i8259.h"
+#include "devices/i8259.h"
 #include "debug.h"
 #include "tests.h"
 #include "idt.h"

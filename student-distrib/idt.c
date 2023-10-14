@@ -1,5 +1,5 @@
 #include "idt.h"
-#include "interrupt_handlers.h"
+#include "exceptions.h"
 #include "lib.h" // for printing
 
 // int (*FUNCTION_POINTERS[NUM_VEC])(); // Array of function pointers to handlers
