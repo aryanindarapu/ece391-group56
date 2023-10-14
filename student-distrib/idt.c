@@ -150,7 +150,7 @@ int idt_init() { // TODO: change to init_idt
     // Setting up for divide error - Interrupt gate
     // .offset_15_00 = 0;
     printf("reached idt init\n");
-
+    lidt(idt_desc_ptr);
     // int i;
     // for (i = 0; i < NUM_VEC; i++) {
     //     switch (i) {

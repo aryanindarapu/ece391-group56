@@ -4,7 +4,7 @@
 
 #define PASS 1
 #define FAIL 0
-#define TEST_VECTOR 0 // 
+#define TEST_VECTOR 128 // 
 
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
@@ -56,6 +56,8 @@ int test_divide_error() {
 	return 0;
 }
 
+// TODO: add more tests for each interrupt
+
 // add more tests here
 
 /* Checkpoint 2 tests */
@@ -76,6 +78,7 @@ void launch_tests() {
 		break;
 	
 	default:
+		asm volatile("int $128");
 		break;
 	}
 
