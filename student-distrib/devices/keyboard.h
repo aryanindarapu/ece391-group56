@@ -1,2 +1,3 @@
-void keyboard_init();
-void keyboard_read();
+void init_keyboard();
+void read_keyboard();
+void keyboard_handler();

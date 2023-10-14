@@ -9,15 +9,24 @@
 #include "../x86_desc.h"
 #include "keyboard.h"
 
-void keyboard_init() {
+void init_keyboard() {
     enable_irq(1);
 }
 
-void keyboard_read() {
+void keyboard_handler () {
+    // Read input from keyboard
+    read_keyboard();
+    
+    // Signal that interupt is done
+    send_eoi(1);
+}
+
+
+void read_keyboard () {
     
     //printf("keyboard int occured\n");
-    unsigned char status;
-    char keycode;
+    // unsigned char status;
+    unsigned char keycode;
     
     unsigned char keyboard_map[128] =
     {

@@ -1,1 +1,3 @@
-void keyboard_handler_linkage();
+#include "devices/keyboard.h"
+
+extern void keyboard_handler_linkage();

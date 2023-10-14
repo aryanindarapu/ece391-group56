@@ -48,8 +48,8 @@ void i8259_init(void) {
 /* Enable (unmask) the specified IRQ */
 void enable_irq(uint32_t irq_num) {
     //master_mask = master_mask & (1<<irq_num); // TODO: Explain/check
-	uint16_t port;
-    uint8_t value;
+	// uint16_t port;
+    // uint8_t value;
  
     // if(irq_num < 8) {
     //     port = PIC1_DATA;
@@ -59,22 +59,21 @@ void enable_irq(uint32_t irq_num) {
     // }
     // value = inb(port) & ~(1 << irq_num);
     // outb(value, port);  
-     if(irq_num < 8) {
-       master_mask&=~(1<<irq_num);
-       outb(master_mask,PIC1_DATA);
-     }
-     else{
-        slave_mask&=~(1<<irq_num-8);
-       outb(master_mask,PIC2_DATA);
-     }
-     return;
+    if (irq_num < 8) {
+        master_mask &= (~(1 << irq_num));
+        outb(master_mask,PIC1_DATA);
+    } else {
+        slave_mask &= (~(1 << (irq_num - 8)));
+        outb(master_mask,PIC2_DATA);
+    }
+    return;
 }
 
 /* Disable (mask) the specified IRQ */
 void disable_irq(uint32_t irq_num) {
     //master_mask = master_mask & (0xffff-(1<<irq_num)); // TODO: Explain/check
-	uint16_t port;
-    uint8_t value;
+	// uint16_t port;
+    // uint8_t value;
  
     // if(irq_num < 8) {
     //     port = PIC1_DATA;
@@ -84,29 +83,26 @@ void disable_irq(uint32_t irq_num) {
     // }
     // value = inb(port) | (1 << irq_num);
     // outb(value, port);
-         if(irq_num < 8) {
-       master_mask|=~(1<<irq_num);
-       outb(master_mask,PIC1_DATA);
-     }
-     else{
-        slave_mask|=~(1<<irq_num-8);
-       outb(master_mask,PIC2_DATA);
-     }
-     return;
+    if (irq_num < 8) {
+        master_mask |= (~(1 << irq_num));
+        outb(master_mask, PIC1_DATA);
+    } else {
+        slave_mask |= (~(1 << (irq_num - 8)));
+        outb(master_mask, PIC2_DATA);
+    }
+    return;
 }
 
 /* Send end-of-interrupt signal for the specified IRQ */
 void send_eoi(uint32_t irq_num) {
     // TODO: Check the irq_num to see if it is greater than 8, that means we have to go to the second PIC
     //outb(EOI | irq_num, MASTER_8259_PORT); // TODO: Explain/check
-    if(irq_num >= 8) {
-        outb(EOI|(irq_num-8), PIC2_COMMAND);
-        outb(EOI|0x02, PIC1_COMMAND); // TODO: comment on hard coded x02
-    }
-    else
-    {
+    if (irq_num >= 8) {
+        outb(EOI | (irq_num - 8), PIC2_COMMAND);
+        outb(EOI | 0x02, PIC1_COMMAND); // TODO: comment on hard coded x02
+    } else {
         //printf("in EOI %d\n", irq_num);
-        outb(EOI|irq_num, PIC1_COMMAND);
+        outb(EOI | irq_num, PIC1_COMMAND);
         //printf("finish EOI\n");
     }   
 }

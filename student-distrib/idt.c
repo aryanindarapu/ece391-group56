@@ -1,5 +1,6 @@
 #include "idt.h"
 #include "exceptions.h"
+#include "asm_linkage.h"
 #include "lib.h" // for printing
 
 // int (*FUNCTION_POINTERS[NUM_VEC])(); // Array of function pointers to handlers
@@ -126,7 +127,7 @@ int idt_init() { // TODO: change to init_idt
     SET_IDT_ENTRY(idt[0x12], machine_check);
     SET_IDT_ENTRY(idt[0x13], simd_floating_point_exception);
     
-    SET_IDT_ENTRY(idt[0x21], read_keyboard); // PIC INT call
+    SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage); // PIC INT call
     //SET_IDT_ENTRY(idt[0x21], read_keyboard_linkage);
     //intr_link(read_keyboard_linkage,read_keyboard); - in ASM file
     // in linkage.h - extern void linkage functions
