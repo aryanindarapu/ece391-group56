@@ -21,6 +21,7 @@
 
 /* Number of vectors in the interrupt descriptor table (IDT) */
 #define NUM_VEC     256
+#define MAX_KERNEL_INTR 32
 
 #ifndef ASM
 
