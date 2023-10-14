@@ -16,25 +16,26 @@ void i8259_init(void) {
     // outb(MASTER_8259_PORT, ICW1);
     // io_wait();
     
-    int i;
-    
+    // int i;
+    // for(i = 0; i < 16; i++)
+    // {
+    //     disable_irq(i);
+    // }
+
     // TODO: initialize devices
     // look pg 795-796
     
-    // master_mask = 0x00;
-    // slave_mask = 0x00;
+    master_mask = 0xFF;
+    slave_mask = 0xFF;
 
-    // Disable all IRQs while we initialize PIC
-	for(i = 0; i < 16; i++)
-	{
-		disable_irq(i);
-	}
     
     // Offset primary PIC to 0x20 on IDT, offset secondary PIC to 0x28 on IDT
-	PIC_remap(0x20, 0x28);
+	PIC_remap(ICW2_MASTER, ICW2_SLAVE);
 	
 	// Enable IRQ for keyboard and for RTC
-    enable_irq(1);
+    enable_irq(1); // TODO: move to keyboard init fnc
+    enable_irq(2); // TODO: enable slave pic
+    
 	printf("finished init pic\n");
     //enable_irq(9);
 }
@@ -47,14 +48,23 @@ void enable_irq(uint32_t irq_num) {
 	uint16_t port;
     uint8_t value;
  
-    if(irq_num < 8) {
-        port = PIC1_DATA;
-    } else {
-        port = PIC2_DATA;
-        irq_num -= 8;
-    }
-    value = inb(port) | (1 << irq_num);
-    outb(value, port);   
+    // if(irq_num < 8) {
+    //     port = PIC1_DATA;
+    // } else {
+    //     port = PIC2_DATA;
+    //     irq_num -= 8;
+    // }
+    // value = inb(port) & ~(1 << irq_num);
+    // outb(value, port);  
+     if(irq_num < 8) {
+       master_mask&=~(1<<irq_num);
+       outb(master_mask,PIC1_DATA);
+     }
+     else{
+        slave_mask&=~(1<<irq_num-8);
+       outb(master_mask,PIC2_DATA);
+     }
+     return;
 }
 
 /* Disable (mask) the specified IRQ */
@@ -63,14 +73,23 @@ void disable_irq(uint32_t irq_num) {
 	uint16_t port;
     uint8_t value;
  
-    if(irq_num < 8) {
-        port = PIC1_DATA;
-    } else {
-        port = PIC2_DATA;
-        irq_num -= 8;
-    }
-    value = inb(port) & ~(1 << irq_num);
-    outb(value, port);
+    // if(irq_num < 8) {
+    //     port = PIC1_DATA;
+    // } else {
+    //     port = PIC2_DATA;
+    //     irq_num -= 8;
+    // }
+    // value = inb(port) | (1 << irq_num);
+    // outb(value, port);
+         if(irq_num < 8) {
+       master_mask|=~(1<<irq_num);
+       outb(master_mask,PIC1_DATA);
+     }
+     else{
+        slave_mask|=~(1<<irq_num-8);
+       outb(master_mask,PIC2_DATA);
+     }
+     return;
 }
 
 /* Send end-of-interrupt signal for the specified IRQ */
@@ -78,10 +97,15 @@ void send_eoi(uint32_t irq_num) {
     // TODO: Check the irq_num to see if it is greater than 8, that means we have to go to the second PIC
     //outb(EOI | irq_num, MASTER_8259_PORT); // TODO: Explain/check
     if(irq_num >= 8) {
-        outb(EOI|irq_num, PIC2_COMMAND);
+        outb(EOI|(irq_num-8), PIC2_COMMAND);
+        outb(EOI|0x02, PIC1_COMMAND); // TODO: comment on hard coded x02
     }
- 
-	outb(EOI|irq_num, PIC1_COMMAND);
+    else
+    {
+        //printf("in EOI %d\n", irq_num);
+        outb(EOI|irq_num, PIC1_COMMAND);
+        //printf("finish EOI\n");
+    }   
 }
 
 /*
@@ -92,31 +116,23 @@ arguments:
 */
 void PIC_remap(int offset1, int offset2)
 {
-	unsigned char a1, a2;
+	// unsigned char a1, a2;
  
-	a1 = inb(PIC1_DATA);                        // save masks
-	a2 = inb(PIC2_DATA);
+	// a1 = inb(PIC1_DATA);                        // save masks
+	// a2 = inb(PIC2_DATA);
  
 	outb(ICW1_INIT | ICW4, PIC1_COMMAND);  // starts the initialization sequence (in cascade mode)
-	io_wait(); // TODO: what is this?
 	outb(ICW1_INIT | ICW4, PIC2_COMMAND);
-	io_wait();
 	outb(offset1, PIC1_DATA);                 // ICW2: Master PIC vector offset
-	io_wait();
 	outb(offset2, PIC2_DATA);                 // ICW2: Slave PIC vector offset
-	io_wait();
-	outb(4, PIC1_DATA);                       // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
-	io_wait();
-	outb(2, PIC2_DATA);                       // ICW3: tell Slave PIC its cascade identity (0000 0010)
-	io_wait();
+	outb(ICW3_MASTER, PIC1_DATA);             // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
+	outb(ICW3_SLAVE, PIC2_DATA);              // ICW3: tell Slave PIC its cascade identity (0000 0010)
  
 	outb(ICW4, PIC1_DATA);               // ICW4: have the PICs use 8086 mode (and not 8080 mode)
-	io_wait();
 	outb(ICW4, PIC2_DATA);
-	io_wait();
  
-	outb(a1, PIC1_DATA);   // restore saved masks.
-	outb(a2, PIC2_DATA);
+	// outb(a1, PIC1_DATA);   // restore saved masks.
+	// outb(a2, PIC2_DATA);
 	printf("remap done\n");
 }
 

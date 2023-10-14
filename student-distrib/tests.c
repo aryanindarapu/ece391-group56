@@ -70,8 +70,7 @@ int test_divide_error() {
 void launch_tests() {
 	// TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
-	printf("please print\n");
-	
+	clear();
 	switch (TEST_VECTOR) {
 	case 0:
 		test_divide_error();
@@ -79,6 +78,10 @@ void launch_tests() {
 	case 128:
 		asm volatile("int $128");
 		break;
+	case 33:
+		asm volatile("int $33");
+		break;
+	
 	default:
 		break;
 	}

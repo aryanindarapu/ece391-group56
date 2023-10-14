@@ -54,7 +54,55 @@ int idt_init() { // TODO: change to init_idt
     // TODO: set up IRQ for everything here
     // TODO: how do I separate the IRQ, TRAP, TASK?
     // SET_IDT_ENTRY(idt[vector number], func name);
-    
+    int i;
+    for (i = 0; i < NUM_VEC; i++) {
+        if (i < 20) {
+            idt[i].present = 1;
+            idt[i].dpl = 0; // set privilege level 0
+            idt[i].reserved0 = 0;
+            idt[i].size = 1; // size of gate - INT gate is a 32 bit gate
+            idt[i].reserved1 = 1;
+            idt[i].reserved2 = 1;
+            idt[i].reserved3 = 1;
+            idt[i].seg_selector = KERNEL_CS;
+        } else if (i < 32) {
+            idt[i].present = 1;
+            idt[i].dpl = 0;
+            idt[i].reserved0 = 0;
+            idt[i].size = 1; // size of gate - INT gate is a 32 bit gate
+            idt[i].reserved1 = 1;
+            idt[i].reserved2 = 1;
+            idt[i].reserved3 = 1;
+            idt[i].seg_selector = KERNEL_CS;
+        } else if (i == 0x80) {
+            idt[i].present = 1;
+            idt[i].dpl = 3; // set privilege level 1
+            idt[i].reserved0 = 0;
+            idt[i].size = 1; // size of gate - INT gate is a 32 bit gate
+            idt[i].reserved1 = 1;
+            idt[i].reserved2 = 1;
+            idt[i].reserved3 = 0;
+            idt[i].seg_selector = KERNEL_CS;
+        } else if (i == 0x21) {
+            idt[i].present = 1;
+            idt[i].dpl = 0; // set privilege level 1
+            idt[i].reserved0 = 0;
+            idt[i].size = 1; // size of gate - INT gate is a 32 bit gate
+            idt[i].reserved1 = 1;
+            idt[i].reserved2 = 1;
+            idt[i].reserved3 = 1;
+            idt[i].seg_selector = KERNEL_CS;
+        } else {
+            idt[i].present = 0;
+            idt[i].dpl = 0; // set privilege level 1
+            idt[i].reserved0 = 0;
+            idt[i].size = 1; // size of gate - INT gate is a 32 bit gate
+            idt[i].reserved1 = 1;
+            idt[i].reserved2 = 1;
+            idt[i].reserved3 = 0;
+            idt[i].seg_selector = KERNEL_CS;
+        }
+    }
     /* instantiate the kernel function pointers */
     SET_IDT_ENTRY(idt[0x00], divide_error);
     SET_IDT_ENTRY(idt[0x01], debug);
@@ -71,57 +119,21 @@ int idt_init() { // TODO: change to init_idt
     SET_IDT_ENTRY(idt[0x0C], stack_segment_fault);
     SET_IDT_ENTRY(idt[0x0D], general_protection);
     SET_IDT_ENTRY(idt[0x0E], page_fault);
+    idt[0x0F].reserved3 = 0;
     SET_IDT_ENTRY(idt[0x0F], reserved);
     SET_IDT_ENTRY(idt[0x10], x87_fpu_floating_point_error);
     SET_IDT_ENTRY(idt[0x11], alignment_check);
     SET_IDT_ENTRY(idt[0x12], machine_check);
     SET_IDT_ENTRY(idt[0x13], simd_floating_point_exception);
-
-    SET_IDT_ENTRY(idt[0x21], read_keyboard); // PIC INT call
     
+    SET_IDT_ENTRY(idt[0x21], read_keyboard); // PIC INT call
+    //SET_IDT_ENTRY(idt[0x21], read_keyboard_linkage);
+    //intr_link(read_keyboard_linkage,read_keyboard); - in ASM file
+    // in linkage.h - extern void linkage functions
     SET_IDT_ENTRY(idt[0x80], system_call); // INT system call
     
 
-    int i;
-    for (i = 0; i < NUM_VEC; i++) {
-        if (i < 20) {
-            idt[i].present = 1;
-            idt[i].dpl = 0; // set privilege level 0
-            idt[i].reserved0 = 0;
-            idt[i].size = 1; // size of gate - INT gate is a 32 bit gate
-            idt[i].reserved1 = 1;
-            idt[i].reserved2 = 1;
-            idt[i].reserved3 = 1;
-            idt[i].seg_selector = KERNEL_CS;
-        } else if (i < 32) {
-            idt[i].present = 0;
-            idt[i].dpl = 0;
-            idt[i].reserved0 = 0;
-            idt[i].size = 1; // size of gate - INT gate is a 32 bit gate
-            idt[i].reserved1 = 1;
-            idt[i].reserved2 = 1;
-            idt[i].reserved3 = 1;
-            idt[i].seg_selector = KERNEL_CS;
-        } else if (i == 0x80 || i == 0x21) {
-            idt[i].present = 1;
-            idt[i].dpl = 1; // set privilege level 1
-            idt[i].reserved0 = 0;
-            idt[i].size = 1; // size of gate - INT gate is a 32 bit gate
-            idt[i].reserved1 = 1;
-            idt[i].reserved2 = 1;
-            idt[i].reserved3 = 0;
-            idt[i].seg_selector = KERNEL_CS;
-        } else {
-            idt[i].present = 0;
-            idt[i].dpl = 1; // set privilege level 1
-            idt[i].reserved0 = 0;
-            idt[i].size = 1; // size of gate - INT gate is a 32 bit gate
-            idt[i].reserved1 = 1;
-            idt[i].reserved2 = 1;
-            idt[i].reserved3 = 0;
-            idt[i].seg_selector = KERNEL_CS;
-        }
-    }
+    
 
     /*
     FUNCTION_POINTERS[0] = divide_error;
@@ -153,7 +165,7 @@ int idt_init() { // TODO: change to init_idt
     // Setting up for divide error - Interrupt gate
     // .offset_15_00 = 0;
     printf("reached idt init\n");
-    lidt(idt_desc_ptr);
+    
     // int i;
     // for (i = 0; i < NUM_VEC; i++) {
     //     switch (i) {
