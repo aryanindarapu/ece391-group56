@@ -11,6 +11,12 @@
 /* Ports that each PIC sits on */
 #define MASTER_8259_PORT    0x20
 #define SLAVE_8259_PORT     0xA0
+#define PIC1_COMMAND	MASTER_8259_PORT
+#define PIC1_DATA	    (MASTER_8259_PORT+1)
+#define PIC2_COMMAND	SLAVE_8259_PORT
+#define PIC2_DATA	    (SLAVE_8259_PORT+1)
+
+#define
 
 /* Initialization control words to init each PIC.
  * See the Intel manuals for details on the meaning
@@ -37,5 +43,15 @@ void enable_irq(uint32_t irq_num);
 void disable_irq(uint32_t irq_num);
 /* Send end-of-interrupt signal for the specified IRQ */
 void send_eoi(uint32_t irq_num);
+/* offset pic vector and set up primary/secondary cascade */ //TODO : check definition
+void PIC_remap(int offset1, int offset2)
+//int int handle_PIC_trash();
+
+//https://wiki.osdev.org/8259_PIC
+//https://forum.osdev.org/viewtopic.php?f=1&t=9746&sid=1847604ca981b6bbc22c6e8f9e97e7da&start=15
+//https://wiki.osdev.org/8259_PIC#The_IBM_PC_8259_PIC_Architecture
+//https://courses.engr.illinois.edu/ece391/fa2023/secure/references/IA32-ref-manual-vol-3.pdf
+//
+
 
 #endif /* _I8259_H */
