@@ -3,6 +3,7 @@
 int get_line_number();
 
 void divide_error();
+void debug(); // How do I raise these interrupts?
 void nmi_interrupt();
 void breakpoint();
 void overflow();
@@ -16,9 +17,10 @@ void segment_not_present();
 void stack_segment_fault();
 void general_protection();
 void page_fault();
+void reserved();
 void x87_fpu_floating_point_error();
 void alignment_check();
-void machine_alignment();
+void machine_check();
 void simd_floating_point_exception();
 void user_defined();
 
