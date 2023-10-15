@@ -23,6 +23,9 @@
 #define NUM_VEC     256
 #define MAX_KERNEL_INTR 32
 
+#define TABLE_SIZE 4096
+#define NUM_ENTRIES 1024
+
 #ifndef ASM
 
 /* This structure is used to load descriptor base registers

@@ -58,8 +58,9 @@ void launch_tests() {
 	// int a, b, c;
 	// TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
-	printf("please print\n");
+	// printf("please print\n");
 	// a = 10;
 	// b = 0;
 	// c = a / b;
+	asm volatile ("movl $0x0, %cr3");
 }

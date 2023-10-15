@@ -124,22 +124,22 @@ _idt:
 idt_bottom:
 
 # TODO: finish paging
-# .align 4096
-# page_dir:
-# _page_dir:
-#    .rept NUM_PAGE_TABLE_ENTRIES
-#    .long 0 // 32-bit entries
-#    .endr
+.align TABLE_SIZE
+page_dir:
+_page_dir:
+    .rept NUM_ENTRIES
+    .long 0 # 32-bit entries
+    .endr
 
-# page_dir_bottom:
+page_dir_bottom:
 
-# .align 4096
-# page_table:
-# _page_table:
-#    .rept NUM_PAGE_TABLE_ENTRIES
-#    .long 0 // 32-bit entries
-#    .endr
+.align TABLE_SIZE
+video_memory_page_table:
+_video_memory_page_table:
+    .rept NUM_ENTRIES
+    .long 0 # 32-bit entries
+    .endr
 
-# page_table_bottom:
+page_table_bottom:
 
 
