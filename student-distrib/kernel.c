@@ -8,8 +8,9 @@
 #include "i8259.h"
 #include "debug.h"
 #include "tests.h"
+#include "idt.h"
 
-#define RUN_TESTS
+#define RUN_TESTS 1
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -136,6 +137,22 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
+    /* Construct IDT entries*/
+    /* */
+    // TODO: do we set the IDTR? 
+    /* x80 sys call interupt */
+    // TODO: set idt entries here with a function
+    // call SET_IDT_ENTRY with the function that acts as the handler
+
+    // TODO: set up interrupt wrapper (look at ece391syscall.S)
+
+    // fill out idt segment descriptor based on INT vs TRAP @ page 156
+    // INT table @ page 145
+
+    idt_init();
+
+    lidt(idt_desc_ptr);
+
     /* Init the PIC */
     i8259_init();
 
@@ -146,8 +163,8 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
-    /*printf("Enabling Interrupts\n");
-    sti();*/
+    printf("Enabling Interrupts\n");
+    sti();
 
 #ifdef RUN_TESTS
     /* Run tests */

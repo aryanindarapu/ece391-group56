@@ -4,6 +4,7 @@
 
 #define PASS 1
 #define FAIL 0
+#define TEST_VECTOR 0 // 
 
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
@@ -14,7 +15,8 @@
 static inline void assertion_failure(){
 	/* Use exception #15 for assertions, otherwise
 	   reserved by Intel */
-	asm volatile("int $15");
+	// asm volatile("int $15");
+	asm volatile("int $128");
 }
 
 
@@ -45,6 +47,15 @@ int idt_test(){
 	return result;
 }
 
+// TODO: comment
+int test_divide_error() {
+	int a, b, c;
+	a = 10;
+	b = 0;
+	c = a / b;
+	return 0;
+}
+
 // add more tests here
 
 /* Checkpoint 2 tests */
@@ -54,8 +65,18 @@ int idt_test(){
 
 
 /* Test suite entry point */
-void launch_tests(){
+void launch_tests() {
 	// TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
-	printf("please print");
+	printf("please print\n");
+	
+	switch (TEST_VECTOR) {
+	case 0:
+		test_divide_error();
+		break;
+	
+	default:
+		break;
+	}
+
 }

@@ -28,15 +28,6 @@ ldt_desc:
 
     .align 4
 
-
-# MP3.1: Created gdt_size and gdt_desc, set address to gdt_ptr
-
-gdt_desc:
-# <gdt size>
-   .word gdt_bottom - gdt - 1 
-# <gdt address>
-   .long gdt
-
 # MP3.1: END
 tss:
 _tss:
@@ -97,14 +88,22 @@ ldt_desc_ptr:
     .quad 0
 
 gdt_bottom:
-
     .align 16
+    
+# MP3.1: Created gdt_size and gdt_desc, set address to gdt_ptr
+
+gdt_desc:
+# <gdt size>
+   .word gdt_bottom - gdt - 1 
+# <gdt address>
+   .long gdt
+
 ldt:
     .rept 4
     .quad 0
     .endr
-ldt_bottom:
 
+ldt_bottom:
 .align 4
     .word 0 # Padding
 
@@ -123,4 +122,23 @@ _idt:
     .endr
 
 idt_bottom:
+
+# TODO: finish paging
+# .align 4096
+# page_dir:
+# _page_dir:
+#    .rept NUM_PAGE_TABLE_ENTRIES
+#    .long 0 // 32-bit entries
+#    .endr
+
+# page_dir_bottom:
+
+# .align 4096
+# page_table:
+# _page_table:
+#    .rept NUM_PAGE_TABLE_ENTRIES
+#    .long 0 // 32-bit entries
+#    .endr
+
+# page_table_bottom:
 
