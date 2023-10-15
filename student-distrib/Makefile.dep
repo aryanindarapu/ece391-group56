@@ -4,7 +4,7 @@ paging.o: paging.S
 x86_desc.o: x86_desc.S x86_desc.h types.h
 exceptions.o: exceptions.c exceptions.h lib.h types.h
 idt.o: idt.c idt.h x86_desc.h types.h devices/keyboard.h exceptions.h \
-  lib.h asm_linkage.h devices/rtc.h
+  lib.h asm_linkage.h devices/rtc.h paging.h
 kernel.o: kernel.c multiboot.h types.h x86_desc.h lib.h debug.h tests.h \
   idt.h devices/keyboard.h paging.h devices/i8259.h devices/../types.h \
   devices/i8259.h devices/../lib.h devices/../x86_desc.h \

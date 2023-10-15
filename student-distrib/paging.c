@@ -1,6 +1,6 @@
 #include "paging.h"
 
-extern int enable_paging(int page_dir);
+extern void enable_paging(int page_dir);
 /* page_directory is our entire page directory object, this function initializes it */
 /* TODO
     INPUTS : None

@@ -2,13 +2,13 @@
 # TODO: how do we allocate an entire 4kB memory set for one page
 
 
-
 # TODO: set cr3 reg here and flush tlbs
 # TODO: cr2 is page fault linear address --> if not null, then page fault
-
+#define ASM 1
 
 # one argument is page directory
 .globl enable_paging
+.align 4
 enable_paging:
     # 1. callee setup
     movl %esp, %ebp

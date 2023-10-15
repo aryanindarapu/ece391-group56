@@ -1,5 +1,9 @@
+#ifndef _PAGING_H
+#define _PAGING_H
+
 #include "types.h"
 #include "lib.h"
+
 /* Constants that are commonly used for paging */
 #define NUM_ENTRIES  1024
 #define FOUR_KB      4096
@@ -7,6 +11,8 @@
 #define KERNEL_ADDRESS 0x400000
 #define USER_ADDRESS 0x800000
 #define VIDEO_ADDRESS       0xB8000
+
+#ifndef ASM
 
 /* steal the similar struct formats for page dir and page tables 
 TODO: how do I used __attribute__((packed))/ do I even need to? */
@@ -69,3 +75,7 @@ operating position
 [31:22 index for the page dir, 21:12 index for the page table, 11:0 has nothing of value = 0]*/
 
 extern int init_paging();
+
+#endif /* ASM */
+
+#endif /* _PAGING_H */
