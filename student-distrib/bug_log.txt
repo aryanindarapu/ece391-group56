@@ -1,0 +1,53 @@
+****************************************** BUG LOG *******************************************
+-----------------
+TEMPLATE: 
+-----------------
+FILE/FUNCTION: 
+BUG: 
+SOLUTION: 
+-----------------
+**************************************** CHECKPOINT 1 ****************************************
+-----------------
+FILE/FUNCTION: rtc.c - handler
+BUG: rtc was not never interupting and calling the handler.
+SOLUTION: We realized that we had done everything right, but had not enabled irq2 on 
+the primary PIC, after enabling irq0 on the secondary.
+-----------------
+FILE/FUNCTION: asm_linkage.S - keyboard.c/h
+BUG: Our keyboard was only recieving the very first input interupt, then not getting anymore.
+SOLUTION: We had not created the ASM linkage for the interupts, causing the interupt flag to 
+prevent more interupts each time an interupt was called. We added the linkage code to call
+iret, causing the orginal eflags to be set and allow more interupts.
+-----------------
+FILE/FUNCTION: 
+BUG: 
+SOLUTION: 
+-----------------
+FILE/FUNCTION: 
+BUG: 
+SOLUTION: 
+-----------------
+**************************************** CHECKPOINT 2 ****************************************
+-----------------
+FILE/FUNCTION:
+BUG:
+SOLUTION:
+-----------------
+**************************************** CHECKPOINT 3 ****************************************
+-----------------
+FILE/FUNCTION:
+BUG:
+SOLUTION:
+-----------------
+**************************************** CHECKPOINT 4 ****************************************
+-----------------
+FILE/FUNCTION:
+BUG:
+SOLUTION:
+-----------------
+**************************************** CHECKPOINT 5 ****************************************
+-----------------
+FILE/FUNCTION:
+BUG:
+SOLUTION:
+-----------------

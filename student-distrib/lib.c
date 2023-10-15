@@ -474,3 +474,8 @@ void test_interrupts(void) {
         video_mem[i << 1]++;
     }
 }
+
+void io_wait(void)
+{
+    outb(0x80, 0);
+}

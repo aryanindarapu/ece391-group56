@@ -14,6 +14,7 @@ int8_t *itoa(uint32_t value, int8_t* buf, int32_t radix);
 int8_t *strrev(int8_t* s);
 uint32_t strlen(const int8_t* s);
 void clear(void);
+//void io_wait(void);
 
 void* memset(void* s, int32_t c, uint32_t n);
 void* memset_word(void* s, int32_t c, uint32_t n);
@@ -71,6 +72,11 @@ static inline uint32_t inl(port) {
     );
     return val;
 }
+
+// static inline void io_wait(void)
+// {
+//     outb(0x80, 0);
+// }
 
 /* Writes a byte to a port */
 #define outb(data, port)                \
@@ -152,5 +158,6 @@ do {                                    \
             : "memory", "cc"            \
     );                                  \
 } while (0)
+
 
 #endif /* _LIB_H */

@@ -5,11 +5,15 @@
 #include "multiboot.h"
 #include "x86_desc.h"
 #include "lib.h"
-#include "i8259.h"
 #include "debug.h"
 #include "tests.h"
 #include "idt.h"
 #include "paging.h"
+
+#include "devices/i8259.h"
+#include "devices/keyboard.h"
+#include "devices/rtc.h"
+
 
 #define RUN_TESTS 1
 
@@ -151,11 +155,35 @@ void entry(unsigned long magic, unsigned long addr) {
     // INT table @ page 145
 
     idt_init();
+    
+    // while (1) {
+    //     char ascii[37] = "1234567890-= qwertyuiop[]asdfghjkl;'";
+    //     char prev;
+    //     char c;
+    //     int input_prev;
+    //     int input=inb(60);
+    //     //iowait();
+    //     //itoa(input, &c, 0);
+    //     if(input_prev != input) {
+    //         if(input != input_prev + 128 && input_prev<26) {
+    //             printf("printing character\n");
+    //             printf("%c", ascii[input_prev]);
+    //             input_prev = input;
+    //         }
 
-    lidt(idt_desc_ptr);
 
+    //     }
+        
+    clear();
+    printf("\n\n");
+    printf(" ***BEGIN***\n");
+    // }
     /* Init the PIC */
     i8259_init();
+
+    // Enable keyboard
+    init_keyboard();
+    init_rtc();
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
@@ -167,11 +195,14 @@ void entry(unsigned long magic, unsigned long addr) {
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
     printf("Enabling Interrupts\n");
+    
+    
     sti();
+    
 
 #ifdef RUN_TESTS
     /* Run tests */
-    launch_tests();
+   //launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
 
