@@ -41,8 +41,8 @@ void init_rtc() {
     
 }
 
-void rtc_handler(){
-    printf("RTC Time Interupt!\n");
+void rtc_handler() {
+    // printf("RTC Time Interupt!\n");
 
     // Register C let's us know which interupt flag was set (there are more types of interupt for RTC outside of timer)
     // If you do not clear these flags, then RTC will no longer trigger interupts
