@@ -84,14 +84,14 @@ int idt_init() { // TODO: change to init_idt
             idt[i].reserved2 = 1;
             idt[i].reserved3 = 0;
             idt[i].seg_selector = KERNEL_CS;
-        } else if (i == 0x21) {
+        } else if (i == 0x21 || i == 0x28) {
             idt[i].present = 1;
             idt[i].dpl = 0; // set privilege level 1
             idt[i].reserved0 = 0;
             idt[i].size = 1; // size of gate - INT gate is a 32 bit gate
             idt[i].reserved1 = 1;
             idt[i].reserved2 = 1;
-            idt[i].reserved3 = 1;
+            idt[i].reserved3 = 0;
             idt[i].seg_selector = KERNEL_CS;
         } else {
             idt[i].present = 0;
@@ -128,6 +128,8 @@ int idt_init() { // TODO: change to init_idt
     SET_IDT_ENTRY(idt[0x13], simd_floating_point_exception);
     
     SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage); // PIC INT call
+    SET_IDT_ENTRY(idt[0x28], rtc_handler_linkage); // PIC INT call
+    
     //SET_IDT_ENTRY(idt[0x21], read_keyboard_linkage);
     //intr_link(read_keyboard_linkage,read_keyboard); - in ASM file
     // in linkage.h - extern void linkage functions

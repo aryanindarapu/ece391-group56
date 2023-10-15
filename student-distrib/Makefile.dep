@@ -3,11 +3,11 @@ boot.o: boot.S multiboot.h x86_desc.h types.h
 x86_desc.o: x86_desc.S x86_desc.h types.h
 exceptions.o: exceptions.c exceptions.h lib.h types.h
 idt.o: idt.c idt.h x86_desc.h types.h devices/keyboard.h exceptions.h \
-  lib.h asm_linkage.h
+  lib.h asm_linkage.h devices/rtc.h
 kernel.o: kernel.c multiboot.h types.h x86_desc.h lib.h debug.h tests.h \
   idt.h devices/keyboard.h devices/i8259.h devices/../types.h \
   devices/i8259.h devices/../lib.h devices/../x86_desc.h \
-  devices/keyboard.h
+  devices/keyboard.h devices/rtc.h
 lib.o: lib.c lib.h types.h
 tests.o: tests.c tests.h x86_desc.h types.h lib.h
 i8259.o: devices/i8259.c devices/i8259.h devices/../types.h \
@@ -16,3 +16,6 @@ i8259.o: devices/i8259.c devices/i8259.h devices/../types.h \
 keyboard.o: devices/keyboard.c devices/i8259.h devices/../types.h \
   devices/../lib.h devices/../types.h devices/../x86_desc.h \
   devices/keyboard.h
+rtc.o: devices/rtc.c devices/i8259.h devices/../types.h devices/../lib.h \
+  devices/../types.h devices/../x86_desc.h devices/keyboard.h \
+  devices/rtc.h

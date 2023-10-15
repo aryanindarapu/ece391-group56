@@ -10,3 +10,4 @@ name:                       ;\
 
 /* the system call library wrappers */
 INTR_LINK(keyboard_handler_linkage, keyboard_handler)
+INTR_LINK(rtc_handler_linkage, rtc_handler)

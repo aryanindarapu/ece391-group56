@@ -11,6 +11,7 @@
 
 void init_keyboard() {
     enable_irq(1);
+    //printf("teststtst");
 }
 
 void keyboard_handler () {
@@ -69,11 +70,11 @@ void read_keyboard () {
         0,  /* All other keys are undefined */
     };
     
-    //keycode = inb(0x60);
     status = inb(0x64);  
     if(status & 0x01){
+        //keycode = inb(0x60);
         keycode = inb(0x60);  
-        if(keycode > 0)
-        printf("%c", keyboard_map[keycode]);
+        if(keycode > 0 && keycode < 58)
+            printf("%c", keyboard_map[keycode]);
     }
 }

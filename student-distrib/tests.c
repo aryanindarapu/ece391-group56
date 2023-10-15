@@ -4,7 +4,7 @@
 
 #define PASS 1
 #define FAIL 0
-#define TEST_VECTOR 2 // 
+#define TEST_VECTOR 40 // 
 
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
@@ -81,7 +81,9 @@ void launch_tests() {
 	case 33:
 		asm volatile("int $33");
 		break;
-	
+	case 40:
+		asm volatile("int $40");
+		break;
 	default:
 		break;
 	}

@@ -15,32 +15,17 @@ uint8_t slave_mask;  /* IRQs 8-15 */
 
 /* Initialize the 8259 PIC */
 void i8259_init(void) {
-    // TODO: Initialize PIC with 0x11
-    // outb(MASTER_8259_PORT, ICW1);
-    // io_wait();
-    
-    // int i;
-    // for(i = 0; i < 16; i++)
-    // {
-    //     disable_irq(i);
-    // }
-
     // TODO: initialize devices
     // look pg 795-796
     
+    // Include master_mask and salve_mask to perform bitwise ops
     master_mask = 0xFF;
     slave_mask = 0xFF;
 
-    
     // Offset primary PIC to 0x20 on IDT, offset secondary PIC to 0x28 on IDT
 	PIC_remap(ICW2_MASTER, ICW2_SLAVE);
 	
-	// Enable IRQ for keyboard and for RTC
-    //enable_irq(1); // TODO: move to keyboard init fnc
-    //enable_irq(2); // TODO: enable slave pic
-    
-	printf("finished init pic\n");
-    //enable_irq(9);
+	// Other devices are initialized in helper functions after 8259
 }
 
 
@@ -64,7 +49,7 @@ void enable_irq(uint32_t irq_num) {
         outb(master_mask,PIC1_DATA);
     } else {
         slave_mask &= (~(1 << (irq_num - 8)));
-        outb(master_mask,PIC2_DATA);
+        outb(slave_mask,PIC2_DATA);
     }
     return;
 }
@@ -88,7 +73,7 @@ void disable_irq(uint32_t irq_num) {
         outb(master_mask, PIC1_DATA);
     } else {
         slave_mask |= (~(1 << (irq_num - 8)));
-        outb(master_mask, PIC2_DATA);
+        outb(slave_mask, PIC2_DATA);
     }
     return;
 }
@@ -98,6 +83,7 @@ void send_eoi(uint32_t irq_num) {
     // TODO: Check the irq_num to see if it is greater than 8, that means we have to go to the second PIC
     //outb(EOI | irq_num, MASTER_8259_PORT); // TODO: Explain/check
     if (irq_num >= 8) {
+        
         outb(EOI | (irq_num - 8), PIC2_COMMAND);
         outb(EOI | 0x02, PIC1_COMMAND); // TODO: comment on hard coded x02
     } else {
@@ -132,7 +118,7 @@ void PIC_remap(int offset1, int offset2)
  
 	// outb(a1, PIC1_DATA);   // restore saved masks.
 	// outb(a2, PIC2_DATA);
-	printf("remap done\n");
+	//printf("remap done\n");
 }
 
 
