@@ -1,5 +1,7 @@
 #include "lib.h"
 
+// TODO: need to comment functions
+
 int get_line_number();
 
 void divide_error();
