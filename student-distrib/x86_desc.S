@@ -141,4 +141,3 @@ idt_bottom:
 #    .endr
 
 # page_table_bottom:
-

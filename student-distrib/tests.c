@@ -47,13 +47,26 @@ int idt_test(){
 	return result;
 }
 
-// TODO: comment
+// TODO: comment AND change to TEST_OUTPUT type function
 int test_divide_error() {
 	int a, b, c;
 	a = 10;
 	b = 0;
 	c = a / b;
 	return 0;
+}
+
+
+int test_page_fault() {
+    //Used to test dereference locations.
+	int a;
+    int* p = (int *) 0x400000; // point to kernel memory
+    a = *p;
+
+	printf("pointing to kernel memory");
+
+    p = (int *) 0x2; 
+	a = *p;
 }
 
 // TODO: add more tests for each interrupt
@@ -76,7 +89,7 @@ void launch_tests() {
 			test_divide_error();
 			break;
 		case 14:
-			asm volatile("int $14");
+			test_page_fault();
 			break;
 		case 33:
 			asm volatile("int $33");

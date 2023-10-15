@@ -27,6 +27,13 @@ FILE/FUNCTION:
 BUG: 
 SOLUTION: 
 -----------------
+
+Ary bugs:
+- assembly linker error with paging.S and paging.h
+- double fault error keeps happening when loading idt (forgot to initialize idt function) --> 2 hours
+- kernel keep looping (gdt wasn't set up properly, and we needed to actually load the gdt)
+- 
+
 **************************************** CHECKPOINT 2 ****************************************
 -----------------
 FILE/FUNCTION:
