@@ -181,7 +181,7 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Init the PIC */
     i8259_init();
 
-    // Enable keyboard
+    // TODO: comment here
     init_keyboard();
     init_rtc();
 
@@ -202,7 +202,7 @@ void entry(unsigned long magic, unsigned long addr) {
 
 #ifdef RUN_TESTS
     /* Run tests */
-   //launch_tests();
+   launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
 

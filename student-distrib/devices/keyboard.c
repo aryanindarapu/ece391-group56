@@ -14,9 +14,9 @@ void init_keyboard() {
     //printf("teststtst");
 }
 
-void keyboard_handler () {
+void keyboard_handler() {
     // Read input from keyboard
-    read_keyboard();
+    read_keyboard(); // TODO: turn back on for tests
     
     // Signal that interupt is done
     send_eoi(1);
