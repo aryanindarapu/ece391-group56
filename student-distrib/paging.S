@@ -37,14 +37,9 @@ enable_paging:
     popl %esi
     popl %ebx
 
-    # flush tlb
-    call flush_tlb
-
-    leave
-    ret
-
-# Flushed the TLB by reloading the CR3 register
-flush_tlb:
+    # flush TLB by reloading the CR3 register
     movl %cr3, %eax
     movl %eax, %cr3
+
+    leave
     ret

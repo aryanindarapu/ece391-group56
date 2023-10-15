@@ -242,14 +242,4 @@ int idt_init() { // TODO: change to init_idt
 
 //     // eventually, iterate through 256 entries and call SET_IDT_ENTRY using assembly jump table wrapper
 //     return 0;
-// }
-
-int idt_init() {
-    int i, j;
-    for (i = 0; i < NUM_VEC; i++){
-        for (j = 0; j < 32; j++){ //all the kernel interrupts 
-
-        }
-    }
-    return 0;
 }
