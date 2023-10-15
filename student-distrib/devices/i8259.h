@@ -7,10 +7,8 @@
 #define _I8259_H
 
 #include "../types.h"
-#include "i8259.h"
 #include "../lib.h"
 #include "../x86_desc.h"
-#include "keyboard.h"
 
 /* Ports that each PIC sits on */
 #define MASTER_8259_PORT    0x20

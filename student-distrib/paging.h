@@ -14,6 +14,14 @@
 
 #ifndef ASM
 
+int init_paging();
+
+// load page directory with our page directory point
+extern void loadPageDirectory(unsigned int *);
+
+// Enable paging for general purpose
+extern void enablePaging();
+
 /* steal the similar struct formats for page dir and page tables 
 TODO: how do I used __attribute__((packed))/ do I even need to? */
 
@@ -24,20 +32,20 @@ typedef union page_dir_desc_t {
     uint32_t val[1];
     struct {
         /* SEE PAGE 90-91 of IA-32 for these variables of PDE */
-        uint32_t present : 1;
+        uint32_t p : 1;
         /* communicates if the particular table exists from this PDE*/
-        uint32_t read_write : 1;
-        uint32_t user_super : 1;
-        uint32_t write_through : 1;
-        uint32_t cache_dis : 1;
+        uint32_t rw : 1;
+        uint32_t us : 1;
+        uint32_t pwt : 1;
+        uint32_t pcd : 1;
         /* page size: this one is important,
         if 1 --> 4MB pages, if 0 --> 4kB pages */
-        uint32_t accessed : 1;
-        uint32_t reserved : 1; // 0 always
-        uint32_t page_size : 1;
-        uint32_t global_page : 1; 
-        uint32_t available : 3; 
-        uint32_t base_31_12 : 20; // [12:31] --> oints to a bage table
+        uint32_t a : 1;
+        uint32_t res : 1; // 0 always
+        uint32_t ps : 1;
+        uint32_t g : 1; 
+        uint32_t avail : 3; 
+        uint32_t table_base_addr : 20; // [12:31] --> points to a page table
     } __attribute__ ((packed));
 } page_dir_desc_t;
 
@@ -49,18 +57,18 @@ typedef union page_table_desc_t {
     struct {
         /* SEE PAGE 50-51 of IA-32 for these variables of PDE */
         /* communicates if the particular page exists from this PTE*/
-        uint32_t present : 1;
-        uint32_t read_write : 1;
-        uint32_t user_super : 1;
-        uint32_t write_through : 1;
-        uint32_t cache_dis : 1;
-        uint32_t accessed : 1;
-        uint32_t dirty : 1; //TODO: wtf is dirty bruh
+        uint32_t p : 1;
+        uint32_t rw : 1;
+        uint32_t us : 1;
+        uint32_t pwt : 1;
+        uint32_t pcd : 1;
+        uint32_t a : 1;
+        uint32_t d : 1; //TODO: wtf is dirty bruh
         /* Page Table Attribute Index */
         uint32_t pat : 1;
-        uint32_t global_page : 1; 
-        uint32_t available : 3; 
-        uint32_t base_31_12 : 20; // [12:31]
+        uint32_t g : 1; 
+        uint32_t avail : 3; 
+        uint32_t page_base_addr : 20; // [12:31]
     } __attribute__ ((packed));
 } page_table_desc_t;
 
@@ -74,7 +82,6 @@ register CR3 contains the control reigster data that points to the OS's current
 operating position
 [31:22 index for the page dir, 21:12 index for the page table, 11:0 has nothing of value = 0]*/
 
-extern int init_paging();
 
 #endif /* ASM */
 

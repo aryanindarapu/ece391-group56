@@ -1,6 +1,8 @@
 #include "paging.h"
 
-extern void enable_paging(int page_dir);
+
+
+
 /* page_directory is our entire page directory object, this function initializes it */
 /* TODO
     INPUTS : None
@@ -10,47 +12,48 @@ extern void enable_paging(int page_dir);
 */
 int init_paging () {
     int i;
+ 
     /* initialize the page directory */
     for(i = 0; i < NUM_ENTRIES; i++) {
         switch (i) {
             case 0: // Video memory page table
-                page_dir[i].present = 1;
-                page_dir[i].read_write = 1;
-                page_dir[i].user_super = 0; //its 0 level privelage
-                page_dir[i].write_through = 0;
-                page_dir[i].cache_dis = 0;
-                page_dir[i].accessed = 0;
-                page_dir[i].reserved = 0;
-                page_dir[i].page_size = 0;
-                page_dir[i].global_page = 0;
-                page_dir[i].available = 0;
-                page_dir[i].base_31_12 = (int) video_memory_page_table / FOUR_KB; // TODO: check if dereference is correct
+                page_dir[i].p = 1;
+                page_dir[i].rw = 1;
+                page_dir[i].us = 0; //its 0 level privelage
+                page_dir[i].pwt = 0;
+                page_dir[i].pcd = 0;
+                page_dir[i].a = 0;
+                page_dir[i].res = 0;
+                page_dir[i].ps = 0;
+                page_dir[i].g = 0;
+                page_dir[i].avail = 0;
+                page_dir[i].table_base_addr = (int) video_memory_page_table / FOUR_KB; // TODO: check if dereference is correct
                 break;
             case 1: // Kernel section (single 4mb page)
-                page_dir[i].present = 1;
-                page_dir[i].read_write = 1;
-                page_dir[i].user_super = 0; //its 0 level privelage
-                page_dir[i].write_through = 0;
-                page_dir[i].cache_dis = 0;
-                page_dir[i].accessed = 0;
-                page_dir[i].reserved = 0;
-                page_dir[i].page_size = 1;
-                page_dir[i].global_page = 1;
-                page_dir[i].available = 0;
-                page_dir[i].base_31_12 = KERNEL_ADDRESS / FOUR_KB;
+                page_dir[i].p = 1;
+                page_dir[i].rw = 1;
+                page_dir[i].us = 0; //its 0 level privelage
+                page_dir[i].pwt = 0;
+                page_dir[i].pcd = 0;
+                page_dir[i].a = 0;
+                page_dir[i].res = 0;
+                page_dir[i].ps = 1;
+                page_dir[i].g = 1;
+                page_dir[i].avail = 0;
+                page_dir[i].table_base_addr = KERNEL_ADDRESS / FOUR_KB;
                 break;
             default: // 8MB - 4GB
-                page_dir[i].present = 0;
-                page_dir[i].read_write = 1;
-                page_dir[i].user_super = 0; //its 0 level privelage
-                page_dir[i].write_through = 0;
-                page_dir[i].cache_dis = 0;
-                page_dir[i].accessed = 0;
-                page_dir[i].reserved = 0;
-                page_dir[i].page_size = 0;
-                page_dir[i].global_page = 0;
-                page_dir[i].available = 0;
-                page_dir[i].base_31_12 = USER_ADDRESS / FOUR_KB; // TODO: is this correct?
+                page_dir[i].p = 0;
+                page_dir[i].rw = 1;
+                page_dir[i].us = 0; //its 0 level privelage
+                page_dir[i].pwt = 0;
+                page_dir[i].pcd = 0;
+                page_dir[i].a = 0;
+                page_dir[i].res = 0;
+                page_dir[i].ps = 0;
+                page_dir[i].g = 0;
+                page_dir[i].avail = 0;
+                page_dir[i].table_base_addr = USER_ADDRESS / FOUR_KB; // TODO: is this correct?
                 break;
         }
     }
@@ -58,23 +61,25 @@ int init_paging () {
     /* setup page table (the one for PDE #0)*/
     for (i = 0; i < NUM_ENTRIES; i++) {
         if(i * FOUR_KB == VIDEO_ADDRESS){
-            video_memory_page_table[i].present = 1;
+            video_memory_page_table[i].p = 1;
         }
         else{
-            video_memory_page_table[i].present = 0;
+            video_memory_page_table[i].p = 0;
         }
-        video_memory_page_table[i].read_write = 1;
-        video_memory_page_table[i].user_super = 0;
-        video_memory_page_table[i].write_through = 0;
-        video_memory_page_table[i].cache_dis = 0;
-        video_memory_page_table[i].accessed = 0;
-        video_memory_page_table[i].dirty = 0;
+        video_memory_page_table[i].rw = 1;
+        video_memory_page_table[i].us = 0;
+        video_memory_page_table[i].pwt = 0;
+        video_memory_page_table[i].pcd = 0;
+        video_memory_page_table[i].a = 0;
+        video_memory_page_table[i].d = 0;
         video_memory_page_table[i].pat = 0;
-        video_memory_page_table[i].global_page = 0;
-        video_memory_page_table[i].available = 0;
-        video_memory_page_table[i].base_31_12 = i;
+        video_memory_page_table[i].g = 0;
+        video_memory_page_table[i].avail = 0;
+        video_memory_page_table[i].page_base_addr = i;
     }
+    
+    loadPageDirectory((int)page_dir & 0x000FFFFF);
+    enablePaging();
 
-    enable_paging((int) page_dir);
     return 0;
 }
