@@ -24,4 +24,8 @@ void machine_check();
 void simd_floating_point_exception();
 void user_defined();
 
+
+void read_keyboard(); // 0x21
+
+
 void system_call();

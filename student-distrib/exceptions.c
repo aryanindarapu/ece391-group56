@@ -1,4 +1,4 @@
-#include "interrupt_handlers.h"
+#include "exceptions.h"
 
 void divide_error() {
     printf("divide error occurred\n");

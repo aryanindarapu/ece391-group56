@@ -4,7 +4,7 @@
 
 #define PASS 1
 #define FAIL 0
-#define TEST_VECTOR 0 // 
+#define TEST_VECTOR 40 // 
 
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
@@ -56,6 +56,8 @@ int test_divide_error() {
 	return 0;
 }
 
+// TODO: add more tests for each interrupt
+
 // add more tests here
 
 /* Checkpoint 2 tests */
@@ -68,13 +70,20 @@ int test_divide_error() {
 void launch_tests() {
 	// TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
-	printf("please print\n");
-	
+	clear();
 	switch (TEST_VECTOR) {
 	case 0:
 		test_divide_error();
 		break;
-	
+	case 128:
+		asm volatile("int $128");
+		break;
+	case 33:
+		asm volatile("int $33");
+		break;
+	case 40:
+		asm volatile("int $40");
+		break;
 	default:
 		break;
 	}

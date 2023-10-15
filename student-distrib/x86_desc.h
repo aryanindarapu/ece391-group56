@@ -161,7 +161,7 @@ typedef union idt_desc_t {
         uint32_t dpl       : 2;
         uint32_t present   : 1;
         uint16_t offset_31_16;
-    } __attribute__ ((packed));
+    } __attribute__ ((packed)); // used attribute aligned 4096
 } idt_desc_t;
 
 /* The IDT itself (declared in x86_desc.S */
