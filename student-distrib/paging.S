@@ -43,6 +43,8 @@ enable_paging:
     leave
     ret
 
+# Flushed the TLB by reloading the CR3 register
 flush_tlb:
-    movl $0, %cr3
+    movl %cr3, %eax
+    movl %eax, %cr3
     ret
