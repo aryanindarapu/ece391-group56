@@ -50,7 +50,6 @@ void disable_irq(uint32_t irq_num);
 void send_eoi(uint32_t irq_num);
 /* offset pic vector and set up primary/secondary cascade */ //TODO : check definition
 void PIC_remap(int offset1, int offset2);
-//int int handle_PIC_trash();
 
 //https://wiki.osdev.org/8259_PIC
 //https://forum.osdev.org/viewtopic.php?f=1&t=9746&sid=1847604ca981b6bbc22c6e8f9e97e7da&start=15

@@ -23,6 +23,14 @@
 
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
+/*
+ *   entry
+ *   DESCRIPTION: entry point for kernel set up after control is recieved from boot.S
+ *   INPUTS: magic, addr
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: sets up kernel, including IDT, GDT, PIC, keyboard, RTC, and paging
+ */ 
 void entry(unsigned long magic, unsigned long addr) {
 
     multiboot_info_t *mbi;

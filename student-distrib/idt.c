@@ -16,8 +16,8 @@
 
 /* 
  * init_idt
- *   DESCRIPTION: Initializes the interrupt descriptor table with
- *                exceptions, keyboard, RTC, and system call entries
+ *   DESCRIPTION: Initializes the interrupt descriptor table with exceptions (first 20 entries),
+ *                keyboard, RTC, and system call (0x80).
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -76,6 +76,7 @@ void init_idt() {
     }
 
     /* instantiate the kernel function pointers */
+    // Setting intel defined entries
     SET_IDT_ENTRY(idt[0x00], divide_error);
     SET_IDT_ENTRY(idt[0x01], debug);
     SET_IDT_ENTRY(idt[0x02], nmi_interrupt);
@@ -98,7 +99,10 @@ void init_idt() {
     SET_IDT_ENTRY(idt[0x12], machine_check);
     SET_IDT_ENTRY(idt[0x13], simd_floating_point_exception);
     
-    SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage); // PIC INT call
+    // Keyboard PIC interupt
+    SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage);
+
+    // RTC PIC Intertupt
     SET_IDT_ENTRY(idt[0x28], rtc_handler_linkage); // PIC INT call
     
     SET_IDT_ENTRY(idt[0x80], system_call); // INT system call    
