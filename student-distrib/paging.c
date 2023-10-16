@@ -1,8 +1,5 @@
 #include "paging.h"
 
-
-
-
 /* page_directory is our entire page directory object, this function initializes it */
 /* TODO
     INPUTS : None

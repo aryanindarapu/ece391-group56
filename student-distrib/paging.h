@@ -9,10 +9,10 @@
 #define FOUR_KB      4096
 #define ENTRY_SIZE   4
 #define KERNEL_ADDRESS 0x400000
-#define USER_ADDRESS 0x800000
-#define VIDEO_ADDRESS       0xB8000
+#define VIDEO_ADDRESS  0xB8000
 
 #ifndef ASM
+
 
 int init_paging();
 
