@@ -23,7 +23,7 @@ void init_keyboard() {
 
 /*
  *   keyboard_handler
- *   DESCRIPTION: This is the handler for the keyboard interupts. It reads the data from port x60 and sends an EOI
+ *   DESCRIPTION: This is the handler for the keyboard interrupts. It reads the data from port x60 and sends an EOI
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -33,7 +33,7 @@ void keyboard_handler() {
     // Read input from keyboard
     read_keyboard();
     
-    // Signal that interupt is done
+    // Signal that interrupt is done
     send_eoi(1);
 }
 

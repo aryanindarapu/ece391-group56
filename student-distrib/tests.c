@@ -4,7 +4,6 @@
 
 #define PASS 1
 #define FAIL 0
-#define TEST_VECTOR 14 // Set to IDT vector number OR to 256 for keyboard tests
 
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
@@ -48,11 +47,11 @@ int idt_test(){
 
 /*
  *   test_divide_error
- *   DESCRIPTION: Test to see if we probably get a divide by 0 error
+ *   DESCRIPTION: Attempt to divide by 0
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
- *   SIDE EFFECTS: Will purposely divide by 0 (invalid operation) to see if it triggers interupt
+ *   SIDE EFFECTS: Causes a divide by 0 error
  */ 
 int test_divide_error() {
 	TEST_HEADER;
@@ -63,100 +62,123 @@ int test_divide_error() {
 	return FAIL;
 }
 
+/*
+ *   test_bound_range_exceeded
+ *   DESCRIPTION: Attempt to access an array out of bounds
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: Causes a bound range exceeded error
+ */ 
+int test_bound_range_exceeded() {
+	TEST_HEADER;
+	int a[2];
+	a[3] = 10;
+	return FAIL;
+}
+
+
+/*
+ *   test_syscall_handler
+ *   DESCRIPTION: Call a system call to see if it triggers interrupt
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: FAIL if it doesn't trigger interrupt
+ *   SIDE EFFECTS: Causes a system call interrupt
+ */ 
 int test_syscall_handler() {
 	TEST_HEADER;
 	asm volatile("int $0x80");
 	return FAIL;
 }
 
+/*
+ *   test_paging
+ *   DESCRIPTION: Testing to see if we can access various points in memory
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: PASS if we can access all points in memory
+ *   SIDE EFFECTS: may cause page fault if initialization failed
+ */
 int test_paging() {
 	TEST_HEADER;
-	int a;
-	int* p;
+	uint8_t a;
+	uint8_t* p;
 
     printf("Point to beginning of kernel memory.\n");
-    p = (int *) 0x400000; // point to kernel memory
+    p = (uint8_t *) 0x400000; // point to beginning of kernel memory
+    a = *p;
+    printf("PASSED\n");
+
+	printf("Point to middle of kernel memory.\n");
+    p = (uint8_t *) 0x600000; // point to beginning of kernel memory
     a = *p;
     printf("PASSED\n");
 
     printf("Pointing to end of kernel memory.\n");
-    p = (int *) 0x700000; // point to kernel memory
+    p = (uint8_t *) 0x7FFFFF; // point to end of kernel memory
     a = *p;
     printf("PASSED\n");
 
     printf("Pointing to beginning of video memory.\n");
-    p = (int *) 0xB8000; // point to kernel memory
+    p = (uint8_t *) 0xB8000; // point to beginning of video memory
     a = *p;
     printf("PASSED\n");
 
-	// TODO: fix this test, it still doesn't work
-    // printf("Pointing to end of video memory.\n");
-    // p = (int *) 0xB8FFd; // point to kernel memory
-    // a = *p;
-    // printf("PASSED\n");
+    printf("Pointing to end of video memory.\n");
+    p = (uint8_t *) 0xB8FFF; // point to end of vide memory
+    a = *p;
+    printf("PASSED\n");
 
 	return PASS;
 }
 
+/*
+ *   test_page_fault_handler
+ *   DESCRIPTION: Testing to see if we page fault when we dereference NULL
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: FAIL if it doesn't trigger interrupt
+ *   SIDE EFFECTS: Causes page fault interrupt
+ */
 int test_page_fault_handler() {
 	TEST_HEADER;
-	int a;
-	int* p;
+	uint8_t a;
+	uint8_t* p;
 
     printf("Point to beginning of kernel memory.\n");
-    p = (int *) 0x400000; // point to kernel memory
+    p = (uint8_t *) 0x400000; // point to kernel memory
     a = *p;
     printf("PASSED\n");
 
     printf("Pointing to not present memory.\n");
-    p = (int *) 0x2; // point to kernel memory
+    p = (uint8_t *) 0x2;
     a = *p;
     printf("FAILED\n");
-
-	// TODO: fix this test, it still doesn't work
-    // printf("Pointing to end of video memory.\n");
-    // p = (int *) 0xB8FFd; // point to kernel memory
-    // a = *p;
-    // printf("PASSED\n");
 
 	return FAIL;
 }
 
 /*
- *   test_page_fault
- *   DESCRIPTION: Testing to see if we page fault when we access an invalid page
+ *   test_null
+ *   DESCRIPTION: Testing to see if we page fault when we dereference NULL
  *   INPUTS: none
  *   OUTPUTS: none
- *   RETURN VALUE: none
- *   SIDE EFFECTS: Will print out error message and interupt should occur
- */ 
-int test_page_fault() {
-    //Used to test dereference locations.
-	uint8_t a;
-    uint8_t* p = (uint8_t *) 0x800000; // point to kernel memory
-    a = *p;
-
-	printf("pointing to kernel memory");
-
-    //p = (int *) 0x2; 
-	//a = *p;
-	return PASS;
-}
-
+ *   RETURN VALUE: FAIL if it doesn't trigger interrupt
+ *   SIDE EFFECTS: Will print out error message and interrupt should occur
+ */
 int test_null() {
 	TEST_HEADER;
-	int a;
-    int* p;
+	uint8_t a;
+    uint8_t* p;
 
-    p = (int *) 0x2; 
+    p = (uint8_t *) 0x2; 
 	a = *p;
 
 	return FAIL;
 }
 
-// TODO: add more tests for each interrupt
-
-// add more tests here
+// TODO: add test for RTC -- "We also expect you to be able to press a key and demonstrate that your operating system reaches the test interrupts function in on RTC interrupts"
 
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
@@ -176,7 +198,14 @@ void launch_tests() {
 	clear();
 	// TEST_OUTPUT("idt_test", idt_test());
 	TEST_OUTPUT("General IDT Test", idt_test());
+	TEST_OUTPUT("Divide Error Test", test_divide_error());
+	TEST_OUTPUT("Bound Range Exceeded Test", test_bound_range_exceeded());
+	TEST_OUTPUT("System Call Test", test_syscall_handler());
+	// TODO: add RTC test call here
 	TEST_OUTPUT("Paging Test", test_paging());
 	TEST_OUTPUT("NULL Dereference Test", test_null());
 	// TEST_OUTPUT("idt_test", test_page_fault_handler());
+
+
+	// To test keyboard, set RUN_TESTS to 0 or comment all tests above
 }

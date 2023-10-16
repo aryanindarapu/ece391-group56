@@ -4,7 +4,7 @@
 
 /*
  *   divide_error
- *   DESCRIPTION: handler for the divide_error exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the divide_error exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -17,7 +17,7 @@ void divide_error() {
 
 /*
  *   debug
- *   DESCRIPTION: handler for the debug exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the debug exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -30,7 +30,7 @@ void debug() {
 
 /*
  *   nmi_interrupt
- *   DESCRIPTION: handler for the nmi_interrupt exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the nmi_interrupt exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -43,7 +43,7 @@ void nmi_interrupt() {
 
 /*
  *   breakpoint
- *   DESCRIPTION: handler for the breakpoint exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the breakpoint exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -56,7 +56,7 @@ void breakpoint() {
 
 /*
  *   overflow
- *   DESCRIPTION: handler for the overflow exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the overflow exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -69,7 +69,7 @@ void overflow() {
 
 /*
  *   bound_range_exceeded
- *   DESCRIPTION: handler for the bound_range_exceeded exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the bound_range_exceeded exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -82,7 +82,7 @@ void bound_range_exceeded() {
 
 /*
  *   invalid_opcode
- *   DESCRIPTION: handler for the invalid_opcode exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the invalid_opcode exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -96,7 +96,7 @@ void invalid_opcode() {
 
 /*
  *   device_not_available
- *   DESCRIPTION: handler for the device_not_available exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the device_not_available exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -109,7 +109,7 @@ void device_not_available() {
 
 /*
  *   double_fault
- *   DESCRIPTION: handler for the double_fault exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the double_fault exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -122,7 +122,7 @@ void double_fault() {
 
 /*
  *   coprocessor_segment_overrun
- *   DESCRIPTION: handler for the coprocessor_segment_overrun exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the coprocessor_segment_overrun exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -135,7 +135,7 @@ void coprocessor_segment_overrun() {
 
 /*
  *   invalid_tss
- *   DESCRIPTION: handler for the invalid_tss exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the invalid_tss exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -148,7 +148,7 @@ void invalid_tss() {
 
 /*
  *   segment_not_present
- *   DESCRIPTION: handler for the segment_not_present exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the segment_not_present exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -161,7 +161,7 @@ void segment_not_present() {
 
 /*
  *   stack_segment_fault
- *   DESCRIPTION: handler for the stack_segment_fault exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the stack_segment_fault exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -174,7 +174,7 @@ void stack_segment_fault() {
 
 /*
  *   general_protection
- *   DESCRIPTION: handler for the general_protection exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the general_protection exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -187,7 +187,7 @@ void general_protection() {
 
 /*
  *   page_fault
- *   DESCRIPTION: handler for the page_fault exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the page_fault exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -200,7 +200,7 @@ void page_fault() {
 
 /*
  *   reserved
- *   DESCRIPTION: handler for the reserved exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the reserved exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -213,7 +213,7 @@ void reserved() {
 
 /*
  *   x87_fpu_floating_point_error
- *   DESCRIPTION: handler for the x87_fpu_floating_point_error exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the x87_fpu_floating_point_error exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -226,7 +226,7 @@ void x87_fpu_floating_point_error() {
 
 /*
  *   alignment_check
- *   DESCRIPTION: handler for the alignment_check exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the alignment_check exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -239,7 +239,7 @@ void alignment_check() {
 
 /*
  *   machine_check
- *   DESCRIPTION: handler for the machine_check exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the machine_check exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -252,7 +252,7 @@ void machine_check() {
 
 /*
  *   simd_floating_point_exception
- *   DESCRIPTION: handler for the simd_floating_point_exception exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the simd_floating_point_exception exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -265,7 +265,7 @@ void simd_floating_point_exception() {
 
 /*
  *   user_defined
- *   DESCRIPTION: handler for the user_defined exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the user_defined exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -278,7 +278,7 @@ void user_defined() {
 
 /*
  *   system_call
- *   DESCRIPTION: handler for the system_call exception, for now just prints to show Interupt has occured
+ *   DESCRIPTION: handler for the system_call exception, for now just prints to show interrupt has occured
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none

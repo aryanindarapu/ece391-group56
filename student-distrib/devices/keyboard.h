@@ -6,5 +6,5 @@ void init_keyboard();
 // Read the value from the keyboard
 void read_keyboard();
 
-// For when the interupt occurs
+// For when the interrupt occurs
 void keyboard_handler();

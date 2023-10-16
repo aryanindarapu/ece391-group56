@@ -15,11 +15,11 @@ IMPORTANT: What is important is that if register C is not read after an IRQ 8, t
 
 /*
  *   init_rtc
- *   DESCRIPTION: Intializes the RTC for interupt generation
+ *   DESCRIPTION: Intializes the RTC for interrupt generation
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
- *   SIDE EFFECTS: Sets bit 6 of register B to 1 (this allows for timer interupts)
+ *   SIDE EFFECTS: Sets bit 6 of register B to 1 (this allows for timer interrupts)
  *                 Sets the rate valid to register A to change speed of RTC (if needed)
  */ 
 void init_rtc() {
@@ -53,17 +53,17 @@ void init_rtc() {
 
 /*
  *   rtc_handler
- *   DESCRIPTION: The handler for when the RTC timer interupt occurs
+ *   DESCRIPTION: The handler for when the RTC timer interrupt occurs
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
- *   SIDE EFFECTS: Clears out status register C so we can receive another timer interupt
+ *   SIDE EFFECTS: Clears out status register C so we can receive another timer interrupt
  */ 
 void rtc_handler() {
-    // printf("RTC Time Interupt!\n");
+    // printf("RTC Time interrupt!\n");
 
-    // Register C let's us know which interupt flag was set (there are more types of interupt for RTC outside of timer)
-    // If you do not clear these flags, then RTC will no longer trigger interupts
+    // Register C let's us know which interrupt flag was set (there are more types of interrupt for RTC outside of timer)
+    // If you do not clear these flags, then RTC will no longer trigger interrupts
     // Luckily for us, when you read from register C, it clears the flag contents
     // Therefore, we have to simply read from register C and just throwaway the date since we don't need it
     outb(0x0C, RTC_PORT_COMMAND);	// select register C

@@ -48,7 +48,7 @@ void enable_irq(uint32_t irq_num);
 void disable_irq(uint32_t irq_num);
 /* Send end-of-interrupt signal for the specified IRQ */
 void send_eoi(uint32_t irq_num);
-/* offset pic vector and set up primary/secondary cascade */ //TODO : check definition
+/* offset pic vector and set up primary/secondary cascade */
 void PIC_remap(int offset1, int offset2);
 
 //https://wiki.osdev.org/8259_PIC

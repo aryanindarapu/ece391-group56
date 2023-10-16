@@ -4,5 +4,5 @@
 // Intialize the RTC
 void init_rtc();
 
-// Handles the RTC when it is called in an interupt
+// Handles the RTC when it is called in an interrupt
 void rtc_handler();

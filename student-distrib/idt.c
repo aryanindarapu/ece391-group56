@@ -99,7 +99,7 @@ void init_idt() {
     SET_IDT_ENTRY(idt[0x12], machine_check);
     SET_IDT_ENTRY(idt[0x13], simd_floating_point_exception);
     
-    // Keyboard PIC interupt
+    // Keyboard PIC interrupt
     SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage);
 
     // RTC PIC Intertupt

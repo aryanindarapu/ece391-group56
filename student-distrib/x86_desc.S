@@ -35,7 +35,6 @@ _tss:
     .byte 0
     .endr
 tss_bottom:
-    # TODO: Ask for conceptually understanding of .align
     .align  16
 gdt:
 _gdt:
@@ -63,7 +62,6 @@ _gdt:
     # |                                    |                                 |
     # |----------------------------------------------------------------------|
 
-# TODO: why is this 64 bits?
 gdt_ptr:
     # Set up an entry for kernel CS
     .quad 0x00CF9A000000FFFF
@@ -111,8 +109,6 @@ ldt_bottom:
 idt_desc_ptr:
     .word idt_bottom - idt - 1
     .long idt
-    # changed from FFFF to 00FF since we only need 256 entries in IDT
-    # .quad 0x00CF9A00000000FF # TODO: check if right
     
     .align  16
 idt:
@@ -122,22 +118,3 @@ _idt:
     .endr
 
 idt_bottom:
-
-# TODO: finish paging
-# .align 4096
-# page_dir:
-# _page_dir:
-#    .rept NUM_PAGE_TABLE_ENTRIES
-#    .long 0 // 32-bit entries
-#    .endr
-
-# page_dir_bottom:
-
-# .align 4096
-# page_table:
-# _page_table:
-#    .rept NUM_PAGE_TABLE_ENTRIES
-#    .long 0 // 32-bit entries
-#    .endr
-
-# page_table_bottom:

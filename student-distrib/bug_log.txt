@@ -9,15 +9,15 @@ SOLUTION:
 **************************************** CHECKPOINT 1 ****************************************
 -----------------
 FILE/FUNCTION: rtc.c - handler
-BUG: rtc was not never interupting and calling the handler.
+BUG: rtc was not never interrupting and calling the handler.
 SOLUTION: We realized that we had done everything right, but had not enabled irq2 on 
 the primary PIC, after enabling irq0 on the secondary.
 -----------------
 FILE/FUNCTION: asm_linkage.S - keyboard.c/h
-BUG: Our keyboard was only recieving the very first input interupt, then not getting anymore.
-SOLUTION: We had not created the ASM linkage for the interupts, causing the interupt flag to 
-prevent more interupts each time an interupt was called. We added the linkage code to call
-iret, causing the orginal eflags to be set and allow more interupts.
+BUG: Our keyboard was only recieving the very first input interrupt, then not getting anymore.
+SOLUTION: We had not created the ASM linkage for the interrupts, causing the interrupt flag to 
+prevent more interrupts each time an interrupt was called. We added the linkage code to call
+iret, causing the orginal eflags to be set and allow more interrupts.
 -----------------
 FILE/FUNCTION: paging_asm.S
 BUG: Saying there was an implicit declaration for function when we clearly had created the functions.
@@ -29,13 +29,13 @@ SOLUTION: We realized that we where passing the incorrect values of memory to th
 We had to use &page_dir instead of just page_dir.
 -----------------
 FILE/FUNCTION: keyboard.c
-BUG: After we press a key on the keyboard, letting go would also trigger an interupt and print a character.
+BUG: After we press a key on the keyboard, letting go would also trigger an interrupt and print a character.
 SOLUTION: To fix this error we realized that the let go characters where the pressed char + 128, so we just
 did a check to filter out higher idx characters.
 -----------------
 FILE/FUNCTION: keyboard.c
 BUG: Keyboard receiving inputs but only printing out numbers instead of characters.
-SOLUTION: Had to map the corresponding values received from the interupt into the correct keyboard characters. We used a char
+SOLUTION: Had to map the corresponding values received from the interrupt into the correct keyboard characters. We used a char
 array and indexed the numbers printed out to corresponding keyboard characters.
 -----------------
 Ary bugs:
