@@ -67,7 +67,7 @@ void rtc_handler() {
     if(clock_count == 100)
     {
         clock_count = 0;
-        update_attrib();
+        // update_attrib();
         test_interrupts();
         //clear();
         //case_count += 1;
