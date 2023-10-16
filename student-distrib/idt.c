@@ -3,9 +3,6 @@
 #include "asm_linkage.h"
 #include "lib.h" // for printing
 
-// int (*FUNCTION_POINTERS[NUM_VEC])(); // Array of function pointers to handlers
-
-
 /* NOTE: IDT DPL levels - @ page 113
  * 0 - OS kernel
  * 1 & 2 - OS Services
@@ -16,6 +13,7 @@
  * - Bit 2: Specifies descriptor table to use
  * - Bits 1 to 0: Requested Privilege Level (@ page 113) 
 */
+<<<<<<< HEAD
 /*
  *   idt_init
  *   DESCRIPTION: initalizes the IDT, filling out the first 20 interupts as well as keyboard, rtc, and x80 sys call
@@ -25,6 +23,13 @@
  *   SIDE EFFECTS: sets up the IDT for the kernel
  */ 
 int idt_init() { // TODO: change to init_idt
+=======
+
+// TODO: function header
+int init_idt() {
+    // TODO: set up IRQ for everything here
+    // TODO: how do I separate the IRQ, TRAP, TASK?
+>>>>>>> f4c77c3250dc8ebe4b67dc923d1bdb4fbacff98a
     // SET_IDT_ENTRY(idt[vector number], func name);
     // Whenever we want to set an IDT, we have to call SET_IDT_ENTRY
     // Vector number will correspond to location on the IDT

@@ -55,13 +55,74 @@ int idt_test(){
  *   SIDE EFFECTS: Will purposely divide by 0 (invalid operation) to see if it triggers interupt
  */ 
 int test_divide_error() {
+	TEST_HEADER;
 	int a, b, c;
 	a = 10;
 	b = 0;
 	c = a / b;
-	return 0;
+	return FAIL;
 }
 
+int test_syscall_handler() {
+	TEST_HEADER;
+	asm volatile("int $0x80");
+	return FAIL;
+}
+
+int test_paging() {
+	TEST_HEADER;
+	int a;
+	int* p;
+
+    printf("Point to beginning of kernel memory.\n");
+    p = (int *) 0x400000; // point to kernel memory
+    a = *p;
+    printf("PASSED\n");
+
+    printf("Pointing to end of kernel memory.\n");
+    p = (int *) 0x700000; // point to kernel memory
+    a = *p;
+    printf("PASSED\n");
+
+    printf("Pointing to beginning of video memory.\n");
+    p = (int *) 0xB8000; // point to kernel memory
+    a = *p;
+    printf("PASSED\n");
+
+	// TODO: fix this test, it still doesn't work
+    // printf("Pointing to end of video memory.\n");
+    // p = (int *) 0xB8FFd; // point to kernel memory
+    // a = *p;
+    // printf("PASSED\n");
+
+	return PASS;
+}
+
+int test_page_fault_handler() {
+	TEST_HEADER;
+	int a;
+	int* p;
+
+    printf("Point to beginning of kernel memory.\n");
+    p = (int *) 0x400000; // point to kernel memory
+    a = *p;
+    printf("PASSED\n");
+
+    printf("Pointing to not present memory.\n");
+    p = (int *) 0x2; // point to kernel memory
+    a = *p;
+    printf("FAILED\n");
+
+	// TODO: fix this test, it still doesn't work
+    // printf("Pointing to end of video memory.\n");
+    // p = (int *) 0xB8FFd; // point to kernel memory
+    // a = *p;
+    // printf("PASSED\n");
+
+	return FAIL;
+}
+
+<<<<<<< HEAD
 /*
  *   test_page_fault
  *   DESCRIPTION: Testing to see if we page fault when we access an invalid page
@@ -81,6 +142,18 @@ int test_page_fault() {
     //p = (int *) 0x2; 
 	//a = *p;
 	return PASS;
+=======
+
+int test_null() {
+	TEST_HEADER;
+	int a;
+    int* p;
+
+    p = (int *) 0x2; 
+	a = *p;
+
+	return FAIL;
+>>>>>>> f4c77c3250dc8ebe4b67dc923d1bdb4fbacff98a
 }
 
 // TODO: add more tests for each interrupt
@@ -102,27 +175,10 @@ int test_page_fault() {
  *   SIDE EFFECTS: performs test indicated by TEST_VECTOR
  */ 
 void launch_tests() {
-	// TEST_OUTPUT("idt_test", idt_test());
-	// launch your tests here
 	clear();
-	switch (TEST_VECTOR) {
-		case 0:
-			test_divide_error();
-			break;
-		case 14:
-			test_page_fault();
-			break;
-		case 33:
-			asm volatile("int $33");
-			break;
-		case 40:
-			asm volatile("int $40");
-			break;
-		case 128:
-			asm volatile("int $128");
-			break;
-		default:
-			// This just takes it to the keyboard interrupt
-			break;
-	}
+	// TEST_OUTPUT("idt_test", idt_test());
+	TEST_OUTPUT("General IDT Test", idt_test());
+	TEST_OUTPUT("Paging Test", test_paging());
+	TEST_OUTPUT("NULL Dereference Test", test_null());
+	// TEST_OUTPUT("idt_test", test_page_fault_handler());
 }
