@@ -1,5 +1,7 @@
 #include "exceptions.h"
 
+/* Handlers for exceptions in IDT in order of vector number*/
+
 void divide_error() {
     printf("divide error occurred\n");
     while (1);    

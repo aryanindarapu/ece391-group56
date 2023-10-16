@@ -1,13 +1,16 @@
 #include "paging.h"
 
-/* page_directory is our entire page directory object, this function initializes it */
-/* TODO
-    INPUTS : None
-    OUTPUTS : None
-    RETURNS : 0 on success, -1 on failure
-    SIDE EFFECTS : initializes the page directory object
-*/
-int init_paging () {
+/* 
+ * init_paging
+ *   DESCRIPTION: Initializes the page directory with page tables
+ *                and loads the page directory into the CR3 register.
+ *                Also sets up the page table for video memory.
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: adds entries to page directory and page tables
+ */
+void init_paging () {
     int i;
  
     /* initialize the page directory */
@@ -16,7 +19,7 @@ int init_paging () {
             case 0: // Video memory page table
                 page_dir[i].p = 1;
                 page_dir[i].rw = 1;
-                page_dir[i].us = 0; //its 0 level privelage
+                page_dir[i].us = 0; // its 0 level privelage
                 page_dir[i].pwt = 0;
                 page_dir[i].pcd = 0;
                 page_dir[i].a = 0;
@@ -29,7 +32,7 @@ int init_paging () {
             case 1: // Kernel section (single 4mb page)
                 page_dir[i].p = 1;
                 page_dir[i].rw = 1;
-                page_dir[i].us = 0; //its 0 level privelage
+                page_dir[i].us = 0; // its 0 level privelage
                 page_dir[i].pwt = 0;
                 page_dir[i].pcd = 1;
                 page_dir[i].a = 0;
@@ -42,7 +45,7 @@ int init_paging () {
             default: // 8MB - 4GB
                 page_dir[i].p = 0;
                 page_dir[i].rw = 1;
-                page_dir[i].us = 0; //its 0 level privelage
+                page_dir[i].us = 0; 
                 page_dir[i].pwt = 0;
                 page_dir[i].pcd = 0;
                 page_dir[i].a = 0;
@@ -50,14 +53,14 @@ int init_paging () {
                 page_dir[i].ps = 0;
                 page_dir[i].g = 0;
                 page_dir[i].avail = 0;
-                page_dir[i].table_base_addr = 0; //USER_ADDRESS / FOUR_KB; // TODO: is this correct?
+                page_dir[i].table_base_addr = 0;
                 break;
         }
     }
 
-    /* setup page table (the one for PDE #0)*/
+    /* setup page table for video memory (the one for PDE #0) */
     for (i = 0; i < NUM_ENTRIES; i++) {
-        if(i * FOUR_KB == VIDEO_ADDRESS){
+        if(i * FOUR_KB == VIDEO_ADDRESS) {
             video_memory_page_table[i].p = 1;
         }
         else{
@@ -77,6 +80,4 @@ int init_paging () {
     
     loadPageDirectory((unsigned int *) (&page_dir));
     enablePaging();
-
-    return 0;
 }

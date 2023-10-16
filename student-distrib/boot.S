@@ -24,8 +24,9 @@ _start:
     jmp     continue
 
 continue:
+    # load the gdt
     lgdt gdt_desc
-    # TODO: do we need to do anything with idt here?
+    
     lidt idt_desc_ptr
     # INTEL IA-32 CALL 16-bit limit = 0xFFFF
     # Load CS with the new descriptor value

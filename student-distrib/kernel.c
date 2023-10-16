@@ -143,8 +143,6 @@ void entry(unsigned long magic, unsigned long addr) {
     }
 
     /* Construct IDT entries*/
-    // TODO: set up interrupt wrapper (look at ece391syscall.S)
-
     init_idt();
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the

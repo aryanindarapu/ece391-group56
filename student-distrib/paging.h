@@ -13,21 +13,17 @@
 
 #ifndef ASM
 
+/* Initialize paging */
+void init_paging();
 
-int init_paging();
-
-// load page directory with our page directory point
-extern void loadPageDirectory(unsigned int *);
+// Load page directory with our page directory point
+extern void load_page_dir(unsigned int *);
 
 // Enable paging for general purpose
-extern void enablePaging();
+extern void enable_paging();
 
-/* steal the similar struct formats for page dir and page tables 
-TODO: how do I used __attribute__((packed))/ do I even need to? */
 
-/* Page Directory Entry 
-    - 1024 of these makes up THE page directory
-*/
+/* Page directory descriptor */
 typedef union page_dir_desc_t {
     uint32_t val[1];
     struct {
@@ -49,9 +45,7 @@ typedef union page_dir_desc_t {
     } __attribute__ ((packed));
 } page_dir_desc_t;
 
-/* Page Table Entry 
-    - 1024 of these makes up a page table
-*/
+/* Page table descriptor */
 typedef union page_table_desc_t {
     uint32_t val[1];
     struct {
@@ -72,16 +66,8 @@ typedef union page_table_desc_t {
     } __attribute__ ((packed));
 } page_table_desc_t;
 
-/* Page Directory */
 page_dir_desc_t page_dir[NUM_ENTRIES] __attribute__((aligned(FOUR_KB)));
 page_table_desc_t video_memory_page_table[NUM_ENTRIES] __attribute__((aligned(FOUR_KB)));
-// uint32_t video_memory_page[NUM_ENTRIES] __attribute__((aligned(FOUR_KB))); //video mem page
-
-/* 
-register CR3 contains the control reigster data that points to the OS's current 
-operating position
-[31:22 index for the page dir, 21:12 index for the page table, 11:0 has nothing of value = 0]*/
-
 
 #endif /* ASM */
 

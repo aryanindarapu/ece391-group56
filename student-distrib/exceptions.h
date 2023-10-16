@@ -1,11 +1,8 @@
 #include "lib.h"
 
-// TODO: need to comment functions
-
-int get_line_number();
-
+/* Handlers for exceptions from 0x00 to 0x13 */
 void divide_error();
-void debug(); // How do I raise these interrupts?
+void debug(); 
 void nmi_interrupt();
 void breakpoint();
 void overflow();
@@ -27,7 +24,5 @@ void simd_floating_point_exception();
 void user_defined();
 
 
-void read_keyboard(); // 0x21
-
-
+/* Handler for system call interrupt (0x80) */
 void system_call();
