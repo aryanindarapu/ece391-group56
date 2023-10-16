@@ -6,8 +6,9 @@
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
-#define ATTRIB      0x7
+//#define ATTRIB      0xCF
 
+static int ATTRIB = 0xCF;
 static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
@@ -22,6 +23,14 @@ void clear(void) {
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
+}
+
+/* void set_attrib(char new_attr);
+ * Inputs: new_attrib to set
+ * Return Value: none
+ * Function: changes attr to new value */
+void update_attrib(){
+    ATTRIB += 16;
 }
 
 /* Standard printf().

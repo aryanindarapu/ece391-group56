@@ -11,7 +11,7 @@
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void divide_error() {
-    printf("divide error occurred\n");
+    printf("Divide error occurred\n");
     while (1);    
 }
 
@@ -24,7 +24,7 @@ void divide_error() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void debug() {
-    printf("debug interrupt occurred\n");
+    printf("Debug interrupt occurred\n");
     while (1);
 }
 
@@ -37,7 +37,7 @@ void debug() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void nmi_interrupt() {
-    printf("nmi innterrupt occured\n");
+    printf("NMI interrupt occured\n");
     while (1);
 }
 
@@ -50,7 +50,7 @@ void nmi_interrupt() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void breakpoint() {
-    printf("breakpoint interrupt occurred\n");
+    printf("Breakpoint interrupt occurred\n");
     while (1);
 }
 
@@ -63,7 +63,7 @@ void breakpoint() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void overflow() {
-    printf("overflow error occurred\n"); 
+    printf("Overflow error occurred\n"); 
     while (1);
 }
 
@@ -76,7 +76,7 @@ void overflow() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void bound_range_exceeded() {
-    printf("bound range error occurred\n");
+    printf("Bound range error occurred\n");
     while (1);
 }
 
@@ -89,7 +89,7 @@ void bound_range_exceeded() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void invalid_opcode() {
-    printf("invalid opcode error occurred\n");
+    printf("Invalid opcode error occurred\n");
     while (1);
     
 }
@@ -103,7 +103,7 @@ void invalid_opcode() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void device_not_available() {
-    printf("device not available\n");
+    printf("Device not available\n");
     while (1);
 }
 
@@ -116,7 +116,7 @@ void device_not_available() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void double_fault() {
-    printf("double fault error occurred\n");
+    printf("Double fault error occurred\n");
     while (1);
 }
 
@@ -129,7 +129,7 @@ void double_fault() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void coprocessor_segment_overrun() {
-    printf("coprocessor segment overrun error occurred\n");
+    printf("Coprocessor segment overrun error occurred\n");
     while (1);
 }
 
@@ -142,7 +142,7 @@ void coprocessor_segment_overrun() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void invalid_tss() {
-    printf("invalid tts error occurred\n");
+    printf("Invalid tts error occurred\n");
     while (1);  
 }
 
@@ -181,7 +181,7 @@ void stack_segment_fault() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void general_protection() {
-    printf("general protection fault\n");
+    printf("General protection fault\n");
     while (1);
 }
 
@@ -194,7 +194,7 @@ void general_protection() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void page_fault() {
-    printf("page fault occurred\n");
+    printf("Page fault occurred\n");
     while (1);
 }
 
@@ -207,7 +207,7 @@ void page_fault() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void reserved() {
-    printf("reserved interrupt occurred\n");
+    printf("Reserved interrupt occurred\n");
     while (1);
 }
 
@@ -233,7 +233,7 @@ void x87_fpu_floating_point_error() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void alignment_check() {
-    printf("alignment check interrupt occurred\n");
+    printf("Alignment check interrupt occurred\n");
     while (1);
 }
 
@@ -246,7 +246,7 @@ void alignment_check() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void machine_check() {
-    printf("machine alignment interrupt occurred\n");
+    printf("Machine alignment interrupt occurred\n");
     while (1);
 }
 
@@ -259,7 +259,7 @@ void machine_check() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void simd_floating_point_exception() {
-    printf("simd floating point exception occurred\n");
+    printf("Simd floating point exception occurred\n");
     while (1);
 }
 
@@ -272,7 +272,7 @@ void simd_floating_point_exception() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void user_defined() {
-    printf("user defined interrupt occurred\n");
+    printf("User defined interrupt occurred\n");
     while (1);
 }
 
@@ -285,6 +285,6 @@ void user_defined() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void system_call() {
-    printf("system call occurred\n");
+    printf("System call occurred\n");
     while (1);   
 }

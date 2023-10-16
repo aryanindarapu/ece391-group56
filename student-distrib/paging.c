@@ -7,7 +7,7 @@
  *                Also sets up the page table for video memory.
  *   INPUTS: none
  *   OUTPUTS: none
- *   RETURN VALUE: none
+ *   RETURN VALUE: 0 on success, -1 on failure to instantiate paging
  *   SIDE EFFECTS: adds entries to page directory and page tables
  */
 void init_paging () {
@@ -80,4 +80,5 @@ void init_paging () {
     
     load_page_dir((unsigned int *) (&page_dir));
     enable_paging();
+
 }

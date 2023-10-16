@@ -13,6 +13,9 @@ IMPORTANT: What is important is that if register C is not read after an IRQ 8, t
 #include "../x86_desc.h"
 #include "rtc.h"
 
+static int case_count;
+static int clock_count;
+
 /*
  *   init_rtc
  *   DESCRIPTION: Intializes the RTC for interrupt generation
@@ -45,6 +48,9 @@ void init_rtc() {
     // Enable both the primary PIC IRQ2 port as well as IRQ0 on the secondary PIC
     enable_irq(2);
     enable_irq(8);
+
+    case_count = 0;
+    clock_count = 0;
 }
 
 /*
@@ -57,7 +63,17 @@ void init_rtc() {
  */ 
 void rtc_handler() {
     // printf("RTC Time interrupt!\n");
-
+    clock_count++;
+    if(clock_count == 100)
+    {
+        clock_count = 0;
+        update_attrib();
+        test_interrupts();
+        //clear();
+        //case_count += 1;
+        //printf(" TIME: %d", case_count);
+    }
+    
     // Register C let's us know which interrupt flag was set (there are more types of interrupt for RTC outside of timer)
     // If you do not clear these flags, then RTC will no longer trigger interrupts
     // Luckily for us, when you read from register C, it clears the flag contents
