@@ -135,6 +135,7 @@ int idt_init() { // TODO: change to init_idt
     // in linkage.h - extern void linkage functions
     SET_IDT_ENTRY(idt[0x80], system_call); // INT system call
     
+    return 0;
 
     
 
@@ -166,9 +167,7 @@ int idt_init() { // TODO: change to init_idt
     */
 
     // Setting up for divide error - Interrupt gate
-    // .offset_15_00 = 0;
-    printf("reached idt init\n");
-    
+    // .offset_15_00 = 0;    
     // int i;
     // for (i = 0; i < NUM_VEC; i++) {
     //     switch (i) {

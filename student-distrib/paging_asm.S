@@ -11,26 +11,26 @@
 .global enablePaging
 
 loadPageDirectory:
-pushl %ebp
-movl %esp, %ebp
-movl 8(%esp), %eax
-movl %eax, %cr3
-leave
-ret
+    pushl %ebp
+    movl %esp, %ebp
+    movl 8(%esp), %eax
+    movl %eax, %cr3
+    leave
+    ret
 
 # Enable paging
 enablePaging:
-pushl %ebp
-movl %esp, %ebp
+    pushl %ebp
+    movl %esp, %ebp
 
-# Set bit 4 in CR4 to enable $MB pages
-mov %cr4, %eax
-or $0x00000010, %eax
-mov %eax, %cr4
+    # Set bit 4 in CR4 to enable $MB pages
+    mov %cr4, %eax
+    or $0x00000010, %eax
+    mov %eax, %cr4
 
-# Need to set 32nd bit in CR0 to enable paging
-mov %cr0, %eax
-or $0x80000001, %eax
-mov %eax, %cr0
-leave
-ret
+    # Need to set 32nd bit in CR0 to enable paging
+    mov %cr0, %eax
+    or $0x80000001, %eax
+    mov %eax, %cr0
+    leave
+    ret

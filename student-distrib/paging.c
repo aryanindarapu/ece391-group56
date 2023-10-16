@@ -27,7 +27,7 @@ int init_paging () {
                 page_dir[i].ps = 0;
                 page_dir[i].g = 0;
                 page_dir[i].avail = 0;
-                page_dir[i].table_base_addr = (int)(&video_memory_page_table) / FOUR_KB; // TODO: check if dereference is correct
+                page_dir[i].table_base_addr = (unsigned int) (&video_memory_page_table) / FOUR_KB; // TODO: check if dereference is correct
                 break;
             case 1: // Kernel section (single 4mb page)
                 page_dir[i].p = 1;
@@ -78,7 +78,7 @@ int init_paging () {
         video_memory_page_table[i].page_base_addr = i;
     }
     
-    loadPageDirectory((int)(&page_dir));
+    loadPageDirectory((unsigned int *) (&page_dir));
     enablePaging();
 
     return 0;

@@ -4,7 +4,7 @@
 
 #define PASS 1
 #define FAIL 0
-#define TEST_VECTOR 14 // 
+#define TEST_VECTOR 14 // Set to IDT vector number OR to 256 for keyboard tests
 
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
@@ -15,8 +15,7 @@
 static inline void assertion_failure(){
 	/* Use exception #15 for assertions, otherwise
 	   reserved by Intel */
-	// asm volatile("int $15");
-	asm volatile("int $128");
+	asm volatile("int $15");
 }
 
 
@@ -67,6 +66,7 @@ int test_page_fault() {
 
     p = (int *) 0x2; 
 	a = *p;
+	return PASS;
 }
 
 // TODO: add more tests for each interrupt
@@ -101,6 +101,7 @@ void launch_tests() {
 			asm volatile("int $128");
 			break;
 		default:
+			// This just takes it to the keyboard interrupt
 			break;
 	}
 }
