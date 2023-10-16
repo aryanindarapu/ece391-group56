@@ -27,14 +27,14 @@ int init_paging () {
                 page_dir[i].ps = 0;
                 page_dir[i].g = 0;
                 page_dir[i].avail = 0;
-                page_dir[i].table_base_addr = (int) video_memory_page_table / FOUR_KB; // TODO: check if dereference is correct
+                page_dir[i].table_base_addr = (int)(&video_memory_page_table) / FOUR_KB; // TODO: check if dereference is correct
                 break;
             case 1: // Kernel section (single 4mb page)
                 page_dir[i].p = 1;
                 page_dir[i].rw = 1;
                 page_dir[i].us = 0; //its 0 level privelage
                 page_dir[i].pwt = 0;
-                page_dir[i].pcd = 0;
+                page_dir[i].pcd = 1;
                 page_dir[i].a = 0;
                 page_dir[i].res = 0;
                 page_dir[i].ps = 1;
@@ -53,7 +53,7 @@ int init_paging () {
                 page_dir[i].ps = 0;
                 page_dir[i].g = 0;
                 page_dir[i].avail = 0;
-                page_dir[i].table_base_addr = USER_ADDRESS / FOUR_KB; // TODO: is this correct?
+                page_dir[i].table_base_addr = 0; //USER_ADDRESS / FOUR_KB; // TODO: is this correct?
                 break;
         }
     }
@@ -78,7 +78,7 @@ int init_paging () {
         video_memory_page_table[i].page_base_addr = i;
     }
     
-    loadPageDirectory((int)page_dir & 0x000FFFFF);
+    loadPageDirectory((int)(&page_dir));
     enablePaging();
 
     return 0;

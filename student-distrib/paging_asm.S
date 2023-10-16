@@ -14,9 +14,6 @@ loadPageDirectory:
 pushl %ebp
 movl %esp, %ebp
 movl 8(%esp), %eax
-# Put address of page directory into the CR3 register
-# Need to do assembly since C code cannot access CR3
-shll $12, %eax 
 movl %eax, %cr3
 leave
 ret
@@ -28,12 +25,12 @@ movl %esp, %ebp
 
 # Set bit 4 in CR4 to enable $MB pages
 mov %cr4, %eax
-or $0x8, %eax
+or $0x00000010, %eax
 mov %eax, %cr4
 
 # Need to set 32nd bit in CR0 to enable paging
 mov %cr0, %eax
-or $0x80000000, %eax
+or $0x80000001, %eax
 mov %eax, %cr0
 leave
 ret
