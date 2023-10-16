@@ -130,9 +130,6 @@ int idt_init() { // TODO: change to init_idt
     SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage); // PIC INT call
     SET_IDT_ENTRY(idt[0x28], rtc_handler_linkage); // PIC INT call
     
-    //SET_IDT_ENTRY(idt[0x21], read_keyboard_linkage);
-    //intr_link(read_keyboard_linkage,read_keyboard); - in ASM file
-    // in linkage.h - extern void linkage functions
     SET_IDT_ENTRY(idt[0x80], system_call); // INT system call
     
     return 0;
