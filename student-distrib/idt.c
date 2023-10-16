@@ -130,43 +130,12 @@ int idt_init() { // TODO: change to init_idt
     SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage); // PIC INT call
     SET_IDT_ENTRY(idt[0x28], rtc_handler_linkage); // PIC INT call
     
-    //SET_IDT_ENTRY(idt[0x21], read_keyboard_linkage);
-    //intr_link(read_keyboard_linkage,read_keyboard); - in ASM file
-    // in linkage.h - extern void linkage functions
     SET_IDT_ENTRY(idt[0x80], system_call); // INT system call
     
 
     
 
-    /*
-    FUNCTION_POINTERS[0] = divide_error;
-
-    FUNCTION_POINTERS[2] = nmi_interrupt;
-    FUNCTION_POINTERS[3] = breakpoint;
-    FUNCTION_POINTERS[4] = overflow;
-    FUNCTION_POINTERS[5] = bound_range_exceeded;
-    FUNCTION_POINTERS[6] = invalid_opcode;
-    FUNCTION_POINTERS[7] = device_not_available;
-    FUNCTION_POINTERS[8] = double_fault;
-    FUNCTION_POINTERS[9] = coprocessor_segment_overrun;
-    FUNCTION_POINTERS[10] = invalid_tss;
-    FUNCTION_POINTERS[11] = segment_not_present;
-    FUNCTION_POINTERS[12] = stack_segment_fault;
-    FUNCTION_POINTERS[13] = general_protection;
-    FUNCTION_POINTERS[14] = page_fault;
-
-    FUNCTION_POINTERS[16] = x87_fpu_floating_point_error;
-    FUNCTION_POINTERS[17] = alignment_check;
-    FUNCTION_POINTERS[18] = machine_alignment;
-    FUNCTION_POINTERS[19] = simd_floating_point_exception;
-    // TODO this is user defined interrupts so its not necessarily idt[32]
-    FUNCTION_POINTERS[32] = user_defined; 
-
-    FUNCTION_POINTERS[128] = system_call; // INT system call
-    */
-
-    // Setting up for divide error - Interrupt gate
-    // .offset_15_00 = 0;
+    
     printf("reached idt init\n");
     
     // int i;
