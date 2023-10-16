@@ -8,27 +8,50 @@
 #include "../x86_desc.h"
 #include "keyboard.h"
 
+/*
+ *   init_keyboard
+ *   DESCRIPTION: initialization for keyboard on PIC
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: enables IRQ1 on PIC for the keyboard
+ */ 
 void init_keyboard() {
+    // Let PIC enable the IRQ1 for keyboard
     enable_irq(1);
-    //printf("teststtst");
 }
 
+/*
+ *   keyboard_handler
+ *   DESCRIPTION: This is the handler for the keyboard interupts. It reads the data from port x60 and sends an EOI
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: prints any keyboard input to the screen
+ */ 
 void keyboard_handler() {
     // Read input from keyboard
-    read_keyboard(); // TODO: turn back on for tests
+    read_keyboard();
     
     // Signal that interupt is done
     send_eoi(1);
 }
 
-
+/*
+ *   read_keyboard
+ *   DESCRIPTION: helper fnc to read data from keyboard port x60
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: prints the data in the keyboard to screen
+ */ 
 void read_keyboard () {
     
     //printf("keyboard int occured\n");
     unsigned char status;
     unsigned char keycode;
     
-    
+    // Created a keyboard map correlating key press values to characters to display on screen
     unsigned char keyboard_map[128] =
     {
         0,  27, '1', '2', '3', '4', '5', '6', '7', '8',     /* 9 */
@@ -69,11 +92,14 @@ void read_keyboard () {
         0,  /* All other keys are undefined */
     };
     
+    // Include status to check for letting go character (unsure fully if needed)
     status = inb(0x64);  
     if(status & 0x01){
-        //keycode = inb(0x60);
+        // Read the keyboard value at PORT 0x60
         keycode = inb(0x60);  
+        // MP3.1: Check to see if it is a valid character or number
         if(keycode > 0 && keycode < 58)
+            // Print the character using the keycode as an index
             printf("%c", keyboard_map[keycode]);
     }
 }

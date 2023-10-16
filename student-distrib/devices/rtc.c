@@ -13,6 +13,15 @@ IMPORTANT: What is important is that if register C is not read after an IRQ 8, t
 #include "../x86_desc.h"
 #include "rtc.h"
 
+/*
+ *   init_rtc
+ *   DESCRIPTION: Intializes the RTC for interupt generation
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: Sets bit 6 of register B to 1 (this allows for timer interupts)
+ *                 Sets the rate valid to register A to change speed of RTC (if needed)
+ */ 
 void init_rtc() {
     
 
@@ -35,12 +44,21 @@ void init_rtc() {
     outb(0x0A, RTC_PORT_COMMAND); // Might need to make this 8A but we want to reenable NMIs
     outb((prev & 0xF0) | rate, RTC_PORT_DATA); //write only our rate to A. Note, rate is the bottom 4 bits.
 
+    // Enable both the primary PIC IRQ2 port as well as IRQ0 on the secondary PIC
     enable_irq(2);
     enable_irq(8);
 
     
 }
 
+/*
+ *   rtc_handler
+ *   DESCRIPTION: The handler for when the RTC timer interupt occurs
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: Clears out status register C so we can receive another timer interupt
+ */ 
 void rtc_handler() {
     // printf("RTC Time Interupt!\n");
 

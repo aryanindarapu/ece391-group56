@@ -4,7 +4,7 @@
 
 #define PASS 1
 #define FAIL 0
-#define TEST_VECTOR 0 // Set to IDT vector number OR to 256 for keyboard tests
+#define TEST_VECTOR 14 // Set to IDT vector number OR to 256 for keyboard tests
 
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
@@ -46,7 +46,14 @@ int idt_test(){
 	return result;
 }
 
-// TODO: comment AND change to TEST_OUTPUT type function
+/*
+ *   test_divide_error
+ *   DESCRIPTION: Test to see if we probably get a divide by 0 error
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: Will purposely divide by 0 (invalid operation) to see if it triggers interupt
+ */ 
 int test_divide_error() {
 	int a, b, c;
 	a = 10;
@@ -55,17 +62,24 @@ int test_divide_error() {
 	return 0;
 }
 
-
+/*
+ *   test_page_fault
+ *   DESCRIPTION: Testing to see if we page fault when we access an invalid page
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: Will print out error message and interupt should occur
+ */ 
 int test_page_fault() {
     //Used to test dereference locations.
-	int a;
-    int* p = (int *) 0x400000; // point to kernel memory
+	uint8_t a;
+    uint8_t* p = (uint8_t *) 0x800000; // point to kernel memory
     a = *p;
 
 	printf("pointing to kernel memory");
 
-    p = (int *) 0x2; 
-	a = *p;
+    //p = (int *) 0x2; 
+	//a = *p;
 	return PASS;
 }
 
@@ -79,7 +93,14 @@ int test_page_fault() {
 /* Checkpoint 5 tests */
 
 
-/* Test suite entry point */
+/*
+ *   launch_tests
+ *   DESCRIPTION: begin of tests
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: performs test indicated by TEST_VECTOR
+ */ 
 void launch_tests() {
 	// TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here

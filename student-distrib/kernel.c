@@ -23,6 +23,14 @@
 
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
+/*
+ *   entry
+ *   DESCRIPTION: entry point for kernel set up after control is recieved from boot.S
+ *   INPUTS: magic, addr
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: sets up kernel, including IDT, GDT, PIC, keyboard, RTC, and paging
+ */ 
 void entry(unsigned long magic, unsigned long addr) {
 
     multiboot_info_t *mbi;
@@ -154,21 +162,23 @@ void entry(unsigned long magic, unsigned long addr) {
     // fill out idt segment descriptor based on INT vs TRAP @ page 156
     // INT table @ page 145
 
+    // Intialize the IDT
     idt_init();
         
     clear();
     printf("\n\n");
     printf(" ***BEGIN***\n");
-    // }
-    /* Init the PIC */
+    
+    // Intializing the PIC...
     i8259_init();
 
-    // TODO: comment here
+    // Initializing the keyboard...
     init_keyboard();
+
+    // Intializing the RTC...
     init_rtc();
 
-    /* Initialize devices, memory, filesystem, enable device interrupts on the
-     * PIC, any other initialization stuff... */
+    // Initialize paging...
     init_paging();
     
 
@@ -177,8 +187,7 @@ void entry(unsigned long magic, unsigned long addr) {
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
     printf("Enabling Interrupts\n");
-    
-    
+
     sti();
     
 

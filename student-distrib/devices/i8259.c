@@ -13,12 +13,20 @@
 uint8_t master_mask; /* IRQs 0-7  */
 uint8_t slave_mask;  /* IRQs 8-15 */
 
-/* Initialize the 8259 PIC */
+/*
+ *   i8259_init
+ *   DESCRIPTION: initializes the PIC by setting masks and calling helper function to map it to idt
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: Prepares pic for operation and intializes starting state
+ */  
+
 void i8259_init(void) {
     // TODO: initialize devices
     // look pg 795-796
     
-    // Include master_mask and salve_mask to perform bitwise ops
+    // Include master_mask and slave_mask to perform bitwise ops
     master_mask = 0xFF;
     slave_mask = 0xFF;
 
@@ -30,44 +38,40 @@ void i8259_init(void) {
 
 
 
-/* Enable (unmask) the specified IRQ */
+/*
+ *   enable_irq
+ *   DESCRIPTION: Enables the irq bit on the PIC and updates masks
+ *   INPUTS: irq_num
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: updates master_mask and slave_mask as well as PIC internal state
+ */  
 void enable_irq(uint32_t irq_num) {
-    //master_mask = master_mask & (1<<irq_num); // TODO: Explain/check
-	// uint16_t port;
-    // uint8_t value;
- 
-    // if(irq_num < 8) {
-    //     port = PIC1_DATA;
-    // } else {
-    //     port = PIC2_DATA;
-    //     irq_num -= 8;
-    // }
-    // value = inb(port) & ~(1 << irq_num);
-    // outb(value, port);  
+    // Check if the interupt is occurring on the second or the first pic
+    // Each PIC has 8 IRQs so IRQs 0-7 are primary, 8-15 are secondary
     if (irq_num < 8) {
+        // Enable normally for primary pic
         master_mask &= (~(1 << irq_num));
         outb(master_mask,PIC1_DATA);
     } else {
+        // Subtract 8 for secondary since we still index on the PIC2_DATA from 0-7
         slave_mask &= (~(1 << (irq_num - 8)));
         outb(slave_mask,PIC2_DATA);
     }
     return;
 }
 
-/* Disable (mask) the specified IRQ */
+/*
+ *   disable_irq
+ *   DESCRIPTION: Disables the irq bit on the PIC and updates masks
+ *   INPUTS: irq_num
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: updates master_mask and slave_mask as well as PIC internal state
+ */  
 void disable_irq(uint32_t irq_num) {
-    //master_mask = master_mask & (0xffff-(1<<irq_num)); // TODO: Explain/check
-	// uint16_t port;
-    // uint8_t value;
- 
-    // if(irq_num < 8) {
-    //     port = PIC1_DATA;
-    // } else {
-    //     port = PIC2_DATA;
-    //     irq_num -= 8;
-    // }
-    // value = inb(port) | (1 << irq_num);
-    // outb(value, port);
+    // Same thing as the enable except we OR it with the mask to disable the interupt
+    // This will make that corresponding IRQ disabled
     if (irq_num < 8) {
         master_mask |= (~(1 << irq_num));
         outb(master_mask, PIC1_DATA);
@@ -78,34 +82,39 @@ void disable_irq(uint32_t irq_num) {
     return;
 }
 
-/* Send end-of-interrupt signal for the specified IRQ */
+/*
+ *   send_eoi
+ *   DESCRIPTION: Sends the EOI to the corresponding irq on the PIC
+ *   INPUTS: irq_num
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: updates PIC internal state to tell it to stop the interupt
+ */  
 void send_eoi(uint32_t irq_num) {
-    // TODO: Check the irq_num to see if it is greater than 8, that means we have to go to the second PIC
-    //outb(EOI | irq_num, MASTER_8259_PORT); // TODO: Explain/check
+    // Check if the irq is from the secondary or primary
     if (irq_num >= 8) {
-        
+        // Have to send EOI to primary and secondary to let them know interupt is over
         outb(EOI | (irq_num - 8), PIC2_COMMAND);
-        outb(EOI | 0x02, PIC1_COMMAND); // TODO: comment on hard coded x02
+        // Then we have to send it to the primary
+        // We or it with two since it comes from the secondary PIC
+        outb(EOI | 0x02, PIC1_COMMAND);
     } else {
-        //printf("in EOI %d\n", irq_num);
+        // Came from primary with no secondary so just let primary PIC know
         outb(EOI | irq_num, PIC1_COMMAND);
-        //printf("finish EOI\n");
     }   
 }
 
 /*
-arguments:
-	offset1 - vector offset for master PIC
-		vectors on the master become offset1..offset1+7
-	offset2 - same for slave PIC: offset2..offset2+7
-*/
+ *   PIC_remap
+ *   DESCRIPTION: This is a helper function for the initialization process
+ *   INPUTS: offset1, offset2
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: updates PIC internal state that starts the pic and sets the vector offsets to the IDT, as well as CASC info for secondary and primary
+ */  
 void PIC_remap(int offset1, int offset2)
 {
-	// unsigned char a1, a2;
- 
-	// a1 = inb(PIC1_DATA);                        // save masks
-	// a2 = inb(PIC2_DATA);
- 
+
 	outb(ICW1_INIT | ICW4, PIC1_COMMAND);  // starts the initialization sequence (in cascade mode)
 	outb(ICW1_INIT | ICW4, PIC2_COMMAND);
 	outb(offset1, PIC1_DATA);                 // ICW2: Master PIC vector offset
@@ -115,23 +124,5 @@ void PIC_remap(int offset1, int offset2)
  
 	outb(ICW4, PIC1_DATA);               // ICW4: have the PICs use 8086 mode (and not 8080 mode)
 	outb(ICW4, PIC2_DATA);
- 
-	// outb(a1, PIC1_DATA);   // restore saved masks.
-	// outb(a2, PIC2_DATA);
-	//printf("remap done\n");
 }
-
-
-// int handle_PIC_trash() {
-//     printf("in pic :)\n");
-//     for (;;) {
-//         char c=inb(60);
-//         if (!(c&80)) // don't print break codes
-//             printf((char)c);
-//         }
-//     }
-    
-
-//     return 0;
-// };
 

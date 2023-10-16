@@ -16,45 +16,18 @@
  * - Bit 2: Specifies descriptor table to use
  * - Bits 1 to 0: Requested Privilege Level (@ page 113) 
 */
-
-// void set_idt_interrupt(int index, int (*f)()) {
-//     {
-//         idt_desc_t idt_descriptor;
-//         idt_descriptor.present = 1;
-//         idt_descriptor.dpl = 0; // TODO: figure out what these privilege levels should be
-//         idt_descriptor.reserved0 = 0;
-//         idt_descriptor.size = 1; // size of gate - INT gate is a 32 bit gate
-//         idt_descriptor.reserved1 = 1;
-//         idt_descriptor.reserved2 = 1;
-//         idt_descriptor.reserved3 = 0;
-//         idt_descriptor.seg_selector = KERNEL_CS;
-//         SET_IDT_ENTRY(idt_descriptor, f);
-//
-//         idt[index] = idt_descriptor;
-//     }
-// }
-
-// void set_idt_trap(int index, int (*f)()) {
-//     {
-//         idt_desc_t idt_descriptor;
-//         idt_descriptor.present = 1;
-//         idt_descriptor.dpl = 0; // TODO: double check dpl
-//         idt_descriptor.reserved0 = 0;
-//         idt_descriptor.size = 1; // size of gate - INT gate is a 32 bit gate
-//         idt_descriptor.reserved1 = 1;
-//         idt_descriptor.reserved2 = 1;
-//         idt_descriptor.reserved3 = 1;
-//         idt_descriptor.seg_selector = KERNEL_CS; // is this correct val?
-//         SET_IDT_ENTRY(idt_descriptor, f);
-//
-//         idt[index] = idt_descriptor;
-//     }
-// }
-
+/*
+ *   idt_init
+ *   DESCRIPTION: initalizes the IDT, filling out the first 20 interupts as well as keyboard, rtc, and x80 sys call
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: sets up the IDT for the kernel
+ */ 
 int idt_init() { // TODO: change to init_idt
-    // TODO: set up IRQ for everything here
-    // TODO: how do I separate the IRQ, TRAP, TASK?
     // SET_IDT_ENTRY(idt[vector number], func name);
+    // Whenever we want to set an IDT, we have to call SET_IDT_ENTRY
+    // Vector number will correspond to location on the IDT
     int i;
     for (i = 0; i < NUM_VEC; i++) {
         if (i < 20) {
@@ -105,6 +78,7 @@ int idt_init() { // TODO: change to init_idt
         }
     }
     /* instantiate the kernel function pointers */
+    // Setting intel defined entries
     SET_IDT_ENTRY(idt[0x00], divide_error);
     SET_IDT_ENTRY(idt[0x01], debug);
     SET_IDT_ENTRY(idt[0x02], nmi_interrupt);
@@ -127,14 +101,16 @@ int idt_init() { // TODO: change to init_idt
     SET_IDT_ENTRY(idt[0x12], machine_check);
     SET_IDT_ENTRY(idt[0x13], simd_floating_point_exception);
     
-    SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage); // PIC INT call
+    // Keyboard PIC interupt
+    SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage);
+
+    // RTC PIC Intertupt
     SET_IDT_ENTRY(idt[0x28], rtc_handler_linkage); // PIC INT call
     
-    SET_IDT_ENTRY(idt[0x80], system_call); // INT system call
+    // System call IDT entry
+    SET_IDT_ENTRY(idt[0x80], system_call);
     
     return 0;
-
-    
 
     /*
     FUNCTION_POINTERS[0] = divide_error;
