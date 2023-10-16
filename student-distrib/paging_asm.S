@@ -1,5 +1,5 @@
-.global loadPageDirectory
-.global enablePaging
+.global load_page_dir
+.global enable_paging
 
 
 # load_page_dir

@@ -23,8 +23,6 @@ IMPORTANT: What is important is that if register C is not read after an IRQ 8, t
  *                 Sets the rate valid to register A to change speed of RTC (if needed)
  */ 
 void init_rtc() {
-    
-
     // Register B's 6th bit is the enable bit for the timer intertupt
     // Therefore, we need to feed in the prev value as well as setting the 6th bit    
     outb(0x8B, RTC_PORT_COMMAND);		// select register B, and disable NMI
@@ -47,8 +45,6 @@ void init_rtc() {
     // Enable both the primary PIC IRQ2 port as well as IRQ0 on the secondary PIC
     enable_irq(2);
     enable_irq(8);
-
-    
 }
 
 /*

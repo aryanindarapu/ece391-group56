@@ -4,9 +4,15 @@ TEMPLATE:
 -----------------
 FILE/FUNCTION: 
 BUG: 
-SOLUTION: 
+SOLUTION:
+DIFFICULTY:
 -----------------
 **************************************** CHECKPOINT 1 ****************************************
+-----------------
+FILE/FUNCTION: x86_desc.S
+BUG: Kernel kept looping over and over again.
+SOLUTION: GDT wasn't loaded correctly (we were using the wrong descriptor pointer with the lgdt command).
+DIFFICULTY: 2 hours
 -----------------
 FILE/FUNCTION: rtc.c - handler
 BUG: rtc was not never interrupting and calling the handler.
@@ -38,11 +44,11 @@ BUG: Keyboard receiving inputs but only printing out numbers instead of characte
 SOLUTION: Had to map the corresponding values received from the interrupt into the correct keyboard characters. We used a char
 array and indexed the numbers printed out to corresponding keyboard characters.
 -----------------
-Ary bugs:
-- assembly linker error with paging.S and paging.h
-- double fault error keeps happening when loading idt (forgot to initialize idt function) --> 2 hours
-- kernel keep looping (gdt wasn't set up properly, and we needed to actually load the gdt)
-- 
+FILE/FUNCTION: idt.c
+BUG: Double fault error keeps happening when loading idt.
+SOLUTION: We forgot to actually initialize the idt itself in the kernel.c file, which caused a double fault (found through GDB).
+DIFFICULTY: 2 hours
+-----------------
 
 **************************************** CHECKPOINT 2 ****************************************
 -----------------

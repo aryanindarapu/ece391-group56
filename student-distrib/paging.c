@@ -78,6 +78,6 @@ void init_paging () {
         video_memory_page_table[i].page_base_addr = i;
     }
     
-    loadPageDirectory((unsigned int *) (&page_dir));
-    enablePaging();
+    load_page_dir((unsigned int *) (&page_dir));
+    enable_paging();
 }

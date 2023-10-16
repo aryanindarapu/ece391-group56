@@ -105,28 +105,28 @@ int test_paging() {
 	uint8_t a;
 	uint8_t* p;
 
-    printf("Point to beginning of kernel memory.\n");
-    p = (uint8_t *) 0x400000; // point to beginning of kernel memory
+	p = (uint8_t *) 0x400000; // point to beginning of kernel memory
+    printf("Point to beginning of kernel memory: 0x%x.\n", p);
     a = *p;
     printf("PASSED\n");
 
-	printf("Point to middle of kernel memory.\n");
     p = (uint8_t *) 0x600000; // point to beginning of kernel memory
+	printf("Point to middle of kernel memory: 0x%x.\n", p);
     a = *p;
     printf("PASSED\n");
 
-    printf("Pointing to end of kernel memory.\n");
     p = (uint8_t *) 0x7FFFFF; // point to end of kernel memory
+    printf("Pointing to end of kernel memory: 0x%x.\n", p);
     a = *p;
     printf("PASSED\n");
 
-    printf("Pointing to beginning of video memory.\n");
     p = (uint8_t *) 0xB8000; // point to beginning of video memory
+    printf("Pointing to beginning of video memory: 0x%x.\n", p);
     a = *p;
     printf("PASSED\n");
 
-    printf("Pointing to end of video memory.\n");
     p = (uint8_t *) 0xB8FFF; // point to end of vide memory
+    printf("Pointing to end of video memory: 0x%x.\n", p);
     a = *p;
     printf("PASSED\n");
 
@@ -146,13 +146,13 @@ int test_page_fault_handler() {
 	uint8_t a;
 	uint8_t* p;
 
-    printf("Point to beginning of kernel memory.\n");
     p = (uint8_t *) 0x400000; // point to kernel memory
+    printf("Point to beginning of kernel memory: 0x%x.\n", p);
     a = *p;
     printf("PASSED\n");
 
-    printf("Pointing to not present memory.\n");
-    p = (uint8_t *) 0x2;
+	p = (uint8_t *) 0x2;
+    printf("Pointing to not present memory: 0x%x.\n", p);
     a = *p;
     printf("FAILED\n");
 
@@ -172,7 +172,8 @@ int test_null() {
 	uint8_t a;
     uint8_t* p;
 
-    p = (uint8_t *) 0x2; 
+    p = (uint8_t *) 0;
+	printf("Pointing to NULL: 0x%x.\n", p);
 	a = *p;
 
 	return FAIL;
@@ -196,15 +197,15 @@ int test_null() {
  */ 
 void launch_tests() {
 	clear();
-	// TEST_OUTPUT("idt_test", idt_test());
 	TEST_OUTPUT("General IDT Test", idt_test());
-	TEST_OUTPUT("Divide Error Test", test_divide_error());
-	TEST_OUTPUT("Bound Range Exceeded Test", test_bound_range_exceeded());
-	TEST_OUTPUT("System Call Test", test_syscall_handler());
+	// TEST_OUTPUT("Divide Error Test", test_divide_error());
+	// TEST_OUTPUT("Bound Range Exceeded Test", test_bound_range_exceeded());
+	// TEST_OUTPUT("System Call Test", test_syscall_handler());
 	// TODO: add RTC test call here
-	TEST_OUTPUT("Paging Test", test_paging());
-	TEST_OUTPUT("NULL Dereference Test", test_null());
-	// TEST_OUTPUT("idt_test", test_page_fault_handler());
+	// TEST_OUTPUT("Paging Test", test_paging());
+	// TEST_OUTPUT("Page Fault Test", test_page_fault_handler());
+	// TEST_OUTPUT("NULL Dereference Test", test_null());
+	
 
 
 	// To test keyboard, set RUN_TESTS to 0 or comment all tests above
