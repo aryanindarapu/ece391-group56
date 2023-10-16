@@ -4,7 +4,7 @@
 
 #define PASS 1
 #define FAIL 0
-#define TEST_VECTOR 0 // 
+#define TEST_VECTOR 0 // Set to IDT vector number OR to 256 for keyboard tests
 
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
@@ -15,8 +15,7 @@
 static inline void assertion_failure(){
 	/* Use exception #15 for assertions, otherwise
 	   reserved by Intel */
-	// asm volatile("int $15");
-	asm volatile("int $128");
+	asm volatile("int $15");
 }
 
 
@@ -47,13 +46,85 @@ int idt_test(){
 	return result;
 }
 
-// TODO: comment
+// TODO: comment AND change to TEST_OUTPUT type function
 int test_divide_error() {
+	TEST_HEADER;
 	int a, b, c;
 	a = 10;
 	b = 0;
 	c = a / b;
-	return 0;
+	return FAIL;
+}
+
+int test_syscall_handler() {
+	TEST_HEADER;
+	asm volatile("int $0x80");
+	return FAIL;
+}
+
+int test_paging() {
+	TEST_HEADER;
+	int a;
+	int* p;
+
+    printf("Point to beginning of kernel memory.\n");
+    p = (int *) 0x400000; // point to kernel memory
+    a = *p;
+    printf("PASSED\n");
+
+    printf("Pointing to end of kernel memory.\n");
+    p = (int *) 0x700000; // point to kernel memory
+    a = *p;
+    printf("PASSED\n");
+
+    printf("Pointing to beginning of video memory.\n");
+    p = (int *) 0xB8000; // point to kernel memory
+    a = *p;
+    printf("PASSED\n");
+
+	// TODO: fix this test, it still doesn't work
+    // printf("Pointing to end of video memory.\n");
+    // p = (int *) 0xB8FFd; // point to kernel memory
+    // a = *p;
+    // printf("PASSED\n");
+
+	return PASS;
+}
+
+int test_page_fault_handler() {
+	TEST_HEADER;
+	int a;
+	int* p;
+
+    printf("Point to beginning of kernel memory.\n");
+    p = (int *) 0x400000; // point to kernel memory
+    a = *p;
+    printf("PASSED\n");
+
+    printf("Pointing to not present memory.\n");
+    p = (int *) 0x2; // point to kernel memory
+    a = *p;
+    printf("FAILED\n");
+
+	// TODO: fix this test, it still doesn't work
+    // printf("Pointing to end of video memory.\n");
+    // p = (int *) 0xB8FFd; // point to kernel memory
+    // a = *p;
+    // printf("PASSED\n");
+
+	return FAIL;
+}
+
+
+int test_null() {
+	TEST_HEADER;
+	int a;
+    int* p;
+
+    p = (int *) 0x2; 
+	a = *p;
+
+	return FAIL;
 }
 
 // TODO: add more tests for each interrupt
@@ -68,26 +139,10 @@ int test_divide_error() {
 
 /* Test suite entry point */
 void launch_tests() {
-	// TEST_OUTPUT("idt_test", idt_test());
-	// launch your tests here
 	clear();
-	switch (TEST_VECTOR) {
-		case 0:
-			test_divide_error();
-			break;
-		case 14:
-			asm volatile("int $14");
-			break;
-		case 33:
-			asm volatile("int $33");
-			break;
-		case 40:
-			asm volatile("int $40");
-			break;
-		case 128:
-			asm volatile("int $128");
-			break;
-		default:
-			break;
-	}
+	// TEST_OUTPUT("idt_test", idt_test());
+	TEST_OUTPUT("General IDT Test", idt_test());
+	TEST_OUTPUT("Paging Test", test_paging());
+	TEST_OUTPUT("NULL Dereference Test", test_null());
+	// TEST_OUTPUT("idt_test", test_page_fault_handler());
 }

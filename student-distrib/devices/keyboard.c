@@ -4,7 +4,6 @@
 *
 */
 
-#include "i8259.h"
 #include "../lib.h"
 #include "../x86_desc.h"
 #include "keyboard.h"

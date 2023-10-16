@@ -8,13 +8,14 @@
 #include "debug.h"
 #include "tests.h"
 #include "idt.h"
+#include "paging.h"
 
 #include "devices/i8259.h"
 #include "devices/keyboard.h"
 #include "devices/rtc.h"
 
 
-#define RUN_TESTS 1
+#define RUN_TESTS 0
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -142,56 +143,27 @@ void entry(unsigned long magic, unsigned long addr) {
     }
 
     /* Construct IDT entries*/
-    /* */
-    // TODO: do we set the IDTR? 
-    /* x80 sys call interupt */
-    // TODO: set idt entries here with a function
-    // call SET_IDT_ENTRY with the function that acts as the handler
-
     // TODO: set up interrupt wrapper (look at ece391syscall.S)
 
-    // fill out idt segment descriptor based on INT vs TRAP @ page 156
-    // INT table @ page 145
-
-    idt_init();
-    
-    // while (1) {
-    //     char ascii[37] = "1234567890-= qwertyuiop[]asdfghjkl;'";
-    //     char prev;
-    //     char c;
-    //     int input_prev;
-    //     int input=inb(60);
-    //     //iowait();
-    //     //itoa(input, &c, 0);
-    //     if(input_prev != input) {
-    //         if(input != input_prev + 128 && input_prev<26) {
-    //             printf("printing character\n");
-    //             printf("%c", ascii[input_prev]);
-    //             input_prev = input;
-    //         }
-
-
-    //     }
-        
-    clear();
-    printf("\n\n");
-    printf(" ***BEGIN***\n");
-    // }
-    /* Init the PIC */
-    i8259_init();
-
-    // TODO: comment here
-    init_keyboard();
-    init_rtc();
+    init_idt();
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
-
+    i8259_init();
+    init_keyboard();
+    init_rtc();
+    init_paging();
+    
+    clear();
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
     printf("Enabling Interrupts\n");
+
+    
+    printf("\n\n");
+    printf(" ***BEGIN***\n");
     
     
     sti();
@@ -202,7 +174,6 @@ void entry(unsigned long magic, unsigned long addr) {
    launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
-
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
 }

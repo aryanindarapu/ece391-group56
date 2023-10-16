@@ -21,6 +21,10 @@
 
 /* Number of vectors in the interrupt descriptor table (IDT) */
 #define NUM_VEC     256
+#define MAX_KERNEL_INTR 32
+
+#define TABLE_SIZE 4096
+#define NUM_ENTRIES 1024
 
 #define NUM_PAGE_TABLE_ENTRIES 1024
 
