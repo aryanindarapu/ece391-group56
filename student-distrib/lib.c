@@ -23,13 +23,16 @@ void clear(void) {
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
+
+    screen_x = 0;
+    screen_y = 0;
 }
 
 /* void set_attrib(char new_attr);
  * Inputs: new_attrib to set
  * Return Value: none
  * Function: changes attr to new value */
-void update_attrib(){
+void update_attrib() {
     ATTRIB += 16;
 }
 
@@ -187,6 +190,18 @@ void putc(uint8_t c) {
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+
+    update_cursor(screen_x, screen_y);
+}
+
+// TODO: comment this
+void update_cursor(int x, int y) {
+	uint16_t pos = y * NUM_COLS + x;
+ 
+	outb(0x0F, 0x3D4);
+	outb((uint8_t) (pos & 0xFF), 0x3D5);
+	outb(0x0E, 0x3D4);
+	outb((uint8_t) ((pos >> 8) & 0xFF), 0x3D5);
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);

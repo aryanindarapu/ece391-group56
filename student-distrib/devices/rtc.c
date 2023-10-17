@@ -64,11 +64,11 @@ void init_rtc() {
 void rtc_handler() {
     // printf("RTC Time interrupt!\n");
     clock_count++;
-    if(clock_count == 100)
+    if (clock_count == 100)
     {
         clock_count = 0;
         // update_attrib();
-        test_interrupts();
+        // test_interrupts();
         //clear();
         //case_count += 1;
         //printf(" TIME: %d", case_count);

@@ -37,6 +37,7 @@ void keyboard_handler() {
     send_eoi(1);
 }
 
+// TODO: move this to terminal.c (for terminal driver). this driver should send the buffer to a function here, which then parses it and does whatever ops it needs to.
 /*
  *   read_keyboard
  *   DESCRIPTION: helper fnc to read data from keyboard port x60
@@ -50,8 +51,10 @@ void read_keyboard () {
     //printf("keyboard int occured\n");
     unsigned char status;
     unsigned char keycode;
+    // Control key code: 29
     
     // Created a keyboard map correlating key press values to characters to display on screen
+    // TODO: move this to a const in keyboard.h
     unsigned char keyboard_map[128] =
     {
         0,  27, '1', '2', '3', '4', '5', '6', '7', '8',     /* 9 */
@@ -94,12 +97,23 @@ void read_keyboard () {
     
     // Include status to check for letting go character (unsure fully if needed)
     status = inb(0x64);  
-    if(status & 0x01){
+    if (status & 0x01) {
         // Read the keyboard value at PORT 0x60
         keycode = inb(0x60);  
         // MP3.1: Check to see if it is a valid character or number
-        if(keycode > 0 && keycode < 58)
+        printf("Keycode is: %d", keycode);
+        if (keycode > 0 && keycode < 58) {
             // Print the character using the keycode as an index
-            printf("%c", keyboard_map[keycode]);
+            putc(keyboard_map[keycode]);
+
+            // Put character into buffer
+            // keyboard_buffer[cursor_position] = keycode;
+            // cursor_position++;
+        } else {
+            if (keycode == CTRL_KEYCODE) {
+                // flip ctrl flag
+                
+            }
+        }
     }
 }
