@@ -1,5 +1,6 @@
 #include "file_system.h"
 
+
 /* https://wiki.osdev.org/Paging */
 /* */
 /* BOTH OF THESE FUNCTIONS ARE DIRECTLY RIPPED FROM OS DEV PAGING */
@@ -42,13 +43,19 @@ void map_page(void *physaddr, void *virtualaddr, unsigned int flags) {
     // or you might not notice the change.
 }
 
-
+// THIS FUNCTION WILL BE CALLED IN OUR SYS_OPEN() SYSTEM CALL
 uint32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
+    // 1. Scan through the directory entries in boot block to find file name
     
+    // 2. When the dentry is found, we now call read_dentry_by_index to populate the dentry parameters
+            //read_dentry_by_index(index, dentry);
+            // index will be index of the directory entry list, dentry is simply our dentry pointer (we pass it through)
+
+
 }
 
 uint32_t read_dentry_by_index (uint32_t index, dentry_t* dentry){
-
+    // Open up a file and set up the file object
 }
 
 uint32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length){
