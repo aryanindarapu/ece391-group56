@@ -173,3 +173,31 @@ void terminal_clear() {
     clear();
     // TODO: clear buffer
 }
+ 
+
+// New functions, don't want to remove old ones
+// TODO: comment
+int32_t terminal_open(const uint8_t * filename) {
+    // TODO: may want to init buf to 0s, but that's handled anyways, so not necessary
+    return 0;
+}
+
+int32_t terminal_close(int32_t fd) {
+    return 0;
+}
+
+// reads from keyboard buffer into buf
+int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
+    // NOTE: this is a blocking call, so it can't be interrupted
+    // should check for ENTER and BACKSPACE here
+}
+
+// writes to screen from buf
+int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
+    int i;
+    for (i = 0; i < nbytes; i++) {
+        putc(((char*)buf)[i]);
+    }
+
+    return nbytes;
+} 

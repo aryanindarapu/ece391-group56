@@ -7,7 +7,7 @@
 #include "../lib.h"
 #include "../x86_desc.h"
 #include "keyboard.h"
-#include "../terminal.h"
+#include "../terminal.h"        
 
 /*
  *   init_keyboard
@@ -40,17 +40,18 @@ void keyboard_handler() {
 
 // TODO: comment
 void keyboard_driver() {
+    // cli();
     //printf("keyboard int occured\n");
     //unsigned char status;
-    unsigned char keycode;
-
-    keycode = inb(KEYBOARD_PORT);  
+    unsigned char keycode = inb(KEYBOARD_PORT);  
+    // TODO: do all special key checking here
     // Control key code: 29
     
     // Created a keyboard map correlating key press values to characters to display on screen
     // TODO: move this to a const in keyboard.h
-    write_to_terminal(keycode);
+    // write_to_terminal(keycode);
     // }
+    // sti();
 }
 
 // TODO: move this to terminal.c (for terminal driver). this driver should send the buffer to a function here, which then parses it and does whatever ops it needs to.

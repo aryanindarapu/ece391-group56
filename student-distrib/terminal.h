@@ -1,5 +1,8 @@
 #include "types.h"
 
+#ifndef _TERMINAL_H
+#define _TERMINAL_H
+
 #define LINE_BUFFER_SIZE 128
 #define NUM_SPECIAL_FLAGS 3
 
@@ -18,9 +21,14 @@
 // TODO: edge case where CAPS LOCK is turned on before starting the kernel
 // TODO: may need to add cli, sti since this is a crit section
 // CTRL | SHIFT | CAPS LOCK
-char line_buffer[LINE_BUFFER_SIZE];
+static char line_buffer[LINE_BUFFER_SIZE];
 
 extern void write_to_terminal(unsigned char keycode);
 void terminal_clear();
-void terminal_read();
-void terminal_write();
+
+extern int32_t terminal_open(const uint8_t * filename);
+extern int32_t terminal_close(int32_t fd);
+extern int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes);
+extern int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes);
+
+#endif /* _TERMINAL_H */
