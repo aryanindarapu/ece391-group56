@@ -275,16 +275,3 @@ void user_defined() {
     printf("User defined interrupt occurred\n");
     while (1);
 }
-
-/*
- *   system_call
- *   DESCRIPTION: handler for the system_call exception, for now just prints to show interrupt has occured
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: none
- *   SIDE EFFECTS: for now just prints the current exception that has occurred
- */ 
-void system_call() {
-    printf("System call occurred\n");
-    while (1);   
-}

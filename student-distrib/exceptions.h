@@ -22,7 +22,3 @@ void alignment_check();
 void machine_check();
 void simd_floating_point_exception();
 void user_defined();
-
-
-/* Handler for system call interrupt (0x80) */
-void system_call();
