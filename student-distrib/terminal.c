@@ -190,6 +190,7 @@ int32_t terminal_close(int32_t fd) {
 int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // NOTE: this is a blocking call, so it can't be interrupted
     // should check for ENTER and BACKSPACE here
+    // TODO: do we need to implement 'ls' command here?
 }
 
 // writes to screen from buf
