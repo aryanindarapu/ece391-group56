@@ -26,7 +26,10 @@ void clear(void) {
 
     screen_x = 0;
     screen_y = 0;
+    update_cursor();
 }
+
+// TODO: add a function to remove previous character
 
 /* void set_attrib(char new_attr);
  * Inputs: new_attrib to set
@@ -35,6 +38,25 @@ void clear(void) {
 void update_attrib() {
     ATTRIB += 16;
 }
+
+void backspace(void)
+{
+    if(screen_x == 0)
+    {
+        if(screen_y == 0) return;
+        screen_x = NUM_COLS;
+        screen_y--;
+    }
+    screen_x --;
+    putc(' ');
+    if(screen_x == 0)
+    {
+        screen_x = NUM_COLS;
+        screen_y--;
+    }
+    screen_x --;
+    update_cursor();
+};
 
 /* Standard printf().
  * Only supports the following format strings:
@@ -180,6 +202,7 @@ int32_t puts(int8_t* s) {
  * Return Value: void
  *  Function: Output a character to the console */
 void putc(uint8_t c) {
+    
     if(c == '\n' || c == '\r') {
         screen_y++;
         screen_x = 0;
@@ -187,16 +210,16 @@ void putc(uint8_t c) {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
-        screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+        screen_x %= NUM_COLS;
     }
 
-    update_cursor(screen_x, screen_y);
+    update_cursor();
 }
 
 // TODO: comment this
-void update_cursor(int x, int y) {
-	uint16_t pos = y * NUM_COLS + x;
+void update_cursor() {
+	uint16_t pos = screen_y * NUM_COLS + screen_x;
  
 	outb(0x0F, 0x3D4);
 	outb((uint8_t) (pos & 0xFF), 0x3D5);
