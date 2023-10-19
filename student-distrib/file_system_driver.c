@@ -1,4 +1,4 @@
-#include "file_system.h"
+#include "file_system_driver.h"
 
 
 // file_sys_t file_system; // TODO: do i make this static?
@@ -8,9 +8,8 @@
 void init_file_system(void) {
     // TODO: idk what mem address to use
     // boot_block_ptr = (boot_block_t *)mem_addr
-    uint32_t num_inodes = boot_block_ptr->num_inodes;
     inode_ptr = (inode_t *)(boot_block_ptr + 1); 
-    data_block_ptr = (uint8_t *)(inode_ptr + num_inodes);
+    data_block_ptr = (uint8_t *)(inode_ptr + boot_block_ptr->num_inodes);
 }
 
 /* https://wiki.osdev.org/Paging */
@@ -90,5 +89,37 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
 }
 
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length) {
+    // TODO: is this 1-indexed or 0-indexed?
+    if (inode >= boot_block_ptr->num_inodes) {
+        return length;
+    }
 
+    inode_t inode_list = inode_ptr[inode];
+    int i;
+    int db_idx;
+    uint8_t * data_block = data_block_ptr + offset;
+    for (i = 0; i < length; i++) {
+        uint32_t data_block_index = inode_list.data_block_num[i];
+        if (data_block_index >= boot_block_ptr->num_data_blocks) {
+            return length - i;
+        }
+
+        buf[i] = data_block[data_block_index + i];
+    }
+
+    return 0;
 }
+
+
+int32_t file_open(const uint8_t * fname) {
+    return 0;
+}
+
+int32_t file_close(uint32_t fd);
+int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes);
+int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes);
+
+int32_t dir_open(const uint8_t * fname);
+int32_t dir_close(uint32_t fd);
+int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes);
+int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes);

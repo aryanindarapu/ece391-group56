@@ -21,13 +21,12 @@ typedef struct boot_block_t {
 // TODO: figure out if we can include this next pointer here
 typedef struct inode_t {
     int32_t length; // How many data block entries there are
-    data_block_t data_block_num[1023]; // INDEX of the data block (data is NOT continuous per block)
+    uint32_t data_block_num[1023]; // INDEX of the data block (data is NOT continuous per block)
 } inode_t;
 
-typedef struct data_block_t {
-    uint8_t data_block[DATA_BLOCK_SIZE];
-    data_block_t * next;
-} data_block_t;
+// typedef struct data_block_t {
+//     uint8_t data[4096]; // 4kB of data
+// } data_block_t;
 
 // within boot block
 typedef struct dentry_t {
@@ -76,7 +75,7 @@ int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes);
 
 boot_block_t * boot_block_ptr; // Pointer to our boot block
 inode_t * inode_ptr; // List of inodes
-data_block_t * data_block_ptr; // Pointer to our data blocks
+uint8_t * data_block_ptr; // Pointer to our data blocks
 
 //no dentries, no inodes, no data blocks, and no pointers to dentries
 
