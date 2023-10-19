@@ -169,7 +169,8 @@ void entry(unsigned long magic, unsigned long addr) {
 
     
     // printf("\n\n");  
-    printf(" ***BEGIN***\n");
+    printf("[Terminal]$ ");
+    //printf(" ***BEGIN***\n");
     
     
     sti();
