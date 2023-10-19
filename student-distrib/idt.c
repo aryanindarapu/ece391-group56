@@ -2,7 +2,7 @@
 #include "exceptions.h"
 #include "asm_linkage.h"
 #include "lib.h" // for printing
-#include "system_call.h"
+#include "syscall.h"
 
 /* NOTE: IDT DPL levels - @ page 113
  * 0 - OS kernel

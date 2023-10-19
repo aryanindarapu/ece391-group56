@@ -1,4 +1,4 @@
-#include "system_call.h"
+#include "syscall.h"
 #include "paging.h"
 #include "file_system.h"
 
@@ -34,20 +34,15 @@ uint32_t open (const uint8_t* filename) {
     if (file_desc_index > 7) {
         return -1;
     }
-    /* 
-    create the dentry object to pass to read_dentry_by_name
-    manually fill the file name field in the dentry object 
-    */
-    for (i = 0; i < strlen(filename); i++) {
-        file_dentry.file_name[i] = filename[i];
-    }
+
     /* find the inode index this file should populate */
     /* we dont know the file_type so we let read_dentry_by_name implement it since
         the function is going to add the filename on the file directory */
-    if (read_dentry_by_name (filename, &file_dentry) == -1){ //if the file doesn't exist == -1
-        file_sys.boot_block.inode_count++;
-        file_sys.boot_block.dir_count++;
+    if (read_dentry_by_name (filename, &file_dentry) == -1) { //if the file doesn't exist == -1
+        return -1;
     }
+
+    // check dentry file type and add to file descriptor array
 
     file_desc_index++;
 

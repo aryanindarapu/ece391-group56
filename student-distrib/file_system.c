@@ -1,8 +1,17 @@
 #include "file_system.h"
 
 
-file_sys_t file_system; // TODO: do i make this static?
+// file_sys_t file_system; // TODO: do i make this static?
 
+// TODO: comment
+// Initialize the file system
+void init_file_system(void) {
+    // TODO: idk what mem address to use
+    // boot_block_ptr = (boot_block_t *)mem_addr
+    uint32_t num_inodes = boot_block_ptr->num_inodes;
+    inode_ptr = (inode_t *)(boot_block_ptr + 1); 
+    data_block_ptr = (uint8_t *)(inode_ptr + num_inodes);
+}
 
 /* https://wiki.osdev.org/Paging */
 /* */
@@ -51,11 +60,10 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
     int dir_index;
 
     // Scan through directory entries to find file name
-    for (dir_index = 0; dir_index < file_system.boot_block.dir_count; dir_index++) {
-        if (file_system.boot_block.dir_entries[dir_index].file_name == fname) {
+    for (dir_index = 0; dir_index < boot_block_ptr->num_dirs; dir_index++) {
+        if (boot_block_ptr->dir_entries[dir_index].file_name == fname) {
             // File found in our boot block so we update our dentry
             strcpy(dentry->file_name, fname);
-
             // Now we update the dentry with the inode and type
             return read_dentry_by_index(dir_index, dentry);
         }
@@ -69,13 +77,14 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
 int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
     // Open up a file and set up the file object
     // NOTE: index is the directory index
-    if (index >= file_system.boot_block.inode_count) {
+    if (index >= boot_block_ptr->num_inodes) {
         return -1;
     }
     
-    dentry_t boot_block_dentry = file_system.boot_block.dir_entries[index];
-    dentry->file_type = boot_block_dentry.file_type;
-    dentry->inode_num = boot_block_dentry.file_name;
+    dentry_t boot_block_dentry_list = boot_block_ptr->dir_entries[index];
+    
+    dentry->file_type = boot_block_dentry_list.file_type;
+    dentry->inode_num = boot_block_dentry_list.file_name;
 
     return 0;
 }
