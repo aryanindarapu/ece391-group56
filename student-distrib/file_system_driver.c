@@ -7,9 +7,9 @@
 // Initialize the file system
 void init_file_system(void) {
     // TODO: idk what mem address to use
-    // boot_block_ptr = (boot_block_t *)mem_addr
-    inode_ptr = (inode_t *)(boot_block_ptr + 1); 
-    data_block_ptr = (uint8_t *)(inode_ptr + boot_block_ptr->num_inodes);
+    // boot_block_ptr = (boot_block_t *)mem_addr -- done in kernel.c
+    inode_ptr = (inode_t *)(boot_block_ptr + 1); // increase by size of pointer 
+    data_block_ptr = (data_block_t *)(inode_ptr + boot_block_ptr->num_inodes);
 }
 
 /* https://wiki.osdev.org/Paging */
@@ -89,25 +89,37 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
 }
 
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length) {
-    // TODO: is this 1-indexed or 0-indexed?
     if (inode >= boot_block_ptr->num_inodes) {
-        return length;
+        return -1;
     }
 
-    inode_t inode_list = inode_ptr[inode];
-    int i;
-    int db_idx;
-    uint8_t * data_block = data_block_ptr + offset;
-    for (i = 0; i < length; i++) {
-        uint32_t data_block_index = inode_list.data_block_num[i];
-        if (data_block_index >= boot_block_ptr->num_data_blocks) {
-            return length - i;
+    inode_t curr_inode = inode_ptr[inode];
+    int curr_byte_idx;
+    int data_block_idx;
+    int within_data_block_idx;
+    for (curr_byte_idx = offset; curr_byte_idx < length; curr_byte_idx++) {
+        // reached end of file
+        if (curr_byte_idx >= curr_inode.length) {
+            return 0;
         }
 
-        buf[i] = data_block[data_block_index + i];
+        
+        data_block_idx = curr_byte_idx / DATA_BLOCK_SIZE;
+        within_data_block_idx = curr_byte_idx % DATA_BLOCK_SIZE;
+        // TODO: is this 1-indexed or 0-indexed?
+        // if (data_block_idx >= )
+        uint32_t data_block_num = curr_inode.data_blocks[data_block_idx];
+
+        // bad data block
+        if (data_block_num >= boot_block_ptr->num_data_blocks) {
+            return -1;
+        }
+
+        data_block_t * data_block = data_block_ptr + data_block_num;
+        buf[curr_byte_idx - offset] = data_block->data[within_data_block_idx];
     }
 
-    return 0;
+    return length;
 }
 
 
