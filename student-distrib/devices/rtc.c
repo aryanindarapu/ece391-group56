@@ -16,6 +16,8 @@ IMPORTANT: What is important is that if register C is not read after an IRQ 8, t
 static int case_count;
 static int clock_count;
 
+static int rtc_interupt_flag;
+
 /*
  *   init_rtc
  *   DESCRIPTION: Intializes the RTC for interrupt generation
@@ -41,7 +43,7 @@ void init_rtc() {
 
     // Standard rate value is 6, it can be between 2 to 15 ranging from 2Hz to 32,xxx Hz
     // Higher rate means slower clock, the rate is fed into bits 0-3 in register A
-    int rate = 0x06;
+    int rate = 0x0F;
     outb(0x0A, RTC_PORT_COMMAND); // Might need to make this 8A but we want to reenable NMIs
     outb((prev & 0xF0) | rate, RTC_PORT_DATA); //write only our rate to A. Note, rate is the bottom 4 bits.
 
@@ -62,6 +64,9 @@ void init_rtc() {
  *   SIDE EFFECTS: Clears out status register C so we can receive another timer interrupt
  */ 
 void rtc_handler() {
+    // Clear interupt flag for the rtc_read
+    rtc_interupt_flag = 0;
+
     // printf("RTC Time interrupt!\n");
     clock_count++;
     if(clock_count == 100)
@@ -83,6 +88,77 @@ void rtc_handler() {
 
     send_eoi(8);
 }
+
+int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
+    rtc_interupt_flag = 1;
+
+    // MP3.2 TODO: Is this fine since RTC is hardware?
+    while(rtc_interupt_flag) {};
+
+    // Always return 0 for RTC
+    return 0
+}
+
+int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
+    uint8_t * hz_rate = (uint8_t *) buf;
+    int count = 0;
+    char prev;
+
+    // Get the 32-bit value Hz rate
+    uint32_t rate = hz_rate[0] | (hz_rate[1] << 8) | (hz_rate[2] << 16) | (hz_rate[3] << 24);
+
+    // Check to make sure Hz rate is less than or equal 8192 Hz
+    if(rate > 8192 || (rate - 1) & rate != 0) {
+        return -1;
+    }
+
+    // MP3.2 TODO: CHECK IF WE NEED TO ACCOUNT FOR 0HZ TO DISABLE RTC
+    //              ALSO CHECK FOR CASE OF 1HZ
+
+    // Make sure that Hz rate is a power of 2
+    while(rate != 1) {
+        count++;
+        rate /= 2;
+    }
+
+    // Rate is calculated by 32768 >> (rate - 1) in our status register
+    // That's why we keep a count variable and shift depending on how many powers of 2 we have
+    rate = 16 - count;
+
+    outb(0x8A, RTC_PORT_COMMAND); // Grab register A contents
+    prev = inb(RTC_PORT_DATA);    // Store in prev
+    
+    outb(0x0A, RTC_PORT_COMMAND); // Reenable NMI
+    // Rate will be between 3 and 15
+    outb((prev & 0xF0) | rate, RTC_PORT_DATA); //write our rate to A. Note, rate is the bottom 4 bits.
+
+    // Always return 0
+    return 0;
+}
+
+int32_t rtc_open(const uint8_t * filename) {
+    // RTC_OPEN SHOULD RESET FREQUENCY TO 2HZ
+    char prev;
+
+    outb(0x8A, RTC_PORT_COMMAND);	// reset index to A
+    prev = inb(RTC_PORT_DATA);      // grab previous value constraints
+
+    // Standard rate value is 6, it can be between 2 to 15 ranging from 2Hz to 32,xxx Hz
+    // Higher rate means slower clock, the rate is fed into bits 0-3 in register A
+    // Rate of 15 sets frequency to 2Hz
+    int rate = 0x0F;
+    outb(0x0A, RTC_PORT_COMMAND); // Might need to make this 8A but we want to reenable NMIs
+    outb((prev & 0xF0) | rate, RTC_PORT_DATA); //write only our rate to A. Note, rate is the bottom 4 bits.
+
+    // MP3.2 TODO: Does this return 0 or a file descriptor?
+    return 0;
+}
+
+int32_t rtc_close(int32_t fd) {
+    // MP3.2 TODO: Do we actually need to close RTC?
+    return -1;
+}
+
 
 // USEFUL WEBSITE FOR UDERSTANDING THE REGISTER CONTENTS FOR RTC
 // https://web.archive.org/web/20150514082645/http://www.nondot.org/sabre/os/files/MiscHW/RealtimeClockFAQ.txt
