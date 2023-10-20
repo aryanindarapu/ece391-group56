@@ -6,6 +6,7 @@
 #define DATA_BLOCK_SIZE 4096
 #define MAX_FILE_DESC 8 
 #define DATA_BLOCKS_PER_INODE 1023
+#define FORMATTER_LENGTH 11
 
 int rtc_interrupt_flag;
 

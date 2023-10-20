@@ -213,6 +213,27 @@ int test_file() {
 	return PASS;
 }
 
+test_directory_ls(){
+	TEST_HEADER;
+	int i;
+	uint8_t filename[32];
+	filename[0] = '.';
+	filename[1] = '\0';
+	init_file_system();
+	dir_open(&filename);
+	char * file_buffer[1440];
+	dir_read(0, file_buffer, 0);
+	for (i = 0; i < strlen(file_buffer); i++){
+		if (file_buffer[i] == '\0'){
+			//null terminating char
+			continue;
+		}
+		// printf("%c", file_buffer[i]);
+		putc(file_buffer[i]);
+	}
+	return PASS;
+}
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -253,6 +274,7 @@ void launch_tests() {
 	// TEST_OUTPUT("Alignment check test", test_alignment_check());
 	// TEST_OUTPUT("Machine check test", test_machine_check());
 	// TEST_OUTPUT("Simd floating point exception test", test_simd_floating_point_exception());
-	TEST_OUTPUT("file test", test_file());
+	// TEST_OUTPUT("file test", test_file());
+	TEST_OUTPUT("directory test(ls)", test_directory_ls());
 	// To test keyboard, set RUN_TESTS to 0 or comment all tests above
 }
