@@ -1,4 +1,5 @@
 #include "exceptions.h"
+#include "lib.h"
 
 /* Handlers for exceptions in IDT in order of vector number*/
 
@@ -8,9 +9,10 @@
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
- *   SIDE EFFECTS: for now just prints the current exception that has occurred
+//  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 void divide_error() {
+    // cli();
     printf("Divide error occurred\n");
     while (1);    
 }

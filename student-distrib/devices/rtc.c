@@ -96,7 +96,7 @@ int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
     while(rtc_interupt_flag) {};
 
     // Always return 0 for RTC
-    return 0
+    return 0;
 }
 
 int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
@@ -108,7 +108,7 @@ int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
     uint32_t rate = hz_rate[0] | (hz_rate[1] << 8) | (hz_rate[2] << 16) | (hz_rate[3] << 24);
 
     // Check to make sure Hz rate is less than or equal 8192 Hz
-    if(rate > 8192 || (rate - 1) & rate != 0) {
+    if(rate > 8192 || (rate - 1) & (rate != 0)) {
         return -1;
     }
 
