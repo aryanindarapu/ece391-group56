@@ -182,34 +182,97 @@ int test_null() {
 // TODO: add test for RTC -- "We also expect you to be able to press a key and demonstrate that your operating system reaches the test interrupts function in on RTC interrupts"
 
 /* Checkpoint 2 tests */
-int test_file() {
+int test_frame1() {
 	TEST_HEADER;
 	int i;
-	uint8_t filename[32];
-	filename[0] = 'f';
-	filename[1] = 'r';
-	filename[2] = 'a';
-	filename[3] = 'm';
-	filename[4] = 'e';
-	filename[5] = '1';
-	filename[6] = '.';
-	filename[7] = 't';
-	filename[8] = 'x';
-	filename[9] = 't';
-	filename[10] = '\0';
 	init_file_system();
-	file_open(&filename);
-	char file_buffer[300];
 
-	file_read(0, (void *) file_buffer, 173);
-	for (i = 0; i < strlen(file_buffer); i++){
+	printf("Reading frame1.txt.\n");
+	if (file_open((const uint8_t *) "frame1.txt") == -1) return FAIL;
+
+	char file_buffer[FRAME1_SIZE];
+	if (file_read(0, (void *) file_buffer, FRAME1_SIZE) == -1) return FAIL;
+	for (i = 0; i < FRAME1_SIZE; i++){
 		if (file_buffer[i] == '\0'){
-			//null terminating char
 			continue;
 		}
-		// printf("%c", file_buffer[i]);
+
 		putc(file_buffer[i]);
 	}
+
+	putc('\n');
+	// close and check that it got closed
+	if (file_close(0) == -1) return FAIL;
+	printf("PASSED\n");
+
+	printf("Attempted to read closed frame1.txt.\n");
+	if (file_read(0, (void *) file_buffer, FRAME1_SIZE) == 0) return FAIL;
+	printf("PASSED\n");
+
+
+	return PASS;
+}
+
+int test_grep() {
+	TEST_HEADER;
+	int i;
+	init_file_system();
+
+	printf("Reading grep.\n");
+	if (file_open((const uint8_t *) "grep") == -1) return FAIL;
+
+	clear();
+	char file_buffer[GREP_SIZE];
+	if (file_read(0, (void *) file_buffer, GREP_SIZE) == -1) return FAIL;
+	for (i = 0; i < GREP_SIZE; i++){
+		if (file_buffer[i] == '\0'){
+			continue;
+		}
+
+		putc(file_buffer[i]);
+	}
+
+	// putc('\n');
+	// // close and check that it got closed
+	// if (file_close(0) == -1) return FAIL;
+	// printf("PASSED\n");
+
+	// printf("Attempted to read closed grep.\n");
+	// if (file_read(0, (void *) file_buffer, GREP_SIZE) == 0) return FAIL;
+	// printf("PASSED\n");
+
+
+	return PASS;
+}
+
+int test_verylarge() {
+	TEST_HEADER;
+	int i;
+	init_file_system();
+
+	printf("Reading verylargetextwithverylongname.txt.\n");
+	if (file_open((const uint8_t *) "verylargetextwithverylongname.txt") == -1) return FAIL;
+
+	char file_buffer[VERYLARGE_SIZE];
+	if (file_read(0, (void *) file_buffer, VERYLARGE_SIZE) == -1) return FAIL;
+	for (i = 0; i < VERYLARGE_SIZE; i++){
+		if (file_buffer[i] == '\0'){
+			continue;
+		}
+
+		putc(file_buffer[i]);
+	}
+
+	putc('\n');
+	// close and check that it got closed
+	if (file_close(0) == -1) return FAIL;
+	printf("PASSED\n");
+
+	printf("Attempted to read closed verylargetextwithverylongname.txt.\n");
+	if (file_read(0, (void *) file_buffer, VERYLARGE_SIZE) == 0) return FAIL;
+	printf("PASSED\n");
+
+
 	return PASS;
 }
 
@@ -228,31 +291,18 @@ int test_file() {
  */ 
 void launch_tests() {
 	clear();
+	/* Checkpoint 1 Tests */
 	// TEST_OUTPUT("General IDT Test", idt_test());
 	// TEST_OUTPUT("Divide Error Test", test_divide_error());
-	// TEST_OUTPUT("Bound Range Exceeded Test", test_bound_range_exceeded());
 	// TEST_OUTPUT("System Call Test", test_syscall_handler());
-	// TODO: add RTC test call here
 	// TEST_OUTPUT("Paging Test", test_paging());
 	// TEST_OUTPUT("Page Fault Test", test_page_fault_handler());
 	// TEST_OUTPUT("NULL Dereference Test", test_null());
-	// TEST_OUTPUT("NMI interrupt test", test_NMI_interupt());
-	// TEST_OUTPUT("Breakpoint test", test_breakpoint());
-	// TEST_OUTPUT("Overflow interrupt test", test_overflow_interrupt());
-	// TEST_OUTPUT("Invalid opcode test", test_invalid_opcode());
-	// TEST_OUTPUT("Device not available test", test_device_not_available());
-	// TEST_OUTPUT("Double fault test", test_double_fault());
-	// TEST_OUTPUT("Segment overrun test", test_segment_overrun());
-	// TEST_OUTPUT("Invalid tss test", test_invalid_tss());
-	// TEST_OUTPUT("Segment not present test", test_segment_not_present());
-	// TEST_OUTPUT("Stack fault test", test_stack_fault());
-	// TEST_OUTPUT("General protection test", test_general_protection());
-	// TEST_OUTPUT("Page fault test", test_page_fault());
-	// TEST_OUTPUT("Implemented paging test", test_paging());
-	// TEST_OUTPUT("x86_FPU error test", test_x86_FPU_error());
-	// TEST_OUTPUT("Alignment check test", test_alignment_check());
-	// TEST_OUTPUT("Machine check test", test_machine_check());
-	// TEST_OUTPUT("Simd floating point exception test", test_simd_floating_point_exception());
-	TEST_OUTPUT("file test", test_file());
+
 	// To test keyboard, set RUN_TESTS to 0 or comment all tests above
+
+	/* Checkpoint 2 Tests */
+	// TEST_OUTPUT("Test frame1.txt", test_frame1());
+	TEST_OUTPUT("Test grep", test_grep());
+	// TEST_OUTPUT("Test verylargetextwithverylongname.txt", test_verylarge());
 }

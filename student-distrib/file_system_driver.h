@@ -74,7 +74,6 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes);
 int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes);
 
 
-
 //TODO: maybe make rtc_open close... functions if we dont already have them somewhere else
 
 /* file system instantiation */
@@ -87,4 +86,4 @@ data_block_t * data_block_ptr; // Pointer to our data blocks
 
 //no dentries, no inodes, no data blocks, and no pointers to dentries
 
-static file_desc_t file_desc_arr[MAX_FILE_DESC];
+file_desc_t file_desc_arr[MAX_FILE_DESC];

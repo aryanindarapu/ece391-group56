@@ -57,13 +57,14 @@ void init_file_system(void) {
 
 // THIS FUNCTION WILL BE CALLED IN OUR SYS_OPEN() SYSTEM CALL
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
-    int dir_index;
+    uint32_t dir_index;
 
     // Scan through directory entries to find file name
     for (dir_index = 0; dir_index < boot_block_ptr->num_dirs; dir_index++) {
-        if (strlen(fname) == strlen((char *) boot_block_ptr->dir_entries[dir_index].file_name) && strncmp(fname, (char *) boot_block_ptr->dir_entries[dir_index].file_name, strlen(fname)) == 0) {
+        if (strlen((const int8_t *) fname) == strlen((const int8_t *) boot_block_ptr->dir_entries[dir_index].file_name) 
+            && strncmp((const int8_t *) fname, (const int8_t *) boot_block_ptr->dir_entries[dir_index].file_name, FILENAME_SIZE) == 0) {
             // File found in our boot block so we update our dentry
-            strcpy(dentry->file_name, fname);
+            strcpy(dentry->file_name, (const int8_t *) fname);
             // Now we update the dentry with the inode and type
             return read_dentry_by_index(dir_index, dentry);
         }
@@ -81,10 +82,10 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
         return -1;
     }
     
-    dentry_t boot_block_dentry_list = boot_block_ptr->dir_entries[index];
+    dentry_t found_dentry = boot_block_ptr->dir_entries[index];
     
-    dentry->file_type = boot_block_dentry_list.file_type;
-    dentry->inode_num = boot_block_dentry_list.inode_num;
+    dentry->file_type = found_dentry.file_type;
+    dentry->inode_num = found_dentry.inode_num;
 
     return 0;
 }
@@ -104,7 +105,6 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
             return 0;
         }
 
-        
         data_block_idx = curr_byte_idx / DATA_BLOCK_SIZE;
         within_data_block_idx = curr_byte_idx % DATA_BLOCK_SIZE;
         // TODO: is this 1-indexed or 0-indexed?
@@ -166,6 +166,10 @@ int32_t file_open(const uint8_t * fname) {
 
 int32_t file_close(uint32_t fd) {
     // TODO: remove from file descriptor array
+    file_desc_arr[fd].file_ops_ptr = NULL;
+    file_desc_arr[fd].file_pos = 0;
+    file_desc_arr[fd].flags = 0;
+    file_desc_arr[fd].inode = 0;
     return 0;
 }
 
@@ -187,8 +191,10 @@ int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes) {
     return -1;
 }
 
-int32_t dir_open(const uint8_t * fname);
+int32_t dir_open(const uint8_t * fname){
+    //fname is irrelevant since directory is always named "."
+    return 0;
+}
 int32_t dir_close(uint32_t fd);
 int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes);
 int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes);
-

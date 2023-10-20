@@ -17,6 +17,11 @@ int test_page_fault_handler();
 int test_null();
 
 /* Checkpoint 2 Tests */
-int test_file();
+#define FRAME1_SIZE 174
+#define GREP_SIZE 6149
+#define VERYLARGE_SIZE 5277
+int test_frame1();
+int test_grep();
+int test_verylarge();
 
 #endif /* TESTS_H */
