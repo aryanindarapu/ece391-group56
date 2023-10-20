@@ -5,6 +5,7 @@
 #define FILENAME_SIZE 32
 #define DATA_BLOCK_SIZE 4096
 #define MAX_FILE_DESC 8 
+#define DATA_BLOCKS_PER_INODE 1023
 
 int rtc_interrupt_flag;
 
@@ -20,13 +21,13 @@ typedef struct boot_block_t {
 // size - 4kB
 // TODO: figure out if we can include this next pointer here
 typedef struct inode_t {
-    int32_t length; // How many data block entries there are
-    uint32_t data_block_num[1023]; // INDEX of the data block (data is NOT continuous per block)
+    int32_t length; // length in bytes of data blocks
+    uint32_t data_blocks[DATA_BLOCKS_PER_INODE]; // INDEX of the data block (data is NOT continuous per block)
 } inode_t;
 
-// typedef struct data_block_t {
-//     uint8_t data[4096]; // 4kB of data
-// } data_block_t;
+typedef struct data_block_t {
+    uint8_t data[4096]; // 4kB of data
+} data_block_t;
 
 // within boot block
 typedef struct dentry_t {
@@ -74,8 +75,9 @@ int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes);
 // file_sys_t file_sys;
 
 boot_block_t * boot_block_ptr; // Pointer to our boot block
+// uint32_t * file_sys_start_ptr;
 inode_t * inode_ptr; // List of inodes
-uint8_t * data_block_ptr; // Pointer to our data blocks
+data_block_t * data_block_ptr; // Pointer to our data blocks
 
 //no dentries, no inodes, no data blocks, and no pointers to dentries
 

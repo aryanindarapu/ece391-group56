@@ -9,6 +9,7 @@
 #include "tests.h"
 #include "idt.h"
 #include "paging.h"
+#include "file_system_driver.h"
 
 #include "devices/i8259.h"
 #include "devices/keyboard.h"
@@ -66,6 +67,7 @@ void entry(unsigned long magic, unsigned long addr) {
         int mod_count = 0;
         int i;
         module_t* mod = (module_t*)mbi->mods_addr;
+        boot_block_ptr = (boot_block_t *) mod->mod_start; // TODO: this works?
         while (mod_count < mbi->mods_count) {
             printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
             printf("Module %d ends at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_end);
