@@ -199,13 +199,13 @@ int test_file() {
 	filename[10] = '\0';
 	init_file_system();
 	file_open(&filename);
-	char * file_buffer[174];
+	char file_buffer[300];
 
-	read(0, (void *) file_buffer, 173);
+	file_read(0, (void *) file_buffer, 173);
 	for (i = 0; i < strlen(file_buffer); i++){
 		if (file_buffer[i] == '\0'){
 			//null terminating char
-			break;
+			continue;
 		}
 		// printf("%c", file_buffer[i]);
 		putc(file_buffer[i]);

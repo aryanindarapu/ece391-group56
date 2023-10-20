@@ -1,3 +1,5 @@
+#include "../types.h"
+
 #define RTC_PORT_COMMAND    0x70
 #define RTC_PORT_DATA       0x71
 

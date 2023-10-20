@@ -96,7 +96,7 @@ int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
     while(rtc_interupt_flag) {};
 
     // Always return 0 for RTC
-    return 0
+    return 0;
 }
 
 int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
