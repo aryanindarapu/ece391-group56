@@ -1,5 +1,5 @@
 #include "file_system_driver.h"
-
+#include "lib.h"
 
 // file_sys_t file_system; // TODO: do i make this static?
 
@@ -19,40 +19,41 @@ void init_file_system(void) {
 /* gets the physical address given the virtual address 
     INPUTS : virtualaddr which is the value of CR3 register holding the virualized address 
 */
-void *get_physaddr (void *virtualaddr) {
-    unsigned long pdindex = (unsigned long)virtualaddr >> 22;
-    unsigned long ptindex = (unsigned long)virtualaddr >> 12 & 0x03FF;
+// void *get_physaddr (void *virtualaddr) {
+//     unsigned long pdindex = (unsigned long)virtualaddr >> 22;
+//     unsigned long ptindex = (unsigned long)virtualaddr >> 12 & 0x03FF;
  
-    unsigned long *pd = (unsigned long *)0xFFFFF000;
-    // Here you need to check whether the PD entry is present.
+//     unsigned long *pd = (unsigned long *)0xFFFFF000;
+//     // Here you need to check whether the PD entry is present.
  
-    unsigned long *pt = ((unsigned long *)0xFFC00000) + (0x400 * pdindex);
-    // Here you need to check whether the PT entry is present.
+//     unsigned long *pt = ((unsigned long *)0xFFC00000) + (0x400 * pdindex);
+//     // Here you need to check whether the PT entry is present.
  
-    return (void *)((pt[ptindex] & ~0xFFF) + ((unsigned long)virtualaddr & 0xFFF));
-}
+//     return (void *)((pt[ptindex] & ~0xFFF) + ((unsigned long)virtualaddr & 0xFFF));
+// }
 
 
-void map_page (void *physaddr, void *virtualaddr, unsigned int flags) {
-    // Make sure that both addresses are page-aligned.
+// void map_page (void *physaddr, void *virtualaddr, unsigned int flags) {
+//     // Make sure that both addresses are page-aligned.
  
-    unsigned long pdindex = (unsigned long)virtualaddr >> 22;
-    unsigned long ptindex = (unsigned long)virtualaddr >> 12 & 0x03FF;
+//     unsigned long pdindex = (unsigned long)virtualaddr >> 22;
+//     unsigned long ptindex = (unsigned long)virtualaddr >> 12 & 0x03FF;
  
-    unsigned long *pd = (unsigned long *)0xFFFFF000;
-    // Here you need to check whether the PD entry is present.
-    // When it is not present, you need to create a new empty PT and
-    // adjust the PDE accordingly.
+//     unsigned long *pd = (unsigned long *)0xFFFFF000;
+//     // Here you need to check whether the PD entry is present.
+//     // When it is not present, you need to create a new empty PT and
+//     // adjust the PDE accordingly.
  
-    unsigned long *pt = ((unsigned long *)0xFFC00000) + (0x400 * pdindex);
-    // Here you need to check whether the PT entry is present.
-    // When it is, then there is already a mapping present. What do you do now?
+//     unsigned long *pt = ((unsigned long *)0xFFC00000) + (0x400 * pdindex);
+//     // Here you need to check whether the PT entry is present.
+//     // When it is, then there is already a mapping present. What do you do now?
  
-    pt[ptindex] = ((unsigned long)physaddr) | (flags & 0xFFF) | 0x01; // Present
+//     pt[ptindex] = ((unsigned long)physaddr) | (flags & 0xFFF) | 0x01; // Present
  
-    // Now you need to flush the entry in the TLB
-    // or you might not notice the change.
-}
+//     // Now you need to flush the entry in the TLB
+//     // or you might not notice the change.
+// }
+
 
 // THIS FUNCTION WILL BE CALLED IN OUR SYS_OPEN() SYSTEM CALL
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
@@ -60,7 +61,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
 
     // Scan through directory entries to find file name
     for (dir_index = 0; dir_index < boot_block_ptr->num_dirs; dir_index++) {
-        if (boot_block_ptr->dir_entries[dir_index].file_name == fname) {
+        if (strlen(fname) == strlen((char *) boot_block_ptr->dir_entries[dir_index].file_name) && strncmp(fname, (char *) boot_block_ptr->dir_entries[dir_index].file_name, strlen(fname)) == 0) {
             // File found in our boot block so we update our dentry
             strcpy(dentry->file_name, fname);
             // Now we update the dentry with the inode and type
@@ -83,7 +84,7 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
     dentry_t boot_block_dentry_list = boot_block_ptr->dir_entries[index];
     
     dentry->file_type = boot_block_dentry_list.file_type;
-    dentry->inode_num = boot_block_dentry_list.file_name;
+    dentry->inode_num = boot_block_dentry_list.inode_num;
 
     return 0;
 }
@@ -93,13 +94,13 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
         return -1;
     }
 
-    inode_t curr_inode = inode_ptr[inode];
+    inode_t * curr_inode = inode_ptr + inode;
     int curr_byte_idx;
     int data_block_idx;
     int within_data_block_idx;
-    for (curr_byte_idx = offset; curr_byte_idx < length; curr_byte_idx++) {
+    for (curr_byte_idx = offset; curr_byte_idx < length + offset; curr_byte_idx++) {
         // reached end of file
-        if (curr_byte_idx >= curr_inode.length) {
+        if (curr_byte_idx >= curr_inode->length) {
             return 0;
         }
 
@@ -108,7 +109,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
         within_data_block_idx = curr_byte_idx % DATA_BLOCK_SIZE;
         // TODO: is this 1-indexed or 0-indexed?
         // if (data_block_idx >= )
-        uint32_t data_block_num = curr_inode.data_blocks[data_block_idx];
+        uint32_t data_block_num = curr_inode->data_blocks[data_block_idx];
 
         // bad data block
         if (data_block_num >= boot_block_ptr->num_data_blocks) {
@@ -135,3 +136,4 @@ int32_t dir_open(const uint8_t * fname);
 int32_t dir_close(uint32_t fd);
 int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes);
 int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes);
+

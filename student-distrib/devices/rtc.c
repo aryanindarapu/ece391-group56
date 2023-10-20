@@ -68,7 +68,7 @@ void rtc_handler() {
     {
         clock_count = 0;
         // update_attrib();
-        test_interrupts();
+        // test_interrupts();
         //clear();
         //case_count += 1;
         //printf(" TIME: %d", case_count);

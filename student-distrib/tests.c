@@ -1,6 +1,7 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
+#include "syscall.h"
 
 #define PASS 1
 #define FAIL 0
@@ -63,65 +64,6 @@ int test_divide_error() {
 }
 
 /*
- *   reservd_interupt
- *   DESCRIPTION: Intel Reserved interupt
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: none
- *   SIDE EFFECTS: Calls on our IDT
- */ 
-int test_reserved_interupt(){
-	// Use #1 for reserved interupt
-	TEST_HEADER;
-	asm volatile("int $1");
-	return FAIL;
-}
-
-/*
- *   NMI Interupt
- *   DESCRIPTION: non-maskable interupt
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: none
- *   SIDE EFFECTS: Calls on our IDT
- */ 
-int test_NMI_interupt(){
-	// Use #2 for NM interupt
-	TEST_HEADER;
-	asm volatile("int $2");
-	return FAIL;
-}
-
-/*
- *   Breakpoint trap
- *   DESCRIPTION: for setting a breakpoint
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: none
- *   SIDE EFFECTS: Calls on our IDT
- */ 
-int test_breakpoint(){
-	// Use #3 for breakpoint
-	TEST_HEADER;
-	asm volatile("int $3");
-	return FAIL;
-}
-
-/*
- *   test_overflow_interrupt
- *   DESCRIPTION: attempts to cause an overflow interrupt otherwise the test fails
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: FAIL, or nothing if the interrupt is triggered
- *   SIDE EFFECTS: Causes a divide by 0 error
- */ 
-int test_overflow_interrupt() {
-	TEST_HEADER;
-	asm volatile("int $4");
-	return FAIL;
-}
-
-/*
  *   test_bound_range_exceeded
  *   DESCRIPTION: Attempt to access an array out of bounds
  *   INPUTS: none
@@ -133,190 +75,6 @@ int test_bound_range_exceeded() {
 	TEST_HEADER;
 	int a[2];
 	a[3] = 10;
-	return FAIL;
-}
-
-/*
- *   invalid_opcode
- *   DESCRIPTION: checks to see if it is an invalid opcode
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: none
- *   SIDE EFFECTS: Calls on our IDT
- */ 
-int test_invalid_opcode(){
-	// Use #6 for invalid opcode
-	TEST_HEADER;
-	asm volatile("int $6");
-	return FAIL;
-}
-
-/*
- *   device_not_available
- *   DESCRIPTION: Checks to see if device not available
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: none
- *   SIDE EFFECTS: Calls on our IDT
- */ 
-int test_device_not_available(){
-	// Use #7 for reserved interupt
-	TEST_HEADER;
-	asm volatile("int $7");
-	return FAIL;
-}
-
-/*
- *   test_double_fault
- *   DESCRIPTION: check for double fault
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: FAIL if it doesn't trigger interrupt
- *   SIDE EFFECTS: Calls on IDT
- */ 
-int test_double_fault(){
-	TEST_HEADER;
-	asm volatile("int $8");
-	return FAIL;
-}
-
-/*
- *   segment_overrun
- *   DESCRIPTION: floating point instruction
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: FAIL if it doesn't trigger interrupt
- *   SIDE EFFECTS: Calls IDT
- */ 
-int test_segment_overrun(){
-	TEST_HEADER;
-	asm volatile("int $9");
-	return FAIL;
-}
-
-/*
- *   Invalid_tss
- *   DESCRIPTION: task switch
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: FAIL if it doesn't trigger interrupt
- *   SIDE EFFECTS: Calls IDT
- */ 
-int test_invalid_tss(){
-	TEST_HEADER;
-	asm volatile("int $10");
-	return FAIL;
-}
-
-/*
- *   segment_not_present
- *   DESCRIPTION: interupts if segment not present
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: FAIL if it doesn't trigger interrupt
- *   SIDE EFFECTS: Calls IDT
- */ 
-int test_segment_not_present(){
-	TEST_HEADER;
-	asm volatile("int $11");
-	return FAIL;
-}
-
-/*
- *   test stack fault
- *   DESCRIPTION: testing to see if fault stacks
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: FAIL if it doesn't trigger interrupt
- *   SIDE EFFECTS: Calls IDT
- */ 
-int test_stack_fault(){
-	TEST_HEADER;
-	asm volatile("int $12");
-	return FAIL;
-}
-
-/*
- *   test_general_protection
- *   DESCRIPTION: force a general protection interrupt
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: FAIL if it doesn't trigger interrupt
- *   SIDE EFFECTS: Causes a general protection interrupt
- */ 
-int test_general_protection(){
-	TEST_HEADER;
-	asm volatile("int $13");
-	return FAIL;
-}
-
-/*
- *   test_page_fault
- *   DESCRIPTION: force page fault interrupt
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: FAIL if it doesn't trigger interrupt
- *   SIDE EFFECTS: Causes a page fault interrupt
- */ 
-int test_page_fault(){
-	TEST_HEADER;
-	asm volatile("int $14");
-	return FAIL;
-}
-
-/*
- *   test_x86_FPU_error
- *   DESCRIPTION: force x86 FPU error check interrupt
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: FAIL if it doesn't trigger interrupt
- *   SIDE EFFECTS: Causes a x86 FPU error interrupt
- */ 
-int test_x86_FPU_error(){
-	TEST_HEADER;
-	asm volatile("int $16");
-	return FAIL;
-}
-
-/*
- *   test_alignment_check
- *   DESCRIPTION: force interrupt alignment check interrupt
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: FAIL if it doesn't trigger interrupt
- *   SIDE EFFECTS: Causes a alignment check interrupt
- */ 
-int test_alignment_check(){
-	TEST_HEADER;
-	asm volatile("int $17");
-	return FAIL;
-}
-
-/*
- *   test machine check
- *   DESCRIPTION: force interrupt machine check
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: FAIL if it doesn't trigger interrupt
- *   SIDE EFFECTS: Causes a machine check interrupt
- */ 
-int test_machine_check(){
-	TEST_HEADER;
-	asm volatile("int $18");
-	return FAIL;
-}
-
-/*
- *   test_simd_floating_point_exception
- *   DESCRIPTION: force interrupt SIMD floating-point interrupt
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: FAIL if it doesn't trigger interrupt
- *   SIDE EFFECTS: Causes a simd floating point interrupt
- */ 
-int test_simd_floating_point_exception(){
-	TEST_HEADER;
-	asm volatile("int $19");
 	return FAIL;
 }
 
@@ -424,6 +182,37 @@ int test_null() {
 // TODO: add test for RTC -- "We also expect you to be able to press a key and demonstrate that your operating system reaches the test interrupts function in on RTC interrupts"
 
 /* Checkpoint 2 tests */
+int test_file() {
+	TEST_HEADER;
+	int i;
+	uint8_t filename[32];
+	filename[0] = 'f';
+	filename[1] = 'r';
+	filename[2] = 'a';
+	filename[3] = 'm';
+	filename[4] = 'e';
+	filename[5] = '1';
+	filename[6] = '.';
+	filename[7] = 't';
+	filename[8] = 'x';
+	filename[9] = 't';
+	filename[10] = '\0';
+	init_file_system();
+	open(&filename);
+	char * file_buffer[174];
+
+	read(0, (void *) file_buffer, 173);
+	for (i = 0; i < strlen(file_buffer); i++){
+		if (file_buffer[i] == '\0'){
+			//null terminating char
+			break;
+		}
+		// printf("%c", file_buffer[i]);
+		putc(file_buffer[i]);
+	}
+	return PASS;
+}
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -459,11 +248,11 @@ void launch_tests() {
 	// TEST_OUTPUT("Stack fault test", test_stack_fault());
 	// TEST_OUTPUT("General protection test", test_general_protection());
 	// TEST_OUTPUT("Page fault test", test_page_fault());
-	TEST_OUTPUT("Implemented paging test", test_paging());
+	// TEST_OUTPUT("Implemented paging test", test_paging());
 	// TEST_OUTPUT("x86_FPU error test", test_x86_FPU_error());
 	// TEST_OUTPUT("Alignment check test", test_alignment_check());
 	// TEST_OUTPUT("Machine check test", test_machine_check());
 	// TEST_OUTPUT("Simd floating point exception test", test_simd_floating_point_exception());
-
+	TEST_OUTPUT("file test", test_file());
 	// To test keyboard, set RUN_TESTS to 0 or comment all tests above
 }

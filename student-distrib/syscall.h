@@ -1,19 +1,33 @@
 #ifndef _SYSTEM_CALL_H
 #define _SYSTEM_CALL_H
 
+#include "types.h"
+
 #ifndef ASM
 int system_call();
 
 extern void system_handler();
 
+/* opcodes at the moment are */
+/*
+    open : 0
+    close : 1
+    read : 2
+    write : 3
+*/
+// extern void rtc_op(int opcode);
+// extern void dir_op(int opcode);
+// extern void file_op(int opcode);
+
 /* DONT NEED TO IMPLEMENT YET */
 // uint32_t halt (uint8_t status);
 // uint32_t execute (const uint8_t* command);
 
-uint32_t read (uint32_t fd, void* buf, uint32_t nbytes);
-uint32_t write (uint32_t fd, const void* buf, uint32_t nbytes);
-uint32_t open (const uint8_t* filename);
-uint32_t close (uint32_t fd);
+int32_t open (const uint8_t* filename);
+int32_t close (uint32_t fd);
+int32_t read (uint32_t fd, void* buf, uint32_t nbytes);
+int32_t write (uint32_t fd, const void* buf, uint32_t nbytes);
+
 
 /* DONT NEED TO IMPLEMENT YET */
 // uint32_t getargs (uint8_t* buf, uint32_t nbytes);

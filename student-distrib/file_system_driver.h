@@ -1,5 +1,5 @@
 // Add other stuff we need to include
-#include "rtc.h"
+#include "devices/rtc.h"
 #include "types.h"
 
 #define FILENAME_SIZE 32
@@ -8,6 +8,14 @@
 #define DATA_BLOCKS_PER_INODE 1023
 
 int rtc_interrupt_flag;
+
+// within boot block
+typedef struct dentry_t {
+    char file_name[FILENAME_SIZE]; // 32B for the file name so 32 8-bit values
+    int32_t file_type; // Will be 0 for RTC, 1 for dir., and 2 for file
+    int32_t inode_num; // Which inode holds the data block information
+    uint8_t reserved[24]; // 24 - number of reserved bytes in dentry
+} dentry_t;
 
 // size - 4kB
 typedef struct boot_block_t {
@@ -29,13 +37,7 @@ typedef struct data_block_t {
     uint8_t data[4096]; // 4kB of data
 } data_block_t;
 
-// within boot block
-typedef struct dentry_t {
-    char file_name[FILENAME_SIZE]; // 32B for the file name so 32 8-bit values
-    int32_t file_type; // Will be 0 for RTC, 1 for dir., and 2 for file
-    int32_t inode_num; // Which inode holds the data block information
-    uint8_t reserved[24]; // 24 - number of reserved bytes in dentry
-} dentry_t;
+
 
 // Don't do this bc this is actually initialized at some point in memory. no idea where, look through kernel.c
 // typedef struct file_sys_t {
@@ -47,7 +49,7 @@ typedef struct dentry_t {
 
 // for file descriptor array ONLY
 typedef struct file_desc_t {
-    uint32_t file_ops_ptr;
+    uint32_t* file_ops_ptr;
     uint32_t inode;
     uint32_t file_pos;
     uint32_t flags;
@@ -71,6 +73,10 @@ int32_t dir_close(uint32_t fd);
 int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes);
 int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes);
 
+
+
+//TODO: maybe make rtc_open close... functions if we dont already have them somewhere else
+
 /* file system instantiation */
 // file_sys_t file_sys;
 
@@ -82,5 +88,3 @@ data_block_t * data_block_ptr; // Pointer to our data blocks
 //no dentries, no inodes, no data blocks, and no pointers to dentries
 
 static file_desc_t file_desc_arr[MAX_FILE_DESC];
-static uint8_t file_desc_index = 0;
-
