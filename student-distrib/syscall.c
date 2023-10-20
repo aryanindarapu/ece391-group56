@@ -22,8 +22,11 @@ int32_t read (uint32_t fd, void* buf, uint32_t nbytes) {
 
     file_desc_t file_desc = file_desc_arr[fd];
 
-    read_data(file_desc.inode, file_desc.file_pos, (uint8_t *) buf, nbytes);
-    file_desc.file_pos++;
+    if (read_data(file_desc.inode, file_desc.file_pos, (uint8_t *) buf, nbytes) == -1) {
+        return -1;
+    }
+
+    file_desc.file_pos += nbytes;
 
     return 0;
 }

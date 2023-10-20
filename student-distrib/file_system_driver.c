@@ -125,12 +125,67 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 
 
 int32_t file_open(const uint8_t * fname) {
+    dentry_t file_dentry;
+    int file_desc_index;
+    
+    //ensure the filename is valid
+    if (fname == NULL){
+        return -1;
+    }
+
+    // ensure the file desc has space AND find the index to emplace this file
+    for (file_desc_index = 0; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
+        //is the index empty?
+        if (file_desc_arr[file_desc_index].flags == 0) {
+            break; //this file_desc_index is the one we will emplace the file to 
+        }
+    }
+
+    // Ensure there was space left
+    if (file_desc_index >= MAX_FILE_DESC) {
+        return -1;
+    }
+
+    /* Let read_dentry_by_name populate our dentry, or tell us that the dentry doesn't exist in our filesystem */
+    if (read_dentry_by_name (fname, &file_dentry) == -1) { 
+        return -1; //file doesn't exist
+    }
+
+    file_desc_arr[file_desc_index].inode = file_dentry.inode_num;
+    file_desc_arr[file_desc_index].flags = 1;
+    file_desc_arr[file_desc_index].file_pos = 0;
+
+    // check dentry file type and add to file descriptor array
+
+    // file_desc_index++;
+    //TODO we just do this now right?
+    /* this fd index is now taken */
+
     return 0;
 }
 
-int32_t file_close(uint32_t fd);
-int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes);
-int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes);
+int32_t file_close(uint32_t fd) {
+    // TODO: remove from file descriptor array
+    return 0;
+}
+
+int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes) {
+    if (file_desc_arr[fd].flags == 0) return -1;
+
+    file_desc_t file_desc = file_desc_arr[fd];
+    int32_t status = read_data(file_desc.inode, file_desc.file_pos, (uint8_t *) buf, nbytes);
+
+    if (status == -1) return -1;
+
+    if (status == 0) file_desc.file_pos = 0; // TODO: should i set this to the bottom of the file or the top?
+    else file_desc.file_pos += nbytes;
+
+    return 0;
+}
+
+int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes) {
+    return -1;
+}
 
 int32_t dir_open(const uint8_t * fname);
 int32_t dir_close(uint32_t fd);

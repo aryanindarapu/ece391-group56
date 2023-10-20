@@ -1,7 +1,7 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
-#include "syscall.h"
+#include "file_system_driver.h"
 
 #define PASS 1
 #define FAIL 0
@@ -198,7 +198,7 @@ int test_file() {
 	filename[9] = 't';
 	filename[10] = '\0';
 	init_file_system();
-	open(&filename);
+	file_open(&filename);
 	char * file_buffer[174];
 
 	read(0, (void *) file_buffer, 173);
