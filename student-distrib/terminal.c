@@ -46,8 +46,17 @@ int32_t terminal_close(int32_t fd) {
 // reads from keyboard buffer into buf
 int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // NOTE: this is a blocking call, so it can't be interrupted
+
+    while (!enter_flag_pressed);
+
+    // TODO: this is not the full implementation, but we should do somthing like this
+    cli();
+    if (nbytes < LINE_BUFFER_SIZE) {
+        memcpy(buf, line_buffer, nbytes);
+        buffer_idx = 0; // clear buffer
+    }
     // should check for ENTER and BACKSPACE here
-    // TODO: do we need to implement 'ls' command here?
+    sti();
 }
 
 // writes to screen from buf
