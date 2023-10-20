@@ -149,7 +149,9 @@ void keyboard_driver() {
             //printf("%d",get_buffer_fill());
             return;
         case 28: //enter
-            printf("\n[Terminal]$ ");
+            if(get_buffer_fill() == 128) return;
+            printf("\n");
+            enter_flag_pressed = 1;
             terminal_clear();
             return;
         default:

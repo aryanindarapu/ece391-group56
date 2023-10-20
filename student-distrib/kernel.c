@@ -178,7 +178,7 @@ void entry(unsigned long magic, unsigned long addr) {
 
 #ifdef RUN_TESTS
     /* Run tests */
-//    launch_tests();
+    //launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
     /* Spin (nicely, so we don't chew up cycles) */

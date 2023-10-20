@@ -47,16 +47,30 @@ int32_t terminal_close(int32_t fd) {
 int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // NOTE: this is a blocking call, so it can't be interrupted
 
-    while (!enter_flag_pressed);
+    while (enter_flag_pressed != 1);
 
-    // TODO: this is not the full implementation, but we should do somthing like this
     cli();
-    if (nbytes < LINE_BUFFER_SIZE) {
+    line_buffer[buffer_idx] = '\n';
+    buffer_idx++;
+    // TODO: this is not the full implementation, but we should do somthing like this
+    
+    enter_flag_pressed = 0;
+    if (nbytes < buffer_idx) {
         memcpy(buf, line_buffer, nbytes);
         buffer_idx = 0; // clear buffer
+        sti();
+        return nbytes;
+    }
+    else
+    {
+        memcpy(buf, line_buffer, buffer_idx);
+        buffer_idx = 0; // clear buffer
+        sti();
+        return buffer_idx;
     }
     // should check for ENTER and BACKSPACE here
     sti();
+    return -1;
 }
 
 // writes to screen from buf

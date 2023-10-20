@@ -197,12 +197,19 @@ int32_t puts(int8_t* s) {
     return index;
 }
 
+void move_screen_up(void){ //TODO: write comments
+    int32_t i;
+    for (i = 0; i < (NUM_ROWS-1) * NUM_COLS; i++) {
+        video_mem[i] = video_mem[i+NUM_ROWS];
+    }
+}
+
 /* void putc(uint8_t c);
  * Inputs: uint_8* c = character to print
  * Return Value: void
  *  Function: Output a character to the console */
 void putc(uint8_t c) {
-    
+    int initial_y = screen_y;
     if(c == '\n' || c == '\r') {
         screen_y++;
         screen_x = 0;
@@ -213,6 +220,12 @@ void putc(uint8_t c) {
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
         screen_x %= NUM_COLS;
     }
+
+    // if(initial_y<screen_y)
+    // {
+    //     move_screen_up();
+    //     screen_y--;
+    // }
 
     update_cursor();
 }

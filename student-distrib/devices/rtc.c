@@ -13,8 +13,9 @@ IMPORTANT: What is important is that if register C is not read after an IRQ 8, t
 #include "../x86_desc.h"
 #include "rtc.h"
 
-static int case_count;
-static int clock_count;
+
+volatile int clock_count;
+static int wait_count;
 
 /*
  *   init_rtc
@@ -41,7 +42,7 @@ void init_rtc() {
 
     // Standard rate value is 6, it can be between 2 to 15 ranging from 2Hz to 32,xxx Hz
     // Higher rate means slower clock, the rate is fed into bits 0-3 in register A
-    int rate = 0x06;
+    int rate = 0x06; // TODO :  set to max freq to virtualize
     outb(0x0A, RTC_PORT_COMMAND); // Might need to make this 8A but we want to reenable NMIs
     outb((prev & 0xF0) | rate, RTC_PORT_DATA); //write only our rate to A. Note, rate is the bottom 4 bits.
 
@@ -49,8 +50,8 @@ void init_rtc() {
     enable_irq(2);
     enable_irq(8);
 
-    case_count = 0;
     clock_count = 0;
+    wait_count = 0;
 }
 
 /*
@@ -62,17 +63,15 @@ void init_rtc() {
  *   SIDE EFFECTS: Clears out status register C so we can receive another timer interrupt
  */ 
 void rtc_handler() {
-    // printf("RTC Time interrupt!\n");
+    //printf("%d\n", clock_count);
+    rtc_int_flag = 1;
     clock_count++;
-    if (clock_count == 100)
-    {
-        clock_count = 0;
-        // update_attrib();
-        // test_interrupts();
-        //clear();
-        //case_count += 1;
-        //printf(" TIME: %d", case_count);
-    }
+    // if (clock_count == freq)
+    // {
+    //     clock_count = 0;
+    //     // update_attrib();
+    //     // test_interrupts();
+    // }
     
     // Register C let's us know which interrupt flag was set (there are more types of interrupt for RTC outside of timer)
     // If you do not clear these flags, then RTC will no longer trigger interrupts
@@ -82,7 +81,41 @@ void rtc_handler() {
     inb(RTC_PORT_DATA);		        // just throw away contents
 
     send_eoi(8);
+    rtc_int_flag = 0;
 }
+
+extern int32_t rtc_open(const uint8_t * filename){
+    wait_count = RTC_MAX_FREQ/RTC_INIT_FREQ;
+    clock_count = 0;
+    // copy stuff and set up dentry for rtc.
+    return 0;
+};
+extern int32_t rtc_close(int32_t fd){
+    // remove dentry
+    return 0;
+};
+extern int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes){
+    while(clock_count <= wait_count)
+    {
+        //printf("%d\n", clock_count);
+    }; // wait to get response;
+    cli();
+    clock_count = 0;
+    sti();
+    while(rtc_int_flag != 1);
+    return 0;
+};
+extern int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes){
+    char freq = *(const char *)buf;
+    if(freq < 2 || freq > 1024) return -1;
+    if(freq && (! (freq & (freq-1))))
+    {
+        wait_count = RTC_MAX_FREQ/freq;
+        clock_count = 0;
+        return 0;
+    }
+    return -1;
+};
 
 // USEFUL WEBSITE FOR UDERSTANDING THE REGISTER CONTENTS FOR RTC
 // https://web.archive.org/web/20150514082645/http://www.nondot.org/sabre/os/files/MiscHW/RealtimeClockFAQ.txt

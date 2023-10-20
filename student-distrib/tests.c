@@ -1,6 +1,7 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
+#include "devices/rtc.h"
 
 #define PASS 1
 #define FAIL 0
@@ -421,9 +422,42 @@ int test_null() {
 	return FAIL;
 }
 
-// TODO: add test for RTC -- "We also expect you to be able to press a key and demonstrate that your operating system reaches the test interrupts function in on RTC interrupts"
-
 /* Checkpoint 2 tests */
+
+// TODO: add test for RTC -- "We also expect you to be able to press a key and demonstrate that your operating system reaches the test interrupts function in on RTC interrupts"
+int test_rtc_driver(){
+	int print_repeat = 10;
+	int print_counter = 0;
+	int wait_ct = 0; 
+	int print_char_counter = 0;
+	unsigned char freq;
+	unsigned char blank_buf;
+
+	rtc_open(0);
+	
+	for(freq = 4; freq<1025; freq*=2)
+	{
+		rtc_write(0, &freq, 1);
+		for(print_counter = 0; print_counter<print_repeat; print_counter++)
+		{
+			
+			for(wait_ct = 0; wait_ct<freq; wait_ct+=4)
+			{
+				rtc_read(0, &blank_buf, 1);
+			}
+	
+			for(print_char_counter = 0; print_char_counter<wait_ct; print_char_counter++)
+			{
+				printf("1");
+			}	
+			
+		}
+		
+		
+		clear();
+	}
+}
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -439,6 +473,12 @@ int test_null() {
  */ 
 void launch_tests() {
 	clear();
+
+	test_rtc_driver();
+
+
+
+
 	// TEST_OUTPUT("General IDT Test", idt_test());
 	// TEST_OUTPUT("Divide Error Test", test_divide_error());
 	// TEST_OUTPUT("Bound Range Exceeded Test", test_bound_range_exceeded());
@@ -459,7 +499,7 @@ void launch_tests() {
 	// TEST_OUTPUT("Stack fault test", test_stack_fault());
 	// TEST_OUTPUT("General protection test", test_general_protection());
 	// TEST_OUTPUT("Page fault test", test_page_fault());
-	TEST_OUTPUT("Implemented paging test", test_paging());
+	// TEST_OUTPUT("Implemented paging test", test_paging());
 	// TEST_OUTPUT("x86_FPU error test", test_x86_FPU_error());
 	// TEST_OUTPUT("Alignment check test", test_alignment_check());
 	// TEST_OUTPUT("Machine check test", test_machine_check());
