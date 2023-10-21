@@ -179,8 +179,6 @@ int test_null() {
 	return FAIL;
 }
 
-// TODO: add test for RTC -- "We also expect you to be able to press a key and demonstrate that your operating system reaches the test interrupts function in on RTC interrupts"
-
 /* Checkpoint 2 tests */
 int test_frame1() {
 	TEST_HEADER;
@@ -228,14 +226,14 @@ int test_hello() {
 		putc(file_buffer[i]);
 	}
 
-	// putc('\n');
-	// // close and check that it got closed
-	// if (file_close(0) == -1) return FAIL;
-	// printf("PASSED\n");
+	putc('\n');
+	// close and check that it got closed
+	if (file_close(0) == -1) return FAIL;
+	printf("PASSED\n");
 
-	// printf("Attempted to read closed grep.\n");
-	// if (file_read(0, (void *) file_buffer, GREP_SIZE) == 0) return FAIL;
-	// printf("PASSED\n");
+	printf("Attempted to read closed hello executable.\n");
+	if (file_read(0, (void *) file_buffer, HELLO_SIZE) == 0) return FAIL;
+	printf("PASSED\n");
 
 
 	return PASS;
@@ -264,7 +262,6 @@ int test_verylarge() {
 	if (file_read(0, (void *) file_buffer, VERYLARGE_SIZE) == 0) return FAIL;
 	printf("PASSED\n");
 
-
 	return PASS;
 }
 
@@ -275,37 +272,20 @@ int test_directory_ls() {
 	filename[0] = '.';
 	filename[1] = '\0';
 	init_file_system();
-	dir_open(filename);
-	// char file_buffer[1440];
-	// dir_read(0, (void *) file_buffer, 0);
-	// for (i = 0; i < strlen(file_buffer); i++){
-	// 	if (file_buffer[i] == '\0'){
-	// 		//null terminating char
-	// 		continue;
-	// 	}
-	// 	// printf("%c", file_buffer[i]);
-	// 	putc(file_buffer[i]);
-	// }
+	if (dir_open(filename) == -1) return FAIL;
 
 	int j;
 	char file_buffer[80];
 
-
-	// while (dir_read(0, (void *) file_buffer, 80) != 0) {
-	// 	for (j = 0; j < 80; j++) {
-	// 		putc(file_buffer[j]);
-	// 	}
-	// 	putc('\n');
-	// }
-
-	for(i = 0; i < 17; i++){
+	for (i = 0; i < 17; i++){
 		dir_read(0, (void *) file_buffer, 80);
 		for (j = 0; j < 80; j++) {
 	 		putc(file_buffer[j]);
-	 	}
-	 	//putc('\n');
+	 	} 	
 	}
-
+	
+	dir_close(0);
+	putc('\n');
 	return PASS;
 }
 
@@ -335,8 +315,7 @@ void launch_tests() {
 
 	/* Checkpoint 2 Tests */
 	// TEST_OUTPUT("Test frame1.txt", test_frame1());
-	//TEST_OUTPUT("Test hello executable", test_hello());
-	//TEST_OUTPUT("directory test(ls)", test_directory_ls());
+	// TEST_OUTPUT("Test hello executable", test_hello());
 	// TEST_OUTPUT("Test verylargetextwithverylongname.txt", test_verylarge());
-	test_directory_ls();
+	TEST_OUTPUT("Test directory read.", test_directory_ls());
 }
