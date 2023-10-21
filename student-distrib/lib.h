@@ -29,9 +29,13 @@ int8_t* strncpy(int8_t* dest, const int8_t*src, uint32_t n);
 int32_t bad_userspace_addr(const void* addr, int32_t len);
 int32_t safe_strncpy(int8_t* dest, const int8_t* src, int32_t n);
 
+/* interupt test helper */
 void test_interrupts(void);
+/* updates the _ cursor to the current screen pos */
 void update_cursor(void);
+/* performs backspace logic on the current screen */
 void backspace(void);
+/* moves the contents of the screen up one line */
 void move_screen_up(void);
 
 /* Port read functions */

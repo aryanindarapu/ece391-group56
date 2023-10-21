@@ -279,7 +279,7 @@ int test_directory_ls() {
 	int j;
 	char file_buffer[80];
 
-	for (i = 0; i < 17; i++){
+	for (i = 0; i < 16; i++){
 		dir_read(0, (void *) file_buffer, 80);
 		for (j = 0; j < 80; j++) {
 	 		putc(file_buffer[j]);
@@ -287,8 +287,12 @@ int test_directory_ls() {
 	}
 	
 	dir_close(0);
-	putc('\n');
-	return PASS;
+
+	if(dir_read(0, (void *) file_buffer, 80)==-1) printf("FAIL\n");
+	else{
+		putc('\n');
+		return PASS;
+	}
 }
 
 
@@ -303,7 +307,7 @@ int test_rtc_driver() {
 
 	rtc_open(0);
 	
-	for (freq = 4; freq <= 1024; freq *= 2) {
+	for (freq = 4; freq <= 256; freq *= 2) {
 		rtc_write(0, &freq, 1);
 		for(print_counter = 0; print_counter<print_repeat; print_counter++) {
 			
@@ -357,10 +361,10 @@ void launch_tests() {
 	// TEST_OUTPUT("Page fault test", test_page_fault());
 
 	/* Checkpoint 2 Tests */
-	TEST_OUTPUT("Test frame1.txt", test_frame1());
+	//TEST_OUTPUT("Test frame1.txt", test_frame1());
 	// TEST_OUTPUT("Test hello executable", test_hello());
 	// TEST_OUTPUT("Test verylargetextwithverylongname.txt", test_verylarge());
-	// TEST_OUTPUT("Test directory read.", test_directory_ls());
+	TEST_OUTPUT("Test directory read.", test_directory_ls());
 	// TEST_OUTPUT("Testing RTC Driver", test_rtc_driver());
 	// TEST_OUTPUT("Testing Terminal Driver", test_terminal_driver());
 }

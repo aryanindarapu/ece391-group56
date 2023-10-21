@@ -29,7 +29,6 @@ void clear(void) {
     update_cursor();
 }
 
-// TODO: add a function to remove previous character
 
 /* void set_attrib(char new_attr);
  * Inputs: new_attrib to set
@@ -39,6 +38,10 @@ void update_attrib() {
     ATTRIB += 16;
 }
 
+/* backspace
+ * Inputs: None
+ * Return Value: None
+ * Function: deletes the previous character if any and updates screen pos */
 void backspace(void)
 {
     if(screen_x == 0)
@@ -234,7 +237,10 @@ void putc(uint8_t c) {
     update_cursor();
 }
 
-// TODO: comment this
+/* update_cursor
+ * Inputs: None
+ * Return Value: None
+ * Function: updates the pos of the cursor to screen x and y */
 void update_cursor() {
 	uint16_t pos = screen_y * NUM_COLS + screen_x;
  

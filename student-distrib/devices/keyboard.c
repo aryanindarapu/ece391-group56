@@ -112,7 +112,10 @@ void keyboard_handler() {
     send_eoi(1);
 }
 
-// TODO: comment
+/* keyboard_driver
+ * Inputs: none
+ * Return Value: none
+ * Function: reads in from keyboard port and decodes keycode. Sends necessary data to terminal to update the buffer */
 void keyboard_driver() {
     // cli();
     //printf("keyboard int occured\n");
@@ -149,14 +152,14 @@ void keyboard_driver() {
             //printf("%d",get_buffer_fill());
             return;
         case 28: //enter
-            if(get_buffer_fill() == 128) return;
+            //if(get_buffer_fill() == 128) return;
             printf("\n");//printf("\n[Terminal]$ ");
             terminal_enter();
             return;
         default:
 
             // TODO: may need to change bounds
-            if(get_buffer_fill() == 128) return; //do check in terminal
+            if(get_buffer_fill() == 127) return; //do check in terminal
             if (keycode > 0 && keycode < 58) {
                 // Check if CTRL is held down
                 

@@ -6,6 +6,7 @@
 #define RTC_INIT_FREQ       2
 
 
+/* standard file functions for the RTC */
 int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes);
 int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes);
 int32_t rtc_open(const uint8_t * filename);

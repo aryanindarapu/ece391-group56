@@ -84,6 +84,10 @@ void rtc_handler() {
     rtc_int_flag = 0;
 }
 
+/* rtc_open
+ * Inputs: filename
+ * Return Value: 0
+ * Function: sets starting settings */
 int32_t rtc_open(const uint8_t * filename){
     wait_count = RTC_MAX_FREQ/RTC_INIT_FREQ;
     clock_count = 0;
@@ -91,25 +95,37 @@ int32_t rtc_open(const uint8_t * filename){
     return 0;
 }
 
+/* rtc_close
+ * Inputs: fd
+ * Return Value: 0
+ * Function: doesn't really do much TODO: check? */
 int32_t rtc_close(int32_t fd){
     // remove dentry
     return 0;
 }
 
+/* rtc_read
+ * Inputs: fd, buf, nbytes
+ * Return Value: 0, always suceeds
+ * Function: holds and returns when an RTC interupt occurs */
 int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes){
     while (clock_count <= wait_count); // wait to get response
     cli();
-    clock_count = 0;
+    clock_count = 0; //reset
     sti();
-    while (rtc_int_flag != 0);
+    while (rtc_int_flag != 0); //wait until not interupting to return
     return 0;
 }
 
+/* rtc_write
+ * Inputs: fd, buf, nbytes
+ * Return Value: 0 for sucess -1 for fail
+ * Function: writes the input frequency from buf, to set the frequency of RTC interupts */
 int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
-    char freq = *(const char *)buf;
-    if (freq < 2 || freq > 1024) return -1;
-    if (freq && (! (freq & (freq-1)))) {
-        wait_count = RTC_MAX_FREQ/freq;
+    int freq = *(const int *)buf; //load freq
+    if (freq < 2 || freq > 1024) return -1; // param check
+    if (freq && (! (freq & (freq-1)))) { //check power of 2
+        wait_count = RTC_MAX_FREQ/freq; //update settings
         clock_count = 0;
         return 0;
     }

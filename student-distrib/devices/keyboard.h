@@ -23,4 +23,5 @@ void init_keyboard();
 
 // For when the interrupt occurs
 void keyboard_handler();
+// handles reading and interaction with temrinal
 void keyboard_driver();
