@@ -85,6 +85,8 @@ boot_block_t * boot_block_ptr; // Pointer to our boot block
 inode_t * inode_ptr; // List of inodes
 data_block_t * data_block_ptr; // Pointer to our data blocks
 
+// static unsigned int dir_read_idx = 1;
+
 //no dentries, no inodes, no data blocks, and no pointers to dentries
 
 file_desc_t file_desc_arr[MAX_FILE_DESC];

@@ -192,11 +192,7 @@ int test_frame1() {
 
 	char file_buffer[FRAME1_SIZE];
 	if (file_read(0, (void *) file_buffer, FRAME1_SIZE) == -1) return FAIL;
-	for (i = 0; i < FRAME1_SIZE; i++){
-		if (file_buffer[i] == '\0'){
-			continue;
-		}
-
+	for (i = 0; i < FRAME1_SIZE; i++) {
 		putc(file_buffer[i]);
 	}
 
@@ -225,10 +221,6 @@ int test_grep() {
 	char file_buffer[GREP_SIZE];
 	if (file_read(0, (void *) file_buffer, GREP_SIZE) == -1) return FAIL;
 	for (i = 0; i < GREP_SIZE; i++){
-		if (file_buffer[i] == '\0'){
-			continue;
-		}
-
 		putc(file_buffer[i]);
 	}
 
@@ -256,10 +248,6 @@ int test_verylarge() {
 	char file_buffer[VERYLARGE_SIZE];
 	if (file_read(0, (void *) file_buffer, VERYLARGE_SIZE) == -1) return FAIL;
 	for (i = 0; i < VERYLARGE_SIZE; i++){
-		if (file_buffer[i] == '\0'){
-			continue;
-		}
-
 		putc(file_buffer[i]);
 	}
 
@@ -276,24 +264,44 @@ int test_verylarge() {
 	return PASS;
 }
 
-test_directory_ls(){
+int test_directory_ls() {
 	TEST_HEADER;
 	int i;
 	uint8_t filename[32];
 	filename[0] = '.';
 	filename[1] = '\0';
 	init_file_system();
-	dir_open(&filename);
-	char file_buffer[1440];
-	dir_read(0, file_buffer, 0);
-	for (i = 0; i < strlen(file_buffer); i++){
-		if (file_buffer[i] == '\0'){
-			//null terminating char
-			continue;
-		}
-		// printf("%c", file_buffer[i]);
-		putc(file_buffer[i]);
+	dir_open(filename);
+	// char file_buffer[1440];
+	// dir_read(0, (void *) file_buffer, 0);
+	// for (i = 0; i < strlen(file_buffer); i++){
+	// 	if (file_buffer[i] == '\0'){
+	// 		//null terminating char
+	// 		continue;
+	// 	}
+	// 	// printf("%c", file_buffer[i]);
+	// 	putc(file_buffer[i]);
+	// }
+
+	int j;
+	char file_buffer[80];
+
+
+	// while (dir_read(0, (void *) file_buffer, 80) != 0) {
+	// 	for (j = 0; j < 80; j++) {
+	// 		putc(file_buffer[j]);
+	// 	}
+	// 	putc('\n');
+	// }
+
+	for(i = 0; i < 10; i++){
+		dir_read(0, (void *) file_buffer, 80);
+		for (j = 0; j < 80; j++) {
+	 		putc(file_buffer[j]);
+	 	}
+	 	putc('\n');
 	}
+
 	return PASS;
 }
 

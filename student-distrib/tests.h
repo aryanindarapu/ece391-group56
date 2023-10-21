@@ -23,5 +23,6 @@ int test_null();
 int test_frame1();
 int test_grep();
 int test_verylarge();
+int test_directory_ls();
 
 #endif /* TESTS_H */
