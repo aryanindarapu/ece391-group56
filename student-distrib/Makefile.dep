@@ -18,12 +18,13 @@ lib.o: lib.c lib.h types.h
 paging.o: paging.c paging.h types.h lib.h
 syscall.o: syscall.c syscall.h types.h paging.h lib.h \
   file_system_driver.h devices/rtc.h devices/../types.h
+terminal.o: terminal.c terminal.h types.h lib.h
 tests.o: tests.c tests.h x86_desc.h types.h lib.h file_system_driver.h \
-  devices/rtc.h devices/../types.h
+  devices/rtc.h devices/../types.h terminal.h
 i8259.o: devices/i8259.c devices/i8259.h devices/../types.h \
   devices/../lib.h devices/../types.h devices/../x86_desc.h
 keyboard.o: devices/keyboard.c devices/../lib.h devices/../types.h \
   devices/../x86_desc.h devices/keyboard.h devices/i8259.h \
-  devices/../types.h
+  devices/../types.h devices/../terminal.h
 rtc.o: devices/rtc.c devices/i8259.h devices/../types.h devices/../lib.h \
   devices/../types.h devices/../x86_desc.h devices/rtc.h

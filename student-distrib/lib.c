@@ -26,15 +26,37 @@ void clear(void) {
 
     screen_x = 0;
     screen_y = 0;
+    update_cursor();
 }
+
+// TODO: add a function to remove previous character
 
 /* void set_attrib(char new_attr);
  * Inputs: new_attrib to set
  * Return Value: none
  * Function: changes attr to new value */
-void update_attrib(){
+void update_attrib() {
     ATTRIB += 16;
 }
+
+void backspace(void)
+{
+    if(screen_x == 0)
+    {
+        if(screen_y == 0) return;
+        screen_x = NUM_COLS;
+        screen_y--;
+    }
+    screen_x --;
+    putc(' ');
+    if(screen_x == 0)
+    {
+        screen_x = NUM_COLS;
+        screen_y--;
+    }
+    screen_x --;
+    update_cursor();
+};
 
 /* Standard printf().
  * Only supports the following format strings:
@@ -175,6 +197,16 @@ int32_t puts(int8_t* s) {
     return index;
 }
 
+void move_screen_up(void){ //TODO: write comments
+    int32_t i;
+    cli();
+    for (i = 0; i < (NUM_ROWS-1) * NUM_COLS; i++) {
+        video_mem[i<<1] = video_mem[(i+NUM_COLS)<<1];
+    }
+    for(i = 0; i<NUM_COLS; i++) video_mem[((NUM_ROWS-1) * NUM_COLS + i)<<1] = 0;
+    sti();
+}
+
 /* void putc(uint8_t c);
  * Inputs: uint_8* c = character to print
  * Return Value: void
@@ -189,9 +221,27 @@ void putc(uint8_t c) {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
-        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+        screen_y = (screen_y + (screen_x / NUM_COLS)); // % NUM_ROWS;
         screen_x %= NUM_COLS;
     }
+
+    if(screen_y == NUM_ROWS)
+    {
+        move_screen_up();
+        screen_y=NUM_ROWS-1;
+    }
+
+    update_cursor();
+}
+
+// TODO: comment this
+void update_cursor() {
+	uint16_t pos = screen_y * NUM_COLS + screen_x;
+ 
+	outb(0x0F, 0x3D4);
+	outb((uint8_t) (pos & 0xFF), 0x3D5);
+	outb(0x0E, 0x3D4);
+	outb((uint8_t) ((pos >> 8) & 0xFF), 0x3D5);
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);

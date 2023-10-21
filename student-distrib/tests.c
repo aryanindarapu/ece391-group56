@@ -2,6 +2,8 @@
 #include "x86_desc.h"
 #include "lib.h"
 #include "file_system_driver.h"
+#include "devices/rtc.h"
+#include "terminal.h"
 
 #define PASS 1
 #define FAIL 0
@@ -289,6 +291,47 @@ int test_directory_ls() {
 	return PASS;
 }
 
+
+int test_rtc_driver() {
+	TEST_HEADER;
+	int print_repeat = 10;
+	int print_counter = 0;
+	int wait_ct = 0; 
+	int print_char_counter = 0;
+	int freq;
+	unsigned char blank_buf;
+
+	rtc_open(0);
+	
+	for (freq = 4; freq <= 1024; freq *= 2) {
+		rtc_write(0, &freq, 1);
+		for(print_counter = 0; print_counter<print_repeat; print_counter++) {
+			
+			for (wait_ct = 0; wait_ct<freq; wait_ct+=4) {
+				rtc_read(0, &blank_buf, 1);
+			}
+	
+			for (print_char_counter = 0; print_char_counter<wait_ct; print_char_counter++) {
+				printf("1");
+			}		
+		}
+		
+		clear();
+	}
+
+	return PASS;
+}
+
+int test_terminal_driver() {
+	char buf[128];
+	int num_char;
+	while(1){
+		num_char = terminal_read(0, &buf, 128);
+		printf("You typed %d chars: ", num_char);
+		terminal_write(0, &buf, num_char);
+	}
+};
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -311,11 +354,13 @@ void launch_tests() {
 	// TEST_OUTPUT("Paging Test", test_paging());
 	// TEST_OUTPUT("Page Fault Test", test_page_fault_handler());
 	// TEST_OUTPUT("NULL Dereference Test", test_null());
-	// To test keyboard, set RUN_TESTS to 0 or comment all tests above
+	// TEST_OUTPUT("Page fault test", test_page_fault());
 
 	/* Checkpoint 2 Tests */
 	TEST_OUTPUT("Test frame1.txt", test_frame1());
 	// TEST_OUTPUT("Test hello executable", test_hello());
 	// TEST_OUTPUT("Test verylargetextwithverylongname.txt", test_verylarge());
 	// TEST_OUTPUT("Test directory read.", test_directory_ls());
+	// TEST_OUTPUT("Testing RTC Driver", test_rtc_driver());
+	// TEST_OUTPUT("Testing Terminal Driver", test_terminal_driver());
 }

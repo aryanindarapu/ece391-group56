@@ -26,4 +26,7 @@ int test_hello();
 int test_verylarge();
 int test_directory_ls();
 
+int test_rtc_driver();
+int test_terminal_driver();
+
 #endif /* TESTS_H */
