@@ -209,18 +209,28 @@ int test_frame1() {
 	return PASS;
 }
 
-int test_grep() {
+int test_hello() {
 	TEST_HEADER;
 	int i;
 	init_file_system();
 
-	printf("Reading grep.\n");
-	if (file_open((const uint8_t *) "grep") == -1) return FAIL;
+	printf("Reading hello.\n");
+	if (file_open((const uint8_t *) "hello") == -1) return FAIL;
 
 	clear();
+<<<<<<< HEAD
 	char file_buffer[GREP_SIZE];
 	if (file_read(0, (void *) file_buffer, GREP_SIZE) == -1) return FAIL;
 	for (i = 0; i < GREP_SIZE; i++){
+=======
+	char file_buffer[HELLO_SIZE];
+	if (file_read(0, (void *) file_buffer, HELLO_SIZE) == -1) return FAIL;
+	for (i = 0; i < HELLO_SIZE; i++) {
+		if (file_buffer[i] == '\0') {
+			continue;
+		}
+
+>>>>>>> 4c5772a1897ce0bd886fe7626065c92e3ea85b6c
 		putc(file_buffer[i]);
 	}
 
@@ -331,7 +341,7 @@ void launch_tests() {
 
 	/* Checkpoint 2 Tests */
 	// TEST_OUTPUT("Test frame1.txt", test_frame1());
-	// TEST_OUTPUT("Test grep", test_grep());
-	TEST_OUTPUT("directory test(ls)", test_directory_ls());
+	TEST_OUTPUT("Test hello executable", test_hello());
+	// TEST_OUTPUT("directory test(ls)", test_directory_ls());
 	// TEST_OUTPUT("Test verylargetextwithverylongname.txt", test_verylarge());
 }
