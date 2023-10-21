@@ -84,17 +84,19 @@ void rtc_handler() {
     rtc_int_flag = 0;
 }
 
-extern int32_t rtc_open(const uint8_t * filename){
+int32_t rtc_open(const uint8_t * filename){
     wait_count = RTC_MAX_FREQ/RTC_INIT_FREQ;
     clock_count = 0;
     // copy stuff and set up dentry for rtc.
     return 0;
-};
-extern int32_t rtc_close(int32_t fd){
+}
+
+int32_t rtc_close(int32_t fd){
     // remove dentry
     return 0;
-};
-extern int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes){
+}
+
+int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes){
     while(clock_count <= wait_count)
     {
         //printf("%d\n", clock_count);
@@ -104,12 +106,12 @@ extern int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes){
     sti();
     while(rtc_int_flag != 0);
     return 0;
-};
-extern int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes){
+}
+
+int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes){
     char freq = *(const char *)buf;
-    if(freq < 2 || freq > 1024) return -1;
-    if(freq && (! (freq & (freq-1))))
-    {
+    if (freq < 2 || freq > 1024) return -1;
+    if (freq && (! (freq & (freq-1)))) {
         wait_count = RTC_MAX_FREQ/freq;
         clock_count = 0;
         return 0;

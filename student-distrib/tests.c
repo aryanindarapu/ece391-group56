@@ -425,42 +425,37 @@ int test_null() {
 
 /* Checkpoint 2 tests */
 
-// TODO: add test for RTC -- "We also expect you to be able to press a key and demonstrate that your operating system reaches the test interrupts function in on RTC interrupts"
-int test_rtc_driver(){
+int test_rtc_driver() {
+	TEST_HEADER;
 	int print_repeat = 10;
 	int print_counter = 0;
 	int wait_ct = 0; 
 	int print_char_counter = 0;
-	unsigned char freq;
+	int freq;
 	unsigned char blank_buf;
 
 	rtc_open(0);
 	
-	for(freq = 4; freq<1025; freq*=2)
-	{
+	for (freq = 4; freq < 1025; freq *= 2) {
 		rtc_write(0, &freq, 1);
-		for(print_counter = 0; print_counter<print_repeat; print_counter++)
-		{
+		for(print_counter = 0; print_counter<print_repeat; print_counter++) {
 			
-			for(wait_ct = 0; wait_ct<freq; wait_ct+=4)
-			{
+			for (wait_ct = 0; wait_ct<freq; wait_ct+=4) {
 				rtc_read(0, &blank_buf, 1);
 			}
 	
-			for(print_char_counter = 0; print_char_counter<wait_ct; print_char_counter++)
-			{
+			for (print_char_counter = 0; print_char_counter<wait_ct; print_char_counter++) {
 				printf("1");
-			}	
-			
+			}		
 		}
-		
 		
 		clear();
 	}
+
+	return PASS;
 }
 
-int test_terminal_driver()
-{
+int test_terminal_driver() {
 	char buf[128];
 	int num_char;
 	while(1){
@@ -486,8 +481,8 @@ int test_terminal_driver()
 void launch_tests() {
 	clear();
 
-	//test_rtc_driver();
-	test_terminal_driver();
+	TEST_OUTPUT("Testing RTC Driver", test_rtc_driver());
+	// TEST_OUTPUT("Testing Terminal Driver", test_terminal_driver());
 
 
 
