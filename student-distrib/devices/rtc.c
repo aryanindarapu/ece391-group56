@@ -102,7 +102,7 @@ extern int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes){
     cli();
     clock_count = 0;
     sti();
-    while(rtc_int_flag != 1);
+    while(rtc_int_flag != 0);
     return 0;
 };
 extern int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes){

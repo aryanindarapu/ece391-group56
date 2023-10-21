@@ -33,4 +33,7 @@ int test_paging();
 int test_page_fault_handler();
 int test_null();
 
+int test_rtc_driver();
+int test_terminal_driver();
+
 #endif /* TESTS_H */

@@ -199,9 +199,12 @@ int32_t puts(int8_t* s) {
 
 void move_screen_up(void){ //TODO: write comments
     int32_t i;
+    cli();
     for (i = 0; i < (NUM_ROWS-1) * NUM_COLS; i++) {
-        video_mem[i] = video_mem[i+NUM_ROWS];
+        video_mem[i<<1] = video_mem[(i+NUM_COLS)<<1];
     }
+    for(i = 0; i<NUM_COLS; i++) video_mem[((NUM_ROWS-1) * NUM_COLS + i)<<1] = 0;
+    sti();
 }
 
 /* void putc(uint8_t c);
@@ -209,7 +212,7 @@ void move_screen_up(void){ //TODO: write comments
  * Return Value: void
  *  Function: Output a character to the console */
 void putc(uint8_t c) {
-    int initial_y = screen_y;
+    //int initial_y = screen_y;
     if(c == '\n' || c == '\r') {
         screen_y++;
         screen_x = 0;
@@ -217,15 +220,15 @@ void putc(uint8_t c) {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
-        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+        screen_y = (screen_y + (screen_x / NUM_COLS));// % NUM_ROWS;
         screen_x %= NUM_COLS;
     }
 
-    // if(initial_y<screen_y)
-    // {
-    //     move_screen_up();
-    //     screen_y--;
-    // }
+    if(screen_y == NUM_ROWS)
+    {
+        move_screen_up();
+        screen_y=NUM_ROWS-1;
+    }
 
     update_cursor();
 }

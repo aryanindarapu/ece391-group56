@@ -121,7 +121,7 @@ void keyboard_driver() {
     // TODO: do all special key checking here
     // Control key code: 29
     // Set special 
-
+    
     switch (keycode) {
         case CTRL_P:
             special_key_flags[CTRL_INDEX] = 1;
@@ -150,9 +150,8 @@ void keyboard_driver() {
             return;
         case 28: //enter
             if(get_buffer_fill() == 128) return;
-            printf("\n");
-            enter_flag_pressed = 1;
-            terminal_clear();
+            printf("\n");//printf("\n[Terminal]$ ");
+            terminal_enter();
             return;
         default:
 

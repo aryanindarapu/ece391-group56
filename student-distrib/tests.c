@@ -2,6 +2,7 @@
 #include "x86_desc.h"
 #include "lib.h"
 #include "devices/rtc.h"
+#include "terminal.h"
 
 #define PASS 1
 #define FAIL 0
@@ -458,6 +459,17 @@ int test_rtc_driver(){
 	}
 }
 
+int test_terminal_driver()
+{
+	char buf[128];
+	int num_char;
+	while(1){
+		num_char = terminal_read(0, &buf, 128);
+		printf("You typed %d chars: ", num_char);
+		terminal_write(0, &buf, num_char);
+	}
+};
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -474,8 +486,8 @@ int test_rtc_driver(){
 void launch_tests() {
 	clear();
 
-	test_rtc_driver();
-
+	//test_rtc_driver();
+	test_terminal_driver();
 
 
 

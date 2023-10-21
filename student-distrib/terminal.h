@@ -15,12 +15,13 @@ extern void write_to_terminal(unsigned char ascii);
 void terminal_clear();
 int get_buffer_fill();
 void terminal_backspace();
+void terminal_enter();
 
 extern int32_t terminal_open(const uint8_t * filename);
 extern int32_t terminal_close(int32_t fd);
 extern int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes);
 extern int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes);
 
-static volatile int enter_flag_pressed = 0;
+
 
 #endif /* _TERMINAL_H */

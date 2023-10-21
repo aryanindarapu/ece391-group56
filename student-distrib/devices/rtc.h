@@ -4,7 +4,7 @@
 #define RTC_MAX_FREQ        1024//32768
 #define RTC_INIT_FREQ       2
 
-static int rtc_int_flag;
+static volatile int rtc_int_flag;
 
 // Intialize the RTC
 void init_rtc();
