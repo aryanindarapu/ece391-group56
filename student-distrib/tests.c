@@ -218,11 +218,6 @@ int test_hello() {
 	if (file_open((const uint8_t *) "hello") == -1) return FAIL;
 
 	clear();
-<<<<<<< HEAD
-	char file_buffer[GREP_SIZE];
-	if (file_read(0, (void *) file_buffer, GREP_SIZE) == -1) return FAIL;
-	for (i = 0; i < GREP_SIZE; i++){
-=======
 	char file_buffer[HELLO_SIZE];
 	if (file_read(0, (void *) file_buffer, HELLO_SIZE) == -1) return FAIL;
 	for (i = 0; i < HELLO_SIZE; i++) {
@@ -230,7 +225,6 @@ int test_hello() {
 			continue;
 		}
 
->>>>>>> 4c5772a1897ce0bd886fe7626065c92e3ea85b6c
 		putc(file_buffer[i]);
 	}
 

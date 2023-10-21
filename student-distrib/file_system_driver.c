@@ -254,7 +254,6 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
    char cur_filename[FILENAME_SIZE];
    int i;
    int32_t cur_size;
-   dentry_t cur_file;
 
    // ensure the fd is a valid entry
    if (file_desc_arr[fd].flags == 0) return -1;
@@ -265,7 +264,7 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
         buffer[i] = filename[i];
     }
     /* do 32 character name emplacement */
-    cur_file = boot_block_ptr->dir_entries[file_desc_arr[fd].file_pos];
+    dentry_t cur_file = boot_block_ptr->dir_entries[file_desc_arr[fd].file_pos];
     strcpy(cur_filename, cur_file.file_name);
     for (i = 0; i < FILENAME_SIZE; i++){
         //cur_filename has many trailing '\0' so we need to make them spaces
