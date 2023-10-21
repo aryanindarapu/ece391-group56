@@ -213,19 +213,19 @@ int test_frame1() {
 	return PASS;
 }
 
-int test_grep() {
+int test_hello() {
 	TEST_HEADER;
 	int i;
 	init_file_system();
 
-	printf("Reading grep.\n");
-	if (file_open((const uint8_t *) "grep") == -1) return FAIL;
+	printf("Reading hello.\n");
+	if (file_open((const uint8_t *) "hello") == -1) return FAIL;
 
 	clear();
-	char file_buffer[GREP_SIZE];
-	if (file_read(0, (void *) file_buffer, GREP_SIZE) == -1) return FAIL;
-	for (i = 0; i < GREP_SIZE; i++){
-		if (file_buffer[i] == '\0'){
+	char file_buffer[HELLO_SIZE];
+	if (file_read(0, (void *) file_buffer, HELLO_SIZE) == -1) return FAIL;
+	for (i = 0; i < HELLO_SIZE; i++) {
+		if (file_buffer[i] == '\0') {
 			continue;
 		}
 
@@ -276,26 +276,26 @@ int test_verylarge() {
 	return PASS;
 }
 
-test_directory_ls(){
-	TEST_HEADER;
-	int i;
-	uint8_t filename[32];
-	filename[0] = '.';
-	filename[1] = '\0';
-	init_file_system();
-	dir_open(&filename);
-	char file_buffer[1440];
-	dir_read(0, file_buffer, 0);
-	for (i = 0; i < strlen(file_buffer); i++){
-		if (file_buffer[i] == '\0'){
-			//null terminating char
-			continue;
-		}
-		// printf("%c", file_buffer[i]);
-		putc(file_buffer[i]);
-	}
-	return PASS;
-}
+// int test_directory_ls() {
+// 	TEST_HEADER;
+// 	int i;
+// 	uint8_t filename[32];
+// 	filename[0] = '.';
+// 	filename[1] = '\0';
+// 	init_file_system();
+// 	dir_open(filename);
+// 	char file_buffer[1440];
+// 	dir_read(0, file_buffer, 0);
+// 	for (i = 0; i < strlen(file_buffer); i++){
+// 		if (file_buffer[i] == '\0'){
+// 			//null terminating char
+// 			continue;
+// 		}
+// 		// printf("%c", file_buffer[i]);
+// 		putc(file_buffer[i]);
+// 	}
+// 	return PASS;
+// }
 
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -323,7 +323,7 @@ void launch_tests() {
 
 	/* Checkpoint 2 Tests */
 	// TEST_OUTPUT("Test frame1.txt", test_frame1());
-	// TEST_OUTPUT("Test grep", test_grep());
-	TEST_OUTPUT("directory test(ls)", test_directory_ls());
+	TEST_OUTPUT("Test hello executable", test_hello());
+	// TEST_OUTPUT("directory test(ls)", test_directory_ls());
 	// TEST_OUTPUT("Test verylargetextwithverylongname.txt", test_verylarge());
 }

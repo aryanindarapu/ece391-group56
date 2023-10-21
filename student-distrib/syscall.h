@@ -1,12 +1,12 @@
-#ifndef _SYSTEM_CALL_H
-#define _SYSTEM_CALL_H
+// #ifndef _SYSTEM_CALL_H
+// #define _SYSTEM_CALL_H
 
 #include "types.h"
 
-#ifndef ASM
+// #ifndef ASM
 int system_call();
 
-extern void system_handler();
+// extern void system_handler();
 
 /* opcodes at the moment are */
 /*
@@ -38,6 +38,6 @@ extern void system_handler();
 // uint32_t sigreturn (void);
 
 
-#endif /* ASM */
+// #endif /* ASM */
 
-#endif /* _SYSTEM_CALL_H */
+// #endif /* _SYSTEM_CALL_H */
