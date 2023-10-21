@@ -298,12 +298,12 @@ int test_directory_ls() {
 	// 	putc('\n');
 	// }
 
-	for(i = 0; i < 10; i++){
+	for(i = 0; i < 17; i++){
 		dir_read(0, (void *) file_buffer, 80);
 		for (j = 0; j < 80; j++) {
 	 		putc(file_buffer[j]);
 	 	}
-	 	putc('\n');
+	 	//putc('\n');
 	}
 
 	return PASS;
@@ -335,7 +335,8 @@ void launch_tests() {
 
 	/* Checkpoint 2 Tests */
 	// TEST_OUTPUT("Test frame1.txt", test_frame1());
-	TEST_OUTPUT("Test hello executable", test_hello());
-	// TEST_OUTPUT("directory test(ls)", test_directory_ls());
+	//TEST_OUTPUT("Test hello executable", test_hello());
+	//TEST_OUTPUT("directory test(ls)", test_directory_ls());
 	// TEST_OUTPUT("Test verylargetextwithverylongname.txt", test_verylarge());
+	test_directory_ls();
 }

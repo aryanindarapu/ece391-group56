@@ -248,13 +248,14 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
 
    char buffer[80];
    char *cur_size_str;
+   char temp[10];
    char filename[11] = {'f', 'i', 'l', 'e', '_', 'n', 'a', 'm', 'e', ':', ' '};
    char filetype[11] = {'f', 'i', 'l', 'e', '_', 't', 'y', 'p', 'e', ':', ' '};
    char filesize[11] = {'f', 'i', 'l', 'e', '_', 's', 'i', 'z', 'e', ':', ' '};
    char cur_filename[FILENAME_SIZE];
    int i;
    int32_t cur_size;
-
+    for(i =0; i<80; i++) buffer[i] = ' ';
    // ensure the fd is a valid entry
    if (file_desc_arr[fd].flags == 0) return -1;
 
@@ -266,6 +267,21 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
     /* do 32 character name emplacement */
     dentry_t cur_file = boot_block_ptr->dir_entries[file_desc_arr[fd].file_pos];
     strcpy(cur_filename, cur_file.file_name);
+    if (strlen(cur_filename) > 32){
+        for(i = 32; i < strlen(cur_filename); i++){
+            cur_filename[i] = ' ';
+        }
+        cur_filename[32] = '\0';
+    }
+    //garbage checking routine
+    i = 0;
+    while(cur_filename[i] != '\0'){
+        i++;
+    }
+    for(i = i; i < FILENAME_SIZE; i++){
+        cur_filename[i] = ' ';
+    }
+    ///////////////////////////////////
     for (i = 0; i < FILENAME_SIZE; i++){
         //cur_filename has many trailing '\0' so we need to make them spaces
         buffer[FORMATTER_LENGTH + i] = (cur_filename[i] != '\0') ? cur_filename[i] : ' ';
@@ -277,21 +293,33 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
             buffer[FORMATTER_LENGTH+FILENAME_SIZE+2+i] = filetype[i];
     }
     /* do file type emplacement */
-    buffer[FORMATTER_LENGTH*2 + FILENAME_SIZE+2] = (char)(cur_file.file_type);
+    buffer[FORMATTER_LENGTH*2 + FILENAME_SIZE+2] = (char)(cur_file.file_type + 48);
     /* setup filesize formatting */
     buffer[FORMATTER_LENGTH*2 + FILENAME_SIZE+3] = ',';
     buffer[FORMATTER_LENGTH*2 + FILENAME_SIZE+4] = ' ';
     for(i = 0; i < FORMATTER_LENGTH; i++){
         buffer[FORMATTER_LENGTH*2+FILENAME_SIZE+5+i] = filesize[i];
     }
+    
+    /* WHAT THE FUCK */
+    buffer[FORMATTER_LENGTH*2 + FILENAME_SIZE+5] = 'f';
+    buffer[FORMATTER_LENGTH*2 + FILENAME_SIZE+6] = 'i';
+    
+
     /* do file size emplacement */
     cur_size = inode_ptr[cur_file.inode_num].length;
-    itoa(cur_size, cur_size_str, 10);
-    for (i = 0; i < strlen(cur_size_str); i++){
-            buffer[FORMATTER_LENGTH*3 + FILENAME_SIZE+5+i] = cur_size_str[i];
+    //printf("%d", cur_size);
+    itoa(cur_size, temp, 10);
+    for(i =0; i< 9; i++) buffer[FORMATTER_LENGTH*3 + FILENAME_SIZE+5+i] = ' ';
+    for (i = 0; i < strlen(temp) ; i++){
+        //printf("\n %d \n", (int)temp[i]);
+        buffer[FORMATTER_LENGTH*3 + FILENAME_SIZE+5+i] = (temp[i] >= 48 && temp[i] <= 57) ? temp[i] : ' ';
     }
+    //printf("e");
     /* buffer is now prepared to send to buf */
-    buf = (void *)buffer;
+    buffer[79] = '\n';
+    memcpy(buf,(void *)buffer, 80 );
+    //buf = (void *)buffer;
     file_desc_arr[fd].file_pos++;
 
     return nbytes;
