@@ -284,7 +284,7 @@ test_directory_ls(){
 	filename[1] = '\0';
 	init_file_system();
 	dir_open(&filename);
-	char * file_buffer[1440];
+	char file_buffer[1440];
 	dir_read(0, file_buffer, 0);
 	for (i = 0; i < strlen(file_buffer); i++){
 		if (file_buffer[i] == '\0'){
@@ -323,7 +323,7 @@ void launch_tests() {
 
 	/* Checkpoint 2 Tests */
 	// TEST_OUTPUT("Test frame1.txt", test_frame1());
-	TEST_OUTPUT("Test grep", test_grep());
+	// TEST_OUTPUT("Test grep", test_grep());
 	TEST_OUTPUT("directory test(ls)", test_directory_ls());
 	// TEST_OUTPUT("Test verylargetextwithverylongname.txt", test_verylarge());
 }
