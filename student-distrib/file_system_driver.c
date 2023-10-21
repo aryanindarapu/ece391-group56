@@ -1,8 +1,6 @@
 #include "file_system_driver.h"
 #include "lib.h"
 
-// file_sys_t file_system; // TODO: do i make this static?
-
 // TODO: comment
 // Initialize the file system
 void init_file_system(void) {
@@ -11,49 +9,6 @@ void init_file_system(void) {
     inode_ptr = (inode_t *)(boot_block_ptr + 1); // increase by size of pointer 
     data_block_ptr = (data_block_t *)(inode_ptr + boot_block_ptr->num_inodes);
 }
-
-/* https://wiki.osdev.org/Paging */
-/* */
-/* BOTH OF THESE FUNCTIONS ARE DIRECTLY RIPPED FROM OS DEV PAGING */
-
-/* gets the physical address given the virtual address 
-    INPUTS : virtualaddr which is the value of CR3 register holding the virualized address 
-*/
-// void *get_physaddr (void *virtualaddr) {
-//     unsigned long pdindex = (unsigned long)virtualaddr >> 22;
-//     unsigned long ptindex = (unsigned long)virtualaddr >> 12 & 0x03FF;
- 
-//     unsigned long *pd = (unsigned long *)0xFFFFF000;
-//     // Here you need to check whether the PD entry is present.
- 
-//     unsigned long *pt = ((unsigned long *)0xFFC00000) + (0x400 * pdindex);
-//     // Here you need to check whether the PT entry is present.
- 
-//     return (void *)((pt[ptindex] & ~0xFFF) + ((unsigned long)virtualaddr & 0xFFF));
-// }
-
-
-// void map_page (void *physaddr, void *virtualaddr, unsigned int flags) {
-//     // Make sure that both addresses are page-aligned.
- 
-//     unsigned long pdindex = (unsigned long)virtualaddr >> 22;
-//     unsigned long ptindex = (unsigned long)virtualaddr >> 12 & 0x03FF;
- 
-//     unsigned long *pd = (unsigned long *)0xFFFFF000;
-//     // Here you need to check whether the PD entry is present.
-//     // When it is not present, you need to create a new empty PT and
-//     // adjust the PDE accordingly.
- 
-//     unsigned long *pt = ((unsigned long *)0xFFC00000) + (0x400 * pdindex);
-//     // Here you need to check whether the PT entry is present.
-//     // When it is, then there is already a mapping present. What do you do now?
- 
-//     pt[ptindex] = ((unsigned long)physaddr) | (flags & 0xFFF) | 0x01; // Present
- 
-//     // Now you need to flush the entry in the TLB
-//     // or you might not notice the change.
-// }
-
 
 // THIS FUNCTION WILL BE CALLED IN OUR SYS_OPEN() SYSTEM CALL
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
@@ -150,16 +105,11 @@ int32_t file_open(const uint8_t * fname) {
     if (read_dentry_by_name (fname, &file_dentry) == -1) { 
         return -1; //file doesn't exist
     }
-
+    
+    /* this fd index is now taken */
     file_desc_arr[file_desc_index].inode = file_dentry.inode_num;
     file_desc_arr[file_desc_index].flags = 1;
     file_desc_arr[file_desc_index].file_pos = 0;
-
-    // check dentry file type and add to file descriptor array
-
-    // file_desc_index++;
-    //TODO we just do this now right?
-    /* this fd index is now taken */
 
     return 0;
 }

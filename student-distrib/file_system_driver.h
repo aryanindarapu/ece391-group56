@@ -1,4 +1,3 @@
-// Add other stuff we need to include
 #include "devices/rtc.h"
 #include "types.h"
 
@@ -28,7 +27,6 @@ typedef struct boot_block_t {
 } boot_block_t;
 
 // size - 4kB
-// TODO: figure out if we can include this next pointer here
 typedef struct inode_t {
     int32_t length; // length in bytes of data blocks
     uint32_t data_blocks[DATA_BLOCKS_PER_INODE]; // INDEX of the data block (data is NOT continuous per block)
@@ -37,16 +35,6 @@ typedef struct inode_t {
 typedef struct data_block_t {
     uint8_t data[4096]; // 4kB of data
 } data_block_t;
-
-
-
-// Don't do this bc this is actually initialized at some point in memory. no idea where, look through kernel.c
-// typedef struct file_sys_t {
-//     boot_block_t * boot_block_ptr; // Pointer to our boot block
-//     inode_t * inode_ptr; // List of inodes
-//     // MP3.2 TODO: Check how in the absolute fuck we are creating pointer to data blocks??
-//     data_block_t * data_block_ptr; // Pointer to our data blocks
-// } file_sys_t;
 
 // for file descriptor array ONLY
 typedef struct file_desc_t {
@@ -74,18 +62,10 @@ int32_t dir_close(uint32_t fd);
 int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes);
 int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes);
 
-
-//TODO: maybe make rtc_open close... functions if we dont already have them somewhere else
-
 /* file system instantiation */
-// file_sys_t file_sys;
-
 boot_block_t * boot_block_ptr; // Pointer to our boot block
-// uint32_t * file_sys_start_ptr;
 inode_t * inode_ptr; // List of inodes
 data_block_t * data_block_ptr; // Pointer to our data blocks
-
-// static unsigned int dir_read_idx = 1;
 
 //no dentries, no inodes, no data blocks, and no pointers to dentries
 

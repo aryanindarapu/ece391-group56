@@ -314,8 +314,8 @@ void launch_tests() {
 	// To test keyboard, set RUN_TESTS to 0 or comment all tests above
 
 	/* Checkpoint 2 Tests */
-	// TEST_OUTPUT("Test frame1.txt", test_frame1());
+	TEST_OUTPUT("Test frame1.txt", test_frame1());
 	// TEST_OUTPUT("Test hello executable", test_hello());
 	// TEST_OUTPUT("Test verylargetextwithverylongname.txt", test_verylarge());
-	TEST_OUTPUT("Test directory read.", test_directory_ls());
+	// TEST_OUTPUT("Test directory read.", test_directory_ls());
 }
