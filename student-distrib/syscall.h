@@ -23,10 +23,10 @@ extern void system_handler();
 // uint32_t halt (uint8_t status);
 // uint32_t execute (const uint8_t* command);
 
-int32_t open (const uint8_t* filename);
-int32_t close (uint32_t fd);
-int32_t read (uint32_t fd, void* buf, uint32_t nbytes);
-int32_t write (uint32_t fd, const void* buf, uint32_t nbytes);
+// int32_t open (const uint8_t* filename);
+// int32_t close (uint32_t fd);
+// int32_t read (uint32_t fd, void* buf, uint32_t nbytes);
+// int32_t write (uint32_t fd, const void* buf, uint32_t nbytes);
 
 
 /* DONT NEED TO IMPLEMENT YET */

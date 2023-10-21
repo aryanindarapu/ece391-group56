@@ -18,6 +18,7 @@ int system_call() {
 
 /* TODO: write the read system call */
 int32_t read (uint32_t fd, void* buf, uint32_t nbytes) {
+    return 0;
     if (file_desc_arr[fd].flags == 0) return -1;
 
     file_desc_t file_desc = file_desc_arr[fd];
@@ -33,12 +34,14 @@ int32_t read (uint32_t fd, void* buf, uint32_t nbytes) {
 
 /* TODO: write the write system call */
 int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
+    return 0;
     //we dont need to implement for this checkpoint
     return -1;
 }
 
 /* TODO: write the open system call */
 int32_t open (const uint8_t* filename) {
+    return 0;
     dentry_t file_dentry;
     int file_desc_index;
     
