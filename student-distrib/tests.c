@@ -287,11 +287,12 @@ int test_directory_ls() {
 	}
 	
 	dir_close(0);
-
-	if(dir_read(0, (void *) file_buffer, 80)==-1) printf("FAIL\n");
-	else{
-		putc('\n');
+	putc('\n');
+	if(dir_read(0, (void *) file_buffer, 80) == -1) {
+		// printf("FAIL\n");
 		return PASS;
+	} else {
+		return FAIL;
 	}
 }
 

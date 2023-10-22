@@ -1,7 +1,6 @@
 asm_linkage.o: asm_linkage.S
 boot.o: boot.S multiboot.h x86_desc.h types.h
 paging_asm.o: paging_asm.S
-syscall_asm.o: syscall_asm.S
 x86_desc.o: x86_desc.S x86_desc.h types.h
 exceptions.o: exceptions.c exceptions.h lib.h types.h
 file_system_driver.o: file_system_driver.c file_system_driver.h \
