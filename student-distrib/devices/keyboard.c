@@ -146,10 +146,10 @@ void keyboard_driver() {
             }
             return;
         case ALT_P:
-            printf(" ALT_PRESSED ");
+            //printf(" ALT_PRESSED ");
             return;
         case ALT_R:
-            printf(" ALT_RELEASED ");
+            //printf(" ALT_RELEASED ");
             return;
         case BACKSPACE: //backspace TODO : just sent to terminal to enter into buffer, handle it there for backspace, save enter for a read
             if(get_buffer_fill() == 0) return;

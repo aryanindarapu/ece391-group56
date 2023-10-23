@@ -29,4 +29,7 @@ int test_directory_ls();
 int test_rtc_driver();
 int test_terminal_driver();
 
+// double cos(double x);
+// double sin(double x);
+
 #endif /* TESTS_H */
