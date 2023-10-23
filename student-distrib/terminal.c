@@ -126,7 +126,15 @@ int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
     int i;
     cli();
     for (i = 0; i < nbytes; i++) {
-        putc(((char*)buf)[i]);
+        if(((char*)buf)[i] == '\t')
+        {
+            putc(' ');
+            putc(' ');
+            putc(' ');
+            putc(' ');
+        }
+        else
+            putc(((char*)buf)[i]);
     }
     sti();
     return nbytes;
