@@ -182,6 +182,14 @@ int test_null() {
 }
 
 /* Checkpoint 2 tests */
+/*
+ *   test_frame1
+ *   DESCRIPTION: Testing to see if we can read frame1.txt
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: PASS if we can read frame1.txt, FAIL otherwise
+ *   SIDE EFFECTS: none
+ */
 int test_frame1() {
 	TEST_HEADER;
 	int i;
@@ -209,6 +217,14 @@ int test_frame1() {
 	return PASS;
 }
 
+/*
+ *   test_hello
+ *   DESCRIPTION: Testing to see if we can read hello executable
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: PASS if we can read hello executable, FAIL otherwise
+ *   SIDE EFFECTS: none
+ */
 int test_hello() {
 	TEST_HEADER;
 	int i;
@@ -241,6 +257,14 @@ int test_hello() {
 	return PASS;
 }
 
+/*
+ *   test_verylarge
+ *   DESCRIPTION: Testing to see if we can read verylargetextwithverylongname.txt
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: PASS if we can read verylargetextwithverylongname.txt, FAIL otherwise
+ *   SIDE EFFECTS: none
+ */
 int test_verylarge() {
 	TEST_HEADER;
 	int i;
@@ -267,6 +291,14 @@ int test_verylarge() {
 	return PASS;
 }
 
+/*
+ *   test_directory_ls
+ *   DESCRIPTION: Testing to see if we can read directory
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: PASS if we can read directory, FAIL otherwise
+ *   SIDE EFFECTS: none
+ */
 int test_directory_ls() {
 	TEST_HEADER;
 	int i;
@@ -296,7 +328,14 @@ int test_directory_ls() {
 	}
 }
 
-
+/*
+ *   test_rtc_driver
+ *   DESCRIPTION: Testing to see if we can read rtc driver
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: PASS if we can read rtc driver, FAIL otherwise
+ *   SIDE EFFECTS: none
+ */
 int test_rtc_driver() {
 	TEST_HEADER;
 	int print_repeat = 10;
@@ -327,6 +366,14 @@ int test_rtc_driver() {
 	return PASS;
 }
 
+/*
+ *   test_terminal_driver
+ *   DESCRIPTION: Testing to see if we can read terminal driver
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: PASS if we can read terminal driver, FAIL otherwise
+ *   SIDE EFFECTS: none
+ */
 int test_terminal_driver() {
 	char buf[128];
 	int num_char;
