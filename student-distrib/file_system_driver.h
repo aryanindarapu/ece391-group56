@@ -32,11 +32,12 @@ typedef struct inode_t {
     uint32_t data_blocks[DATA_BLOCKS_PER_INODE]; // INDEX of the data block (data is NOT continuous per block)
 } inode_t;
 
+// size - 4kB
 typedef struct data_block_t {
-    uint8_t data[4096]; // 4kB of data
+    uint8_t data[DATA_BLOCK_SIZE]; // 4kB of data
 } data_block_t;
 
-// for file descriptor array ONLY
+// file descriptor struct
 typedef struct file_desc_t {
     uint32_t* file_ops_ptr;
     uint32_t inode;
@@ -44,19 +45,21 @@ typedef struct file_desc_t {
     uint32_t flags;
 } file_desc_t;
 
-void* get_physaddr(void *virtualaddr);
-void map_page(void *physaddr, void *virtualaddr, unsigned int flags);
-
+/* file system helper functions */
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry);
 int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry);
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
 
+/* file system initialization */
 void init_file_system(void);
+
+/* file system operations */
 int32_t file_open(const uint8_t * fname);
 int32_t file_close(uint32_t fd);
 int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes);
 int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes);
 
+/* directory syscall functions */
 int32_t dir_open(const uint8_t * fname);
 int32_t dir_close(uint32_t fd);
 int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes);
@@ -67,6 +70,5 @@ boot_block_t * boot_block_ptr; // Pointer to our boot block
 inode_t * inode_ptr; // List of inodes
 data_block_t * data_block_ptr; // Pointer to our data blocks
 
-//no dentries, no inodes, no data blocks, and no pointers to dentries
-
+/* file descriptor array */
 file_desc_t file_desc_arr[MAX_FILE_DESC];

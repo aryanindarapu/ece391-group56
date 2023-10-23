@@ -16,13 +16,13 @@ void init_file_system(void) {
     data_block_ptr = (data_block_t *)(inode_ptr + boot_block_ptr->num_inodes);
 }
 
-// THIS FUNCTION WILL BE CALLED IN OUR SYS_OPEN() SYSTEM CALL
 /* 
  * read_dentry_by_name
  *   DESCRIPTION: Goes through the dentries and compares the 
- *   INPUTS: none
+ *   INPUTS: fname - file name to search for
+ *           dentry - dentry to populate with file information
  *   OUTPUTS: none
- *   RETURN VALUE: none
+ *   RETURN VALUE: 0 if success, -1 if failure
  *   SIDE EFFECTS: none
  */
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
@@ -44,6 +44,15 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
 
 }
 
+/* 
+ * read_dentry_by_index
+ *   DESCRIPTION: Goes through the dentries and compares the 
+ *   INPUTS: index - index of the directory entry
+ *           dentry - dentry to populate with file information
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 if success, -1 if failure
+ *   SIDE EFFECTS: none
+ */
 int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
     // Open up a file and set up the file object
     // NOTE: index is the directory index
@@ -59,7 +68,20 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
     return 0;
 }
 
+/* 
+ * read_data
+ *   DESCRIPTION: Reads data from a file given an inode and offsetm
+ *                and writes length bytes of data into the given buffer.
+ *   INPUTS: inode - inode number of the file
+ *           offset - offset of the file
+ *           buf - buffer to read into
+ *           length - length of the file
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 if success, -1 if failure
+ *   SIDE EFFECTS: none
+ */
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length) {
+    // Check if inode is valid
     if (inode >= boot_block_ptr->num_inodes) {
         return -1;
     }
@@ -74,10 +96,9 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
             return 0;
         }
 
+        // Get indices for data block and within data block
         data_block_idx = curr_byte_idx / DATA_BLOCK_SIZE;
         within_data_block_idx = curr_byte_idx % DATA_BLOCK_SIZE;
-        // TODO: is this 1-indexed or 0-indexed?
-        // if (data_block_idx >= )
         uint32_t data_block_num = curr_inode->data_blocks[data_block_idx];
 
         // bad data block
@@ -92,12 +113,19 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     return length;
 }
 
-
+/* 
+ * file_open
+ *   DESCRIPTION: Opens a file given a file name
+ *   INPUTS: fname - file name to open
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 if success, -1 if failure
+ *   SIDE EFFECTS: adds to file descriptor array
+ */
 int32_t file_open(const uint8_t * fname) {
     dentry_t file_dentry;
     int file_desc_index;
     
-    //ensure the filename is valid
+    // ensure the filename is valid
     if (fname == NULL){
         return -1;
     }
@@ -106,7 +134,7 @@ int32_t file_open(const uint8_t * fname) {
     for (file_desc_index = 0; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
         //is the index empty?
         if (file_desc_arr[file_desc_index].flags == 0) {
-            break; //this file_desc_index is the one we will emplace the file to 
+            break; // this file_desc_index is the one we will emplace the file to 
         }
     }
 
@@ -128,6 +156,14 @@ int32_t file_open(const uint8_t * fname) {
     return 0;
 }
 
+/* 
+ * file_close
+ *   DESCRIPTION: Closes a file given a file descriptor
+ *   INPUTS: fd - file descriptor
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 if success, -1 if failure
+ *   SIDE EFFECTS: removes from file descriptor array
+ */
 int32_t file_close(uint32_t fd) {
     // TODO: remove from file descriptor array
     // make the file unreadable and remove its pointers to operation functions
@@ -138,6 +174,16 @@ int32_t file_close(uint32_t fd) {
     return 0;
 }
 
+/* 
+ * file_read
+ *   DESCRIPTION: Reads a file given a file descriptor
+ *   INPUTS: fd - file descriptor
+ *           buf - buffer to read into
+ *           nbytes - number of bytes to read
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 if success, -1 if failure
+ *   SIDE EFFECTS: none
+ */
 int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes) {
     if (file_desc_arr[fd].flags == 0) return -1;
 
@@ -156,7 +202,14 @@ int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes) {
     return -1;
 }
 
-//open function for a directory type file descriptor process
+/* 
+ * dir_open
+ *   DESCRIPTION: Opens a directory given a file name
+ *   INPUTS: fname - file name to open
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 if success, -1 if failure
+ *   SIDE EFFECTS: adds to file descriptor array
+ */
 int32_t dir_open(const uint8_t * fname){
     int file_desc_index;
     dentry_t dir_dentry;
@@ -187,7 +240,14 @@ int32_t dir_open(const uint8_t * fname){
     return 0;
 }
 
-//close function for a directory type file descriptor process
+/* 
+ * dir_close
+ *   DESCRIPTION: Closes a directory given a file descriptor
+ *   INPUTS: fd - file descriptor
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 if success, -1 if failure
+ *   SIDE EFFECTS: removes from file descriptor array
+ */
 int32_t dir_close(uint32_t fd) {
     //clear the flag and remove the file operations pointers for this process
     file_desc_arr[fd].flags = 0;
@@ -197,7 +257,16 @@ int32_t dir_close(uint32_t fd) {
     return 0;
 }
 
-//read function for a directory type file descriptor process
+/* 
+ * dir_read
+ *   DESCRIPTION: Reads a directory given a file descriptor
+ *   INPUTS: fd - file descriptor
+ *           buf - buffer to read into
+ *           nbytes - number of bytes to read
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 if success, -1 if failure
+ *   SIDE EFFECTS: none
+ */
 int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
     /* Directory read is really what separates file from dir operations 
         - We need to iterate through the existing dentrys and return them
@@ -288,6 +357,16 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
     return nbytes;
 }
 
-int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes){
+/* 
+ * dir_write
+ *   DESCRIPTION: Writes a directory to the given buffer.
+ *   INPUTS: fd - file descriptor
+ *           buf - buffer to read into
+ *           nbytes - number of bytes to read
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 if success, -1 if failure
+ *   SIDE EFFECTS: none
+ */
+int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes) {
     return -1;
 }
