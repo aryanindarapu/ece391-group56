@@ -377,7 +377,9 @@ int test_rtc_driver() {
 int test_terminal_driver() {
 	char buf[128];
 	int num_char;
-	while(1){
+	uint8_t filename[32];
+	terminal_open(filename);
+	while(1) {
 		num_char = terminal_read(0, &buf, 128);
 		printf("You typed %d chars: ", num_char);
 		terminal_write(0, &buf, num_char);
