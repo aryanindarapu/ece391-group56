@@ -292,10 +292,7 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
    if (file_desc_arr[fd].flags == 0) return -1;
 
     /* fill out the buffer based given the number of dentrys from boot_block */
-    /* setup filename formatting */
-    for(i = 0; i < FORMATTER_LENGTH; i++){
-        buffer[i] = filename[i];
-    }
+
     /* do 32 character name emplacement */
     dentry_t cur_file = boot_block_ptr->dir_entries[file_desc_arr[fd].file_pos];
     strcpy(cur_filename, cur_file.file_name);
@@ -318,26 +315,10 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
         //cur_filename has many trailing '\0' so we need to make them spaces
         buffer[FORMATTER_LENGTH + i] = (cur_filename[i] != '\0') ? cur_filename[i] : ' ';
     }
-    /* setup filetype formatting */
-    buffer[FORMATTER_LENGTH + FILENAME_SIZE] = ',';
-    buffer[FORMATTER_LENGTH + FILENAME_SIZE + 1] = ' ';
-    for(i = 0; i < FORMATTER_LENGTH; i++){
-            buffer[FORMATTER_LENGTH + FILENAME_SIZE + 2 + i] = filetype[i];
-    }
+    
     /* do file type emplacement */
     buffer[FORMATTER_LENGTH * 2 + FILENAME_SIZE + 2] = (char)(cur_file.file_type + 48);
-    /* setup filesize formatting */
-    buffer[FORMATTER_LENGTH * 2 + FILENAME_SIZE + 3] = ',';
-    buffer[FORMATTER_LENGTH * 2 + FILENAME_SIZE + 4] = ' ';
-    for(i = 0; i < FORMATTER_LENGTH; i++){
-        buffer[FORMATTER_LENGTH * 2 + FILENAME_SIZE + 5 + i] = filesize[i];
-    }
     
-    /* WHAT THE FUCK */
-    buffer[FORMATTER_LENGTH * 2 + FILENAME_SIZE + 5] = 'f';
-    buffer[FORMATTER_LENGTH * 2 + FILENAME_SIZE + 6] = 'i';
-    
-
     /* do file size emplacement */
     cur_size = inode_ptr[cur_file.inode_num].length;
     //printf("%d", cur_size);
@@ -346,6 +327,25 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
     for (i = 0; i < strlen(temp) ; i++){
         //printf("\n %d \n", (int)temp[i]);
         buffer[FORMATTER_LENGTH * 3 + FILENAME_SIZE + 5 + i] = (temp[i] >= 48 && temp[i] <= 57) ? temp[i] : ' ';
+    }
+
+     /* setup filename formatting */
+    for(i = 0; i < FORMATTER_LENGTH; i++){
+        buffer[i] = filename[i];
+    }
+
+    /* setup filetype formatting */
+    buffer[FORMATTER_LENGTH + FILENAME_SIZE] = ',';
+    buffer[FORMATTER_LENGTH + FILENAME_SIZE + 1] = ' ';
+    for(i = 0; i < FORMATTER_LENGTH; i++){
+            buffer[FORMATTER_LENGTH + FILENAME_SIZE + 2 + i] = filetype[i];
+    }
+
+    /* setup filesize formatting */
+    buffer[FORMATTER_LENGTH * 2 + FILENAME_SIZE + 3] = ',';
+    buffer[FORMATTER_LENGTH * 2 + FILENAME_SIZE + 4] = ' ';
+    for(i = 0; i < FORMATTER_LENGTH; i++){
+        buffer[FORMATTER_LENGTH * 2 + FILENAME_SIZE + 5 + i] = filesize[i];
     }
 
     /* buffer is now prepared to send to buf */

@@ -311,7 +311,7 @@ int test_directory_ls() {
 	int j;
 	char file_buffer[80];
 
-	for (i = 0; i < 16; i++){
+	for (i = 0; i < 17; i++){
 		dir_read(0, (void *) file_buffer, 80);
 		for (j = 0; j < 80; j++) {
 	 		putc(file_buffer[j]);
@@ -321,7 +321,7 @@ int test_directory_ls() {
 	dir_close(0);
 	putc('\n');
 	if(dir_read(0, (void *) file_buffer, 80) == -1) {
-		// printf("FAIL\n");
+		/* should return negative one because we closed the file */
 		return PASS;
 	} else {
 		return FAIL;
