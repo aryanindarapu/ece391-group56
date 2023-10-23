@@ -1,16 +1,30 @@
 #include "file_system_driver.h"
 #include "lib.h"
 
-// TODO: comment
-// Initialize the file system
+/* 
+ * init_file_system
+ *   DESCRIPTION: Initializes the file system pointers to point to memory
+ *                addresses based on boot block.
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: initializes inode_ptr and data_block_ptr
+ */
 void init_file_system(void) {
-    // TODO: idk what mem address to use
-    // boot_block_ptr = (boot_block_t *)mem_addr -- done in kernel.c
+    // Boot block pointer set in kernel.c
     inode_ptr = (inode_t *)(boot_block_ptr + 1); // increase by size of pointer 
     data_block_ptr = (data_block_t *)(inode_ptr + boot_block_ptr->num_inodes);
 }
 
 // THIS FUNCTION WILL BE CALLED IN OUR SYS_OPEN() SYSTEM CALL
+/* 
+ * read_dentry_by_name
+ *   DESCRIPTION: Goes through the dentries and compares the 
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: none
+ */
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
     uint32_t dir_index;
 
