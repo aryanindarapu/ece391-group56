@@ -49,28 +49,45 @@ BUG: Double fault error keeps happening when loading idt.
 SOLUTION: We forgot to actually initialize the idt itself in the kernel.c file, which caused a double fault (found through GDB).
 DIFFICULTY: 2 hours
 -----------------
-
 **************************************** CHECKPOINT 2 ****************************************
 -----------------
-FILE/FUNCTION:
-BUG:
-SOLUTION:
+FILE/FUNCTION: terminal/keyboard writing
+BUG: moving text up for new line causing weird graphical errors
+DIFFICULTY: 30 min
+SOLUTION: when I tried to move the screen up the entire screen would change color and fill with random characters. I realized that when I
+was rewriting bytes in video memory to move the characters up, I was writing byte by byte instead of every other byte. This caused the colors
+to change because the 2nd byte is the color of that character. To fix this I changed every other byte in my iteration.
+-----------------
+FILE/FUNCTION: rtc_write
+BUG: the rtc tests where not going to the frequency I was setting it to
+DIFFICULTY: 1 hr
+SOLUTION: I was using an unsigned char to store the input frequency which was limiting it to 255 Hz. To fix this bug I replaced it with an int
+to hold all inputs from 2-1024 Hz.
+-----------------
+FILE/FUNCTION: terminal/keyboard roles
+BUG: More of a conceptual misunderstanding of what terminal should do
+DIFFICULTY: 3 hrs
+SOLUTION: I initially used the terminal to handle the printing and did not even have a buffer. Once we realized that terminal was supposed to maintain
+the buffer and keyboard is meant to do more of the printing, we had to re-organize our code and add the buffer along with checks for proper handling.
 -----------------
 **************************************** CHECKPOINT 3 ****************************************
 -----------------
 FILE/FUNCTION:
 BUG:
+DIFFICULTY: 
 SOLUTION:
 -----------------
 **************************************** CHECKPOINT 4 ****************************************
 -----------------
 FILE/FUNCTION:
 BUG:
+DIFFICULTY: 
 SOLUTION:
 -----------------
 **************************************** CHECKPOINT 5 ****************************************
 -----------------
 FILE/FUNCTION:
 BUG:
+DIFFICULTY: 
 SOLUTION:
 -----------------

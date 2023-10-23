@@ -124,7 +124,7 @@ void keyboard_driver() {
     // TODO: do all special key checking here
     // Control key code: 29
     // Set special 
-    
+    //printf("%d",keycode);
     switch (keycode) {
         case CTRL_P:
             special_key_flags[CTRL_INDEX] = 1;
@@ -145,16 +145,30 @@ void keyboard_driver() {
                 special_key_flags[CAPS_LOCK_INDEX] = 0;
             }
             return;
-        case 14: //backspace TODO : just sent to terminal to enter into buffer, handle it there for backspace, save enter for a read
+        case ALT_P:
+            printf(" ALT_PRESSED ");
+            return;
+        case ALT_R:
+            printf(" ALT_RELEASED ");
+            return;
+        case BACKSPACE: //backspace TODO : just sent to terminal to enter into buffer, handle it there for backspace, save enter for a read
             if(get_buffer_fill() == 0) return;
             backspace();
             terminal_backspace();
             //printf("%d",get_buffer_fill());
             return;
-        case 28: //enter
+        case ENTER: //enter
             //if(get_buffer_fill() == 128) return;
             printf("\n");//printf("\n[Terminal]$ ");
             terminal_enter();
+            return;
+        case TAB:
+            if(get_buffer_fill() == 127) return;
+            putc(' '); // put 4 spaces for tab
+            putc(' ');
+            putc(' ');
+            putc(' ');
+            write_to_terminal(keyboard_map[keycode]);
             return;
         default:
 

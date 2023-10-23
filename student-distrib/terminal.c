@@ -35,7 +35,17 @@ void write_to_terminal(unsigned char ascii) {
  * Function: removes the last char in the buffer */
 void terminal_backspace()
 {
+    if(buffer_idx==0) return;
+    
+    if(line_buffer[buffer_idx-1] == '\t')
+    {
+        backspace();
+        backspace();
+        backspace();
+    }
+
     line_buffer[buffer_idx-1] = 0;
+
     buffer_idx--;
 }
 

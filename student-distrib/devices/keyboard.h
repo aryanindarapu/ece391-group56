@@ -8,6 +8,12 @@
 #define CTRL_R 157
 #define SHIFT_P 42
 #define SHIFT_R 170
+#define ALT_P 56
+#define ALT_R 184
+#define ENTER 28
+#define BACKSPACE 14
+
+#define TAB 15
 
 #define CTRL_INDEX 0 
 #define SHIFT_INDEX 1
