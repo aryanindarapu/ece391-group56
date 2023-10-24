@@ -1,6 +1,8 @@
+#ifndef _FILE_SYSTEM_DRIVER_H
+#define _FILE_SYSTEM_DRIVER_H
+
 #include "devices/rtc.h"
-#include "types.h"
-#include "syscall.h"
+// #include "syscall.h"
 #include "terminal.h"
 
 
@@ -11,6 +13,13 @@
 #define FORMATTER_LENGTH 11
 
 int rtc_interrupt_flag;
+
+typedef struct template_ops_table {
+    int32_t (*open) (const uint8_t* filename);
+    int32_t (*close) (uint32_t fd);
+    int32_t (*read) (uint32_t fd, void* buf, uint32_t nbytes);
+    int32_t (*write) (uint32_t fd, const void* buf, uint32_t nbytes);
+} template_ops_table_t;
 
 // within boot block
 typedef struct dentry_t {
@@ -43,6 +52,8 @@ typedef struct data_block_t {
 // file descriptor struct
 typedef struct file_desc_t {
     template_ops_table_t ops_ptr; // TODO: do we need a pointer
+    // uint32_t ops_ptr; // TODO: do we need a pointer
+
     uint32_t inode;
     uint32_t file_pos;
     uint32_t flags;
@@ -68,33 +79,12 @@ int32_t file_close(uint32_t fd);
 int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes);
 int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes);
 
+
 /* directory syscall functions */
 int32_t dir_open(const uint8_t * filename);
 int32_t dir_close(uint32_t fd);
 int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes);
 int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes);
-
-/* file system instantiation */
-boot_block_t * boot_block_ptr; // Pointer to our boot block
-inode_t * inode_ptr; // List of inodes
-data_block_t * data_block_ptr; // Pointer to our data blocks
-
-/* file descriptor array */
-static file_desc_t file_desc_arr[MAX_FILE_DESC];
-
-typedef struct template_ops_table {
-    int32_t (*open) (const uint8_t* filename);
-    int32_t (*close) (uint32_t fd);
-    int32_t (*read) (uint32_t fd, void* buf, uint32_t nbytes);
-    int32_t (*write) (uint32_t fd, const void* buf, uint32_t nbytes);
-} template_ops_table_t;
-
-template_ops_table_t file_ops_table = {
-    file_open,
-    file_close,
-    file_read,
-    file_write
-} ;
 
 template_ops_table_t dir_ops_table = {
     dir_open,
@@ -103,17 +93,35 @@ template_ops_table_t dir_ops_table = {
     dir_write
 };
 
-// TODO: is this correct? -- do we need fake function that returns -1 instead of NULL?
-template_ops_table_t keyboard_ops_table = {
-    NULL,
-    NULL,
-    terminal_read,
-    NULL
-};
-
 template_ops_table_t terminal_ops_table = {
     NULL,
     NULL,
     NULL,
     terminal_write
 };
+
+template_ops_table_t file_ops_table = {
+    file_open,
+    file_close,
+    file_read,
+    file_write
+};
+
+// // TODO: is this correct? -- do we need fake function that returns -1 instead of NULL?
+// template_ops_table_t keyboard_ops_table = {
+//     NULL,
+//     NULL,
+//     terminal_read,
+//     NULL
+// };
+
+/* file system instantiation */
+boot_block_t * boot_block_ptr; // Pointer to our boot block
+inode_t * inode_ptr; // List of inodes
+data_block_t * data_block_ptr; // Pointer to our data blocks
+
+/* file descriptor array */
+file_desc_t file_desc_arr[MAX_FILE_DESC];
+
+
+#endif /* _FILE_SYSTEM_DRIVER_H */

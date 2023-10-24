@@ -1,5 +1,6 @@
 #include "file_system_driver.h"
 #include "lib.h"
+#include "types.h"
 
 /* 
  * init_file_system

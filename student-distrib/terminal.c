@@ -77,8 +77,9 @@ void terminal_enter()
 int32_t terminal_open(const uint8_t* filename) {
     // TODO: will this ever be called? also, fix
     // TODO: may want to init buf to 0s, but that's handled anyways, so not necessary
+    return 0;
     buffer_idx = 0;
-    if (file_desc_arr[0] )
+    // if (file_desc_arr[0] )
 
     dentry_t file_dentry;
     int file_desc_index;
@@ -98,7 +99,7 @@ int32_t terminal_open(const uint8_t* filename) {
     }
 
     /* Let read_dentry_by_name populate our dentry, or tell us that the dentry doesn't exist in our filesystem */
-    if (read_dentry_by_name (fname, &file_dentry) == -1) { 
+    if (read_dentry_by_name (filename, &file_dentry) == -1) { 
         return -1; //file doesn't exist
     }
     

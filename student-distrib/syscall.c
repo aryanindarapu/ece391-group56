@@ -1,4 +1,7 @@
 #include "syscall.h"
+#include "lib.h"
+#include "file_system_driver.h"
+#include "types.h"
 
 int32_t open (const uint8_t* filename) {
     dentry_t file_dentry;
@@ -72,26 +75,30 @@ int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
 // TODO: add init system calls the sets up stdin and stdout file entries
 
 /* NO NEED TO IMPLEMENT YET(CHECKPOINT 3.2 COMMENT) */
-// int32_t halt (uint8_t status){
-
-// }
+int32_t halt (uint8_t status){
+    return -1;
+}
 
 
 
 /* NO NEED TO IMPLEMENT YET (CHECKPOINT 3.2 COMMENT)*/
-// uint32_t getargs (uint8_t* buf, uint32_t nbytes){
+int32_t getargs (uint8_t* buf, uint32_t nbytes){
+    return -1;
+}
 
-// }
-
-// uint32_t vidmap (uint8_t** screen_start){
-
-// }
+int32_t vidmap (uint8_t** screen_start){
+    return -1;
+}
 
 /* EXTRA CREDIT SYSTEM CALLS */
-// int32_t set_handler (uint32_t signum, void* handler_address){
-//     return -1;
-// }
+int32_t set_handler (uint32_t signum, void* handler_address){
+    return -1;
+}
 
-// int32_t sigreturn (void){
-//     return -1;
-// }
+int32_t sigreturn (void){
+    return -1;
+}
+
+int32_t execute (const uint8_t* command){
+    return -1;
+}
