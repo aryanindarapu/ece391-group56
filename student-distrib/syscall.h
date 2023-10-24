@@ -2,22 +2,13 @@
 #define _SYSTEM_CALL_H
 
 #include "types.h"
+#include "paging.h"
+#include "file_system_driver.h"
+#include "lib.h"
 
 #ifndef ASM
-int system_call();
 
-// extern void system_handler();
-
-/* opcodes at the moment are */
-/*
-    open : 0
-    close : 1
-    read : 2
-    write : 3
-*/
-// extern void rtc_op(int opcode);
-// extern void dir_op(int opcode);
-// extern void file_op(int opcode);
+extern void system_call_handler();
 
 /* DONT NEED TO IMPLEMENT YET */
 // int32_t halt (uint8_t status);

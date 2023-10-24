@@ -106,5 +106,5 @@ void init_idt() {
     // RTC PIC Intertupt
     SET_IDT_ENTRY(idt[0x28], rtc_handler_linkage); // PIC INT call
     
-    SET_IDT_ENTRY(idt[0x80], system_call); // INT system call    
+    SET_IDT_ENTRY(idt[0x80], system_call_handler); // INT system call    
 }

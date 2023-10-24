@@ -1,5 +1,6 @@
 #include "devices/rtc.h"
 #include "types.h"
+#include "syscall.h"
 
 #define FILENAME_SIZE 32
 #define DATA_BLOCK_SIZE 4096
@@ -45,27 +46,30 @@ typedef struct file_desc_t {
     uint32_t flags;
 } file_desc_t;
 
+//THIS CODE IS CAUSING SOME PROBLEMS I THINK
+//TODO: ary help me debug the errors i'm getting on the current build, I really don't know whats going on and its
+// not even an assembly issue
 // TODO: ask TA if this is correct
-typedef struct template_ops_table {
-    int32_t (*open) (const uint8_t* filename);
-    int32_t (*close) (uint32_t fd);
-    int32_t (*read) (uint32_t fd, void* buf, uint32_t nbytes);
-    int32_t (*write) (uint32_t fd, const void* buf, uint32_t nbytes);
-} template_ops_table_t;
+// typedef struct template_ops_table {
+//     int32_t (*open) (const uint8_t* filename);
+//     int32_t (*close) (uint32_t fd);
+//     int32_t (*read) (uint32_t fd, void* buf, uint32_t nbytes);
+//     int32_t (*write) (uint32_t fd, const void* buf, uint32_t nbytes);
+// } template_ops_table_t;
 
-template_ops_table_t file_ops_table = {
-    file_open,
-    file_close,
-    file_read,
-    file_write
-};
+// template_ops_table_t file_ops_table = {
+//     file_open,
+//     file_close,
+//     file_read,
+//     file_write
+// };
 
-template_ops_table_t dir_ops_table = {
-    dir_open,
-    dir_close,
-    dir_read,
-    dir_write
-};
+// template_ops_table_t dir_ops_table = {
+//     dir_open,
+//     dir_close,
+//     dir_read,
+//     dir_write
+// };
 
 // TODO: is this correct? -- do we need fake function that returns -1 instead of NULL?
 // template_ops_table_t keyboard_ops_table = {

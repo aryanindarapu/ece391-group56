@@ -1,12 +1,5 @@
 #include "syscall.h"
-#include "paging.h"
-#include "file_system_driver.h"
-#include "lib.h"
 
-int system_call() {
-    // system_handler(); // TODO: add back in after syscalls implemented
-    return 0;
-}
 
 int32_t open (const uint8_t* filename) {
     dentry_t file_dentry;
@@ -100,9 +93,9 @@ int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
 
 /* EXTRA CREDIT SYSTEM CALLS */
 int32_t set_handler (uint32_t signum, void* handler_address){
-
+    return -1;
 }
 
 int32_t sigreturn (void){
-
+    return -1;
 }
