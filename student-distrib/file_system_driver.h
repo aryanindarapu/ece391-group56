@@ -3,6 +3,7 @@
 #include "syscall.h"
 #include "terminal.h"
 
+
 #define FILENAME_SIZE 32
 #define DATA_BLOCK_SIZE 4096
 #define MAX_FILE_DESC 8 
@@ -51,41 +52,7 @@ typedef struct file_desc_t {
 //TODO: ary help me debug the errors i'm getting on the current build, I really don't know whats going on and its
 // not even an assembly issue
 // TODO: ask TA if this is correct
-typedef struct template_ops_table {
-    int32_t (*open) (const uint8_t* filename);
-    int32_t (*close) (uint32_t fd);
-    int32_t (*read) (uint32_t fd, void* buf, uint32_t nbytes);
-    int32_t (*write) (uint32_t fd, const void* buf, uint32_t nbytes);
-} template_ops_table_t;
 
-template_ops_table_t file_ops_table = {
-    file_open,
-    file_close,
-    file_read,
-    file_write
-};
-
-template_ops_table_t dir_ops_table = {
-    dir_open,
-    dir_close,
-    dir_read,
-    dir_write
-};
-
-// TODO: is this correct? -- do we need fake function that returns -1 instead of NULL?
-template_ops_table_t keyboard_ops_table = {
-    NULL,
-    NULL,
-    terminal_read,
-    NULL
-};
-
-template_ops_table_t terminal_ops_table = {
-    NULL,
-    NULL,
-    NULL,
-    terminal_write
-};
 
 /* file system helper functions */
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry);
@@ -114,3 +81,39 @@ data_block_t * data_block_ptr; // Pointer to our data blocks
 
 /* file descriptor array */
 static file_desc_t file_desc_arr[MAX_FILE_DESC];
+
+typedef struct template_ops_table {
+    int32_t (*open) (const uint8_t* filename);
+    int32_t (*close) (uint32_t fd);
+    int32_t (*read) (uint32_t fd, void* buf, uint32_t nbytes);
+    int32_t (*write) (uint32_t fd, const void* buf, uint32_t nbytes);
+} template_ops_table_t;
+
+template_ops_table_t file_ops_table = {
+    file_open,
+    file_close,
+    file_read,
+    file_write
+} ;
+
+template_ops_table_t dir_ops_table = {
+    dir_open,
+    dir_close,
+    dir_read,
+    dir_write
+};
+
+// TODO: is this correct? -- do we need fake function that returns -1 instead of NULL?
+template_ops_table_t keyboard_ops_table = {
+    NULL,
+    NULL,
+    terminal_read,
+    NULL
+};
+
+template_ops_table_t terminal_ops_table = {
+    NULL,
+    NULL,
+    NULL,
+    terminal_write
+};
