@@ -1,6 +1,24 @@
 #include "syscall.h"
 
 
+int32_t execute (const uint8_t* command){
+    // Do iret to go to user memory
+    // start program at given value in user memory
+    int pid;
+    for (pid = 0; pid < MAX_NUM_PROCESSES; pid++) {
+        if (process_flags[pid] == 0) {
+            break;
+        }
+    }
+
+    if (pid >= MAX_NUM_PROCESSES) {
+        return -1;
+    }
+
+    pcb_t * pcb = (pcb_t *)(EIGHT_MB - (pid + 1) * EIGHT_KB);
+    // TODO: check commands here
+}
+
 int32_t open (const uint8_t* filename) {
     dentry_t file_dentry;
     uint32_t fd;
@@ -77,10 +95,7 @@ int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
 
 // }
 
-// int32_t execute (const uint8_t* command){
-    // Do iret to go to user memory
-    // start program at given value in user memory
-// }
+
 
 /* NO NEED TO IMPLEMENT YET (CHECKPOINT 3.2 COMMENT)*/
 // uint32_t getargs (uint8_t* buf, uint32_t nbytes){

@@ -6,6 +6,10 @@
 #include "file_system_driver.h"
 #include "lib.h"
 
+#define MAX_NUM_PROCESSES 6
+#define EIGHT_MB 0x800000
+#define EIGHT_KB 0x2000
+
 #ifndef ASM
 
 extern void system_call_handler();
@@ -28,6 +32,7 @@ int32_t write (uint32_t fd, const void* buf, uint32_t nbytes);
 // int32_t set_handler (uint32_t signum, void* handler_address);
 // int32_t sigreturn (void);
 
+uint8_t process_flags[MAX_NUM_PROCESSES];
 
 #endif /* ASM */
 
