@@ -1,5 +1,9 @@
 #include "syscall.h"
 
+// TODO: add init system calls the sets up stdin and stdout file entries
+void init_syscall() {
+    // TODO: initialize array of PID flags
+}
 
 int32_t execute (const uint8_t* command){
     // Do iret to go to user memory
@@ -16,7 +20,23 @@ int32_t execute (const uint8_t* command){
     }
 
     pcb_t * pcb = (pcb_t *)(EIGHT_MB - (pid + 1) * EIGHT_KB);
+    // TODO: add values to PCB here
+    
+    int i;
+    for (i = 0; i < 128; i++) {
+
+    }
+
     // TODO: check commands here
+
+    // find file name, iterate through file descriptor array, and check if there
+    // if file is opened, check bytes 24 - 27 to get eip (use read_data)
+
+    // TODO: copy file from kernel memory to user memory (need to set up 4 MB page)
+    // this happens at 128 MB (find in doc)
+    // also need to set up page that points to physical memory (8MB, then 12, then 16, ...)
+    // this means the only thing we would change in the page is the table_base_addr --> use helper function
+    
 }
 
 int32_t open (const uint8_t* filename) {
@@ -88,7 +108,17 @@ int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
     return file_desc_arr[fd].ops_ptr.write(fd, buf, nbytes);
 }
 
-// TODO: add init system calls the sets up stdin and stdout file entries
+
+int32_t execute (const uint8_t* command){
+    // Do iret to go to user memory
+    // start program at given value in user memory
+
+    uint32_t page 
+
+    // write to pcb here
+    
+}
+
 
 /* NO NEED TO IMPLEMENT YET(CHECKPOINT 3.2 COMMENT) */
 // int32_t halt (uint8_t status){
@@ -96,8 +126,7 @@ int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
 // }
 
 
-
-/* NO NEED TO IMPLEMENT YET (CHECKPOINT 3.2 COMMENT)*/
+/* NO NEED TO IMPLEMENT YET (CHECKPOINT 3.4)*/
 // uint32_t getargs (uint8_t* buf, uint32_t nbytes){
 
 // }

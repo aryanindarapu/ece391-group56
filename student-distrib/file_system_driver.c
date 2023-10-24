@@ -11,6 +11,7 @@
  *   SIDE EFFECTS: initializes inode_ptr and data_block_ptr
  */
 void init_file_system(void) {
+    // TODO: set up stdin and stdout here
     // Boot block pointer set in kernel.c
     inode_ptr = (inode_t *)(boot_block_ptr + 1); // increase by size of pointer 
     data_block_ptr = (data_block_t *)(inode_ptr + boot_block_ptr->num_inodes);

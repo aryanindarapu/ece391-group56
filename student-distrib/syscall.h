@@ -9,6 +9,7 @@
 #define MAX_NUM_PROCESSES 6
 #define EIGHT_MB 0x800000
 #define EIGHT_KB 0x2000
+#define PAGE_BASE_ADDR 0x08000000
 
 #ifndef ASM
 
@@ -22,6 +23,12 @@ int32_t open (const uint8_t* filename);
 int32_t close (uint32_t fd);
 int32_t read (uint32_t fd, void* buf, uint32_t nbytes);
 int32_t write (uint32_t fd, const void* buf, uint32_t nbytes);
+
+typedef struct pcb {
+    file_desc_t file_desc_arr[MAX_FILE_DESC];
+    uint32_t esp_reg;
+    pcb_t * child_pcb_ptr;
+} pcb_t;
 
 
 /* DONT NEED TO IMPLEMENT YET */
