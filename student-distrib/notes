@@ -16,4 +16,21 @@ push abcd reg to stack - see asm linkage
 
 IRET NOTES
 
+Xander's Notes:
+
+Debugging Execute:
+- Execute can work but others aspects may be incorrect, not just Execute
+- Set breakpoints and if they occur, that means you are in user-space and something else is going wrong
+	- From there, you know if it's an execute or user-sapce error
+	- ALSO, check memory addresses too, we should know where in memory we should be so keep it updated
+
+Regarding Open/Close/Write/Read
+- Write isn't actually used with writing to files, mainly just used with the RTC
+- Open sends to file descriptor, close removes from file descriptor
+
+Regarding Execute/Halt
+- Execute will set acquire the memory address of where we run the compiled assembly code
+- Then we push the corresponding registers for IRET which can be found online, then we call iret
+- For halt, we go to kernel space and then return to user/kernel depending on where we were originally
+
 https://www.felixcloutier.com/x86/iret:iretd:iretq
