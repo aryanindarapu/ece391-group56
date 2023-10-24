@@ -75,8 +75,6 @@ gdt_ptr:
     # Set up an entry for user DS
     .quad 0x00CFF2000000FFFF
 
-    # MP3.1 TODO: Create spaace between 5-20 for GDT (Lect 15, P5)
-    # for 64 bit register information... page 50 of IA-32 Intel docu
     # Set up an entry for TSS
 tss_desc_ptr:
     .quad 0
@@ -105,7 +103,6 @@ ldt_bottom:
 .align 4
     .word 0 # Padding
 
-# TODO: initialize IDT
 idt_desc_ptr:
     .word idt_bottom - idt - 1
     .long idt

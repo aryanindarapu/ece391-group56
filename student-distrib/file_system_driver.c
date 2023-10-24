@@ -118,22 +118,23 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
  *   DESCRIPTION: Opens a file given a file name
  *   INPUTS: fname - file name to open
  *   OUTPUTS: none
- *   RETURN VALUE: 0 if success, -1 if failure
+ *   RETURN VALUE: fd index on success, -1 if failure
  *   SIDE EFFECTS: adds to file descriptor array
  */
-int32_t file_open(const uint8_t * fname) {
+int32_t file_open(const uint8_t * filename) {
     dentry_t file_dentry;
     int file_desc_index;
     
     // ensure the filename is valid
-    if (fname == NULL){
+    if (filename == NULL) {
         return -1;
     }
 
     // ensure the file desc has space AND find the index to emplace this file
-    for (file_desc_index = 0; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
+    for (file_desc_index = 2; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
         //is the index empty?
         if (file_desc_arr[file_desc_index].flags == 0) {
+            //https://stackoverflow.com/questions/9932212/jump-table-examples-in-c
             break; // this file_desc_index is the one we will emplace the file to 
         }
     }
@@ -144,7 +145,7 @@ int32_t file_open(const uint8_t * fname) {
     }
 
     /* Let read_dentry_by_name populate our dentry, or tell us that the dentry doesn't exist in our filesystem */
-    if (read_dentry_by_name (fname, &file_dentry) == -1) { 
+    if (read_dentry_by_name (filename, &file_dentry) == -1) { 
         return -1; //file doesn't exist
     }
     
@@ -153,7 +154,7 @@ int32_t file_open(const uint8_t * fname) {
     file_desc_arr[file_desc_index].flags = 1;
     file_desc_arr[file_desc_index].file_pos = 0;
 
-    return 0;
+    return file_desc_index;
 }
 
 /* 
@@ -165,12 +166,8 @@ int32_t file_open(const uint8_t * fname) {
  *   SIDE EFFECTS: removes from file descriptor array
  */
 int32_t file_close(uint32_t fd) {
-    // TODO: remove from file descriptor array
     // make the file unreadable and remove its pointers to operation functions
     file_desc_arr[fd].flags = 0;
-    file_desc_arr[fd].file_pos = 0;
-    file_desc_arr[fd].inode = 0;
-    file_desc_arr[fd].file_ops_ptr = NULL;
     return 0;
 }
 
@@ -191,11 +188,9 @@ int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes) {
     int32_t status = read_data(file_desc.inode, file_desc.file_pos, (uint8_t *) buf, nbytes);
 
     if (status == -1) return -1;
+    file_desc.file_pos += status;
 
-    if (status == 0) file_desc.file_pos = 0; // TODO: should i set this to the bottom of the file or the top?
-    else file_desc.file_pos += nbytes;
-
-    return 0;
+    return status;
 }
 
 int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes) {
@@ -210,13 +205,12 @@ int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes) {
  *   RETURN VALUE: 0 if success, -1 if failure
  *   SIDE EFFECTS: adds to file descriptor array
  */
-int32_t dir_open(const uint8_t * fname){
+int32_t dir_open(const uint8_t * filename) {
     int file_desc_index;
     dentry_t dir_dentry;
-    //fname should be = "."
 
     // ensure the file desc has space AND find the index to emplace this file
-    for (file_desc_index = 0; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
+    for (file_desc_index = 2; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
         //is the index empty?
         if (file_desc_arr[file_desc_index].flags == 0) {
             break; //this file_desc_index is the one we will emplace the file to 
@@ -229,15 +223,15 @@ int32_t dir_open(const uint8_t * fname){
     }
 
     /* Let read_dentry_by_name populate our dentry, or tell us that the dentry doesn't exist in our filesystem */
-    if (read_dentry_by_name (fname, &dir_dentry) == -1) { 
+    if (read_dentry_by_name (filename, &dir_dentry) == -1) { 
         return -1; //file doesn't exist
     }
 
-    file_desc_arr[file_desc_index].inode = dir_dentry.inode_num;
     file_desc_arr[file_desc_index].flags = 1;
+    file_desc_arr[file_desc_index].inode = dir_dentry.inode_num;
     file_desc_arr[file_desc_index].file_pos = 0;
 
-    return 0;
+    return file_desc_index;
 }
 
 /* 
@@ -251,9 +245,6 @@ int32_t dir_open(const uint8_t * fname){
 int32_t dir_close(uint32_t fd) {
     //clear the flag and remove the file operations pointers for this process
     file_desc_arr[fd].flags = 0;
-    file_desc_arr[fd].file_pos = 0;
-    file_desc_arr[fd].inode = 0;
-    file_desc_arr[fd].file_ops_ptr = NULL;
     return 0;
 }
 

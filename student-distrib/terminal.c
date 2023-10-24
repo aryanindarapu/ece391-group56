@@ -1,5 +1,6 @@
 #include "terminal.h"
 #include "lib.h"
+#include "file_system_driver.h"
 
 static unsigned int buffer_idx = 0;
 static char line_buffer[LINE_BUFFER_SIZE];
@@ -55,7 +56,6 @@ void terminal_backspace()
  * Function: resets buffer_idx */
 void terminal_clear() {
     buffer_idx = 0;
-    // TODO: clear buffer
 }
 
 /* terminal_enter
@@ -69,13 +69,45 @@ void terminal_enter()
     buffer_idx = 0;
 }
 
-/* terminal_open
+/* 
+ * terminal_open
  * Inputs: filename
- * Return Value: 0 sucess always
+ * Return Value: 0 success always
  * Function: sets terminal start setttings */
-int32_t terminal_open(const uint8_t * filename) {
+int32_t terminal_open(const uint8_t* filename) {
+    // TODO: will this ever be called? also, fix
     // TODO: may want to init buf to 0s, but that's handled anyways, so not necessary
     buffer_idx = 0;
+    if (file_desc_arr[0] )
+
+    dentry_t file_dentry;
+    int file_desc_index;
+
+    // ensure the file desc has space AND find the index to emplace this file
+    for (file_desc_index = 0; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
+        //is the index empty?
+        if (file_desc_arr[file_desc_index].flags == 0) {
+            
+            break; // this file_desc_index is the one we will emplace the file to 
+        }
+    }
+
+    // Ensure there was space left
+    if (file_desc_index >= MAX_FILE_DESC) {
+        return -1;
+    }
+
+    /* Let read_dentry_by_name populate our dentry, or tell us that the dentry doesn't exist in our filesystem */
+    if (read_dentry_by_name (fname, &file_dentry) == -1) { 
+        return -1; //file doesn't exist
+    }
+    
+    /* this fd index is now taken */
+    file_desc_arr[file_desc_index].inode = file_dentry.inode_num;
+    file_desc_arr[file_desc_index].flags = 1;
+    file_desc_arr[file_desc_index].file_pos = 0;
+
+    return file_desc_index;
     return 0;
 }
 
@@ -84,6 +116,7 @@ int32_t terminal_open(const uint8_t * filename) {
  * Return Value: 0 for sucess always
  * Function: resets buffer_idx */
 int32_t terminal_close(int32_t fd) {
+    // TODO: what should i return here, probably -1 bc should never close
     buffer_idx = 0;
     return 0;
 }

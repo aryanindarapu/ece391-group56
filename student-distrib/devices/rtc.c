@@ -42,7 +42,7 @@ void init_rtc() {
 
     // Standard rate value is 6, it can be between 2 to 15 ranging from 2Hz to 32,xxx Hz
     // Higher rate means slower clock, the rate is fed into bits 0-3 in register A
-    int rate = 0x06; // TODO :  set to max freq to virtualize
+    int rate = 0x06; // set to max freq to virtualize
     outb(0x0A, RTC_PORT_COMMAND); // Might need to make this 8A but we want to reenable NMIs
     outb((prev & 0xF0) | rate, RTC_PORT_DATA); //write only our rate to A. Note, rate is the bottom 4 bits.
 
@@ -88,7 +88,8 @@ void rtc_handler() {
  * Inputs: filename
  * Return Value: 0
  * Function: sets starting settings */
-int32_t rtc_open(const uint8_t * filename){
+int32_t rtc_open(const uint8_t * filename) {
+    // TODO: fix to return fd 
     wait_count = RTC_MAX_FREQ/RTC_INIT_FREQ;
     clock_count = 0;
     // copy stuff and set up dentry for rtc.
@@ -98,7 +99,7 @@ int32_t rtc_open(const uint8_t * filename){
 /* rtc_close
  * Inputs: fd
  * Return Value: 0
- * Function: doesn't really do much TODO: check? */
+ * Function: doesn't really do much TODO: this should never close? */
 int32_t rtc_close(int32_t fd){
     // remove dentry
     return 0;
