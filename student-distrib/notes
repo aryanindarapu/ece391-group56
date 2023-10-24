@@ -1,0 +1,19 @@
+set up iret context
+return to start addr in usr space
+
+create 4mb page
+load usr data
+design pcb struct
+	-relevant stuff for return SP, Pids -- self parent,  global array of process
+	-fd array -- look docs for pcb stuff
+set up iret context - asm volatile for pushing stuff
+call iret
+deubugging : add a break starting at PC val in pcb - check stack seg and sp values in reg
+
+
+create seperate asm-linkage for sys call - push to stack and check param
+push abcd reg to stack - see asm linkage 
+
+IRET NOTES
+
+https://www.felixcloutier.com/x86/iret:iretd:iretq
