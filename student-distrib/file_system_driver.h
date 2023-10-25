@@ -53,7 +53,7 @@ typedef struct data_block_t {
 
 // file descriptor struct
 typedef struct file_desc_t {
-    template_ops_table_t ops_ptr; // TODO: do we need a pointer
+    template_ops_table_t ops_table; // TODO: do we need a pointer
     // uint32_t ops_ptr; // TODO: do we need a pointer
 
     uint32_t inode;
@@ -98,7 +98,9 @@ void init_ops_tables();
 
 template_ops_table_t dir_ops_table;
 
- template_ops_table_t terminal_ops_table;
+template_ops_table_t stdin_ops_table;
+
+template_ops_table_t stdout_ops_table;
 
 template_ops_table_t file_ops_table;
 

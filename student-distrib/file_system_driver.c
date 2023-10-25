@@ -126,7 +126,7 @@ int32_t file_open(const uint8_t * filename) {
     int file_desc_index;
     
     // ensure the filename is valid
-    if (filename == NULL) {
+    if (filename == NULL || strlen(filename) > 32) {
         return -1;
     }
 
@@ -384,13 +384,23 @@ void init_ops_tables(){
     dir_ops_table.read = dir_read;
     dir_ops_table.write = dir_write;
 
-    terminal_ops_table.open = empty_open;
-    terminal_ops_table.close = empty_close;
-    terminal_ops_table.read = empty_read;
-    terminal_ops_table.write = terminal_write;
-
+    stdin_ops_table.open = empty_open;
+    stdin_ops_table.close = empty_close;
+    stdin_ops_table.read = terminal_read;
+    stdin_ops_table.write = empty_write;
+    
+    stdout_ops_table.open = empty_open;
+    stdout_ops_table.close = empty_close;
+    stdout_ops_table.read = empty_read;
+    stdout_ops_table.write = terminal_write;
+    
     file_ops_table.open = file_open;
     file_ops_table.close = file_close;
     file_ops_table.read = file_read;
     file_ops_table.write = file_write;
+
+    file_desc_arr[0].ops_table = stdin_ops_table;
+    file_desc_arr[1].ops_table = stdout_ops_table;
+    file_desc_arr[0].flags = 1;
+    file_desc_arr[1].flags = 1;
 }

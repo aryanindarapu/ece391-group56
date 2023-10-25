@@ -40,12 +40,12 @@ int32_t open (const uint8_t* filename) {
         case 1: // dir
             fd = dir_open(filename);
             if (fd < 0) return -1;
-            file_desc_arr[fd].ops_ptr = dir_ops_table;
+            file_desc_arr[fd].ops_table = dir_ops_table;
             break;
         case 2: // file
             fd = file_open(filename);
             if (fd < 0) return -1;
-            file_desc_arr[fd].ops_ptr = file_ops_table;
+            file_desc_arr[fd].ops_table = file_ops_table;
             break;
         default:
             return -1;
@@ -55,21 +55,23 @@ int32_t open (const uint8_t* filename) {
 }
 
 int32_t close (uint32_t fd) {
-    if (fd <= 1 || fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
+    if (fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
     if (!file_desc_arr[fd].flags) return -1; // Checks if fd is inactive
-    return file_desc_arr[fd].ops_ptr.close(fd);
+    return file_desc_arr[fd].ops_table.close(fd);
 }
 
 int32_t read (uint32_t fd, void* buf, uint32_t nbytes) {
-    if (fd <= 1 || fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
+    // printf("SYS CALL READ: %d", fd);
+    if (fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
     if (!file_desc_arr[fd].flags) return -1; // Checks if fd is inactive
-    return file_desc_arr[fd].ops_ptr.read(fd, buf, nbytes);
+    // printf("SYS CALL TYPE: %d", fd);
+    return file_desc_arr[fd].ops_table.read(fd, buf, nbytes);
 }
 
 int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
-    if (fd <= 1 || fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
+    if (fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
     if (!file_desc_arr[fd].flags) return -1; // Checks if fd is inactive
-    return file_desc_arr[fd].ops_ptr.write(fd, buf, nbytes);
+    return file_desc_arr[fd].ops_table.write(fd, buf, nbytes);
 }
 
 // TODO: add init system calls the sets up stdin and stdout file entries
