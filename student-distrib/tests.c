@@ -393,13 +393,20 @@ int test_sys_calls() {
 	// asm volatile("movl $5, %eax");
 	// asm volatile("");
 	const uint8_t buf[128];
+	int rval;
 	init_file_system();
-	stdin(&buf);
-	stdout(&buf);
-	return 0;
+	rval = stdin(&buf);
+	if(rval == -1) return FAIL;
+	rval = stdout(&buf);
+	if(rval == -1) return FAIL;
+
+	asm volatile ("INT $0x80" : "=a" (rval) : "a" (6), "b" (0));
+	if(rval == -1) return FAIL;
+	
+	return PASS;
 };
 
-void stdin(char* buf)
+int stdin(char* buf)
 {
 	uint32_t rval;
 	asm volatile ("INT $0x80" : "=a" (rval) : "a" (3), "b" (0), "c" (buf), "d" (6));
@@ -407,10 +414,10 @@ void stdin(char* buf)
 	// asm volatile ("pushl 8(%ebp)");
 	// asm volatile ("pushl $0");
 	// asm volatile ("int 0x80");
-	return;
+	return rval;
 }
 
-void stdout(char* buf)
+int stdout(char* buf)
 {
 	uint32_t rval;
 	asm volatile ("INT $0x80" : "=a" (rval) : "a" (4), "b" (1), "c" (buf), "d" (6));
@@ -418,7 +425,7 @@ void stdout(char* buf)
 	// asm volatile ("pushl 8(%ebp)");
 	// asm volatile ("pushl $1");
 	// asm volatile ("int 0x80");
-	return;
+	return rval;
 }
 
 
