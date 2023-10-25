@@ -102,6 +102,7 @@ pcb_t * get_pcb_ptr() {
     // TODO: should this actually be ANDing ESP bitmask?
     // https://www.cs.columbia.edu/~junfeng/10sp-w4118/lectures/l07-proc-linux.pdf
     pcb_t * pcb_ptr;
+    // AND ESP WITH PCB_BITMASK
     asm volatile (
         "movl %%esp, %0;\
          andl %0, ;\
