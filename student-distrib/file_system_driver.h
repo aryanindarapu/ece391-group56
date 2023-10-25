@@ -2,7 +2,6 @@
 #define _FILE_SYSTEM_DRIVER_H
 
 #include "devices/rtc.h"
-// #include "syscall.h"
 #include "terminal.h"
 
 
@@ -52,8 +51,6 @@ typedef struct data_block_t {
 // file descriptor struct
 typedef struct file_desc_t {
     template_ops_table_t ops_ptr; // TODO: do we need a pointer
-    // uint32_t ops_ptr; // TODO: do we need a pointer
-
     uint32_t inode;
     uint32_t file_pos;
     uint32_t flags;
@@ -63,12 +60,6 @@ typedef struct file_desc_t {
 //TODO: ary help me debug the errors i'm getting on the current build, I really don't know whats going on and its
 // not even an assembly issue
 // TODO: ask TA if this is correct
-
-
-/* file system helper functions */
-int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry);
-int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry);
-int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
 
 /* file system initialization */
 void init_file_system(void);
@@ -121,7 +112,7 @@ inode_t * inode_ptr; // List of inodes
 data_block_t * data_block_ptr; // Pointer to our data blocks
 
 /* file descriptor array */
-file_desc_t file_desc_arr[MAX_FILE_DESC];
+// file_desc_t file_desc_arr[MAX_FILE_DESC];
 
 
 #endif /* _FILE_SYSTEM_DRIVER_H */

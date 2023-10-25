@@ -1,6 +1,8 @@
 #include "file_system_driver.h"
+#include "syscall_helpers.h"
 #include "lib.h"
 #include "types.h"
+#include "syscall.h"
 
 /* 
  * init_file_system
@@ -12,106 +14,10 @@
  *   SIDE EFFECTS: initializes inode_ptr and data_block_ptr
  */
 void init_file_system(void) {
+    // TODO: set up stdin and stdout here
     // Boot block pointer set in kernel.c
     inode_ptr = (inode_t *)(boot_block_ptr + 1); // increase by size of pointer 
     data_block_ptr = (data_block_t *)(inode_ptr + boot_block_ptr->num_inodes);
-}
-
-/* 
- * read_dentry_by_name
- *   DESCRIPTION: Goes through the dentries and compares the 
- *   INPUTS: fname - file name to search for
- *           dentry - dentry to populate with file information
- *   OUTPUTS: none
- *   RETURN VALUE: 0 if success, -1 if failure
- *   SIDE EFFECTS: none
- */
-int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
-    uint32_t dir_index;
-
-    // Scan through directory entries to find file name
-    for (dir_index = 0; dir_index < boot_block_ptr->num_dirs; dir_index++) {
-        if (strlen((const int8_t *) fname) == strlen((const int8_t *) boot_block_ptr->dir_entries[dir_index].file_name) 
-            && strncmp((const int8_t *) fname, (const int8_t *) boot_block_ptr->dir_entries[dir_index].file_name, FILENAME_SIZE) == 0) {
-            // File found in our boot block so we update our dentry
-            strcpy(dentry->file_name, (const int8_t *) fname);
-            // Now we update the dentry with the inode and type
-            return read_dentry_by_index(dir_index, dentry);
-        }
-    }
-    
-    // File not found
-    return -1;
-
-}
-
-/* 
- * read_dentry_by_index
- *   DESCRIPTION: Goes through the dentries and compares the 
- *   INPUTS: index - index of the directory entry
- *           dentry - dentry to populate with file information
- *   OUTPUTS: none
- *   RETURN VALUE: 0 if success, -1 if failure
- *   SIDE EFFECTS: none
- */
-int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
-    // Open up a file and set up the file object
-    // NOTE: index is the directory index
-    if (index >= boot_block_ptr->num_inodes) {
-        return -1;
-    }
-    
-    dentry_t found_dentry = boot_block_ptr->dir_entries[index];
-    
-    dentry->file_type = found_dentry.file_type;
-    dentry->inode_num = found_dentry.inode_num;
-
-    return 0;
-}
-
-/* 
- * read_data
- *   DESCRIPTION: Reads data from a file given an inode and offsetm
- *                and writes length bytes of data into the given buffer.
- *   INPUTS: inode - inode number of the file
- *           offset - offset of the file
- *           buf - buffer to read into
- *           length - length of the file
- *   OUTPUTS: none
- *   RETURN VALUE: 0 if success, -1 if failure
- *   SIDE EFFECTS: none
- */
-int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length) {
-    // Check if inode is valid
-    if (inode >= boot_block_ptr->num_inodes) {
-        return -1;
-    }
-
-    inode_t * curr_inode = inode_ptr + inode;
-    int curr_byte_idx;
-    int data_block_idx;
-    int within_data_block_idx;
-    for (curr_byte_idx = offset; curr_byte_idx < length + offset; curr_byte_idx++) {
-        // reached end of file
-        if (curr_byte_idx >= curr_inode->length) {
-            return 0;
-        }
-
-        // Get indices for data block and within data block
-        data_block_idx = curr_byte_idx / DATA_BLOCK_SIZE;
-        within_data_block_idx = curr_byte_idx % DATA_BLOCK_SIZE;
-        uint32_t data_block_num = curr_inode->data_blocks[data_block_idx];
-
-        // bad data block
-        if (data_block_num >= boot_block_ptr->num_data_blocks) {
-            return -1;
-        }
-
-        data_block_t * data_block = data_block_ptr + data_block_num;
-        buf[curr_byte_idx - offset] = data_block->data[within_data_block_idx];
-    }
-
-    return length;
 }
 
 /* 
@@ -123,6 +29,8 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
  *   SIDE EFFECTS: adds to file descriptor array
  */
 int32_t file_open(const uint8_t * filename) {
+    pcb_t * pcb = get_pcb_ptr();
+
     dentry_t file_dentry;
     int file_desc_index;
     
@@ -134,7 +42,7 @@ int32_t file_open(const uint8_t * filename) {
     // ensure the file desc has space AND find the index to emplace this file
     for (file_desc_index = 2; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
         //is the index empty?
-        if (file_desc_arr[file_desc_index].flags == 0) {
+        if (pcb->file_desc_arr[file_desc_index].flags == 0) {
             //https://stackoverflow.com/questions/9932212/jump-table-examples-in-c
             break; // this file_desc_index is the one we will emplace the file to 
         }
@@ -151,9 +59,9 @@ int32_t file_open(const uint8_t * filename) {
     }
     
     /* this fd index is now taken */
-    file_desc_arr[file_desc_index].inode = file_dentry.inode_num;
-    file_desc_arr[file_desc_index].flags = 1;
-    file_desc_arr[file_desc_index].file_pos = 0;
+    pcb->file_desc_arr[file_desc_index].inode = file_dentry.inode_num;
+    pcb->file_desc_arr[file_desc_index].flags = 1;
+    pcb->file_desc_arr[file_desc_index].file_pos = 0;
 
     return file_desc_index;
 }
@@ -167,8 +75,10 @@ int32_t file_open(const uint8_t * filename) {
  *   SIDE EFFECTS: removes from file descriptor array
  */
 int32_t file_close(uint32_t fd) {
+    pcb_t * pcb = get_pcb_ptr();
+
     // make the file unreadable and remove its pointers to operation functions
-    file_desc_arr[fd].flags = 0;
+    pcb->file_desc_arr[fd].flags = 0;
     return 0;
 }
 
@@ -183,9 +93,11 @@ int32_t file_close(uint32_t fd) {
  *   SIDE EFFECTS: none
  */
 int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes) {
-    if (file_desc_arr[fd].flags == 0) return -1;
+    pcb_t * pcb = get_pcb_ptr();
 
-    file_desc_t file_desc = file_desc_arr[fd];
+    if (pcb->file_desc_arr[fd].flags == 0) return -1;
+
+    file_desc_t file_desc = pcb->file_desc_arr[fd];
     int32_t status = read_data(file_desc.inode, file_desc.file_pos, (uint8_t *) buf, nbytes);
 
     if (status == -1) return -1;
@@ -209,11 +121,12 @@ int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes) {
 int32_t dir_open(const uint8_t * filename) {
     int file_desc_index;
     dentry_t dir_dentry;
+    pcb_t * pcb = get_pcb_ptr();
 
     // ensure the file desc has space AND find the index to emplace this file
     for (file_desc_index = 2; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
         //is the index empty?
-        if (file_desc_arr[file_desc_index].flags == 0) {
+        if (pcb->file_desc_arr[file_desc_index].flags == 0) {
             break; //this file_desc_index is the one we will emplace the file to 
         }
     }
@@ -228,9 +141,9 @@ int32_t dir_open(const uint8_t * filename) {
         return -1; //file doesn't exist
     }
 
-    file_desc_arr[file_desc_index].flags = 1;
-    file_desc_arr[file_desc_index].inode = dir_dentry.inode_num;
-    file_desc_arr[file_desc_index].file_pos = 0;
+    pcb->file_desc_arr[file_desc_index].flags = 1;
+    pcb->file_desc_arr[file_desc_index].inode = dir_dentry.inode_num;
+    pcb->file_desc_arr[file_desc_index].file_pos = 0;
 
     return file_desc_index;
 }
@@ -245,7 +158,9 @@ int32_t dir_open(const uint8_t * filename) {
  */
 int32_t dir_close(uint32_t fd) {
     //clear the flag and remove the file operations pointers for this process
-    file_desc_arr[fd].flags = 0;
+    pcb_t * pcb = get_pcb_ptr();
+
+    pcb->file_desc_arr[fd].flags = 0;
     return 0;
 }
 
@@ -269,7 +184,8 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
         syscall operations table is set to the dir_ops_ptr for this entry, as for nbytes we need to display 
         all of the entry names anyway we nbytes can't be specified by the caller
     */
-    if (file_desc_arr[fd].file_pos == boot_block_ptr->num_dirs) return 0;
+   pcb_t * pcb = get_pcb_ptr();
+    if (pcb->file_desc_arr[fd].file_pos == boot_block_ptr->num_dirs) return 0;
 
    char buffer[80];
    char temp[10];
@@ -281,12 +197,12 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
    int32_t cur_size;
     for(i = 0; i < 80; i++) buffer[i] = ' ';
    // ensure the fd is a valid entry
-   if (file_desc_arr[fd].flags == 0) return -1;
+   if (pcb->file_desc_arr[fd].flags == 0) return -1;
 
     /* fill out the buffer based given the number of dentrys from boot_block */
 
     /* do 32 character name emplacement */
-    dentry_t cur_file = boot_block_ptr->dir_entries[file_desc_arr[fd].file_pos];
+    dentry_t cur_file = boot_block_ptr->dir_entries[pcb->file_desc_arr[fd].file_pos];
     strcpy(cur_filename, cur_file.file_name);
     if (strlen(cur_filename) > 32){
         for(i = 32; i < strlen(cur_filename); i++){
@@ -344,7 +260,7 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
     buffer[79] = '\n';
     memcpy(buf,(void *)buffer, 80 );
     //buf = (void *)buffer;
-    file_desc_arr[fd].file_pos++;
+    pcb->file_desc_arr[fd].file_pos++;
 
     return nbytes;
 }
