@@ -17,10 +17,10 @@ int32_t execute (const uint8_t* command) {
 
     // NOTE: all of this is probably out of order, need to rearrange
     
-    // Assuming: filname cmd1 cmd2
+    // Assuming: filename cmd1 cmd2
     // NOTE: this doesn't allow for preceding spaces, but that's fine for now
     int i;
-    char filename[128]; // TODO: get filename here
+    char filename[128]; // TODO BEN: get filename here
     for (i = 0; i < strlen((const int8_t *) command); i++) {
         if (command[i] == ' ') {
             break;
@@ -45,7 +45,7 @@ int32_t execute (const uint8_t* command) {
         return -1;
     }
 
-    uint8_t magic_byte_buf[40];
+    uint8_t magic_byte_buf[4];
     if (read_data(exec_dentry.inode_num, 0, magic_byte_buf, sizeof(uint32_t)) == -1) {
         return -1;
     }
@@ -119,15 +119,17 @@ int32_t execute (const uint8_t* command) {
     pcb->eip_reg = *((uint32_t *) eip_ptr); // TODO: check if this is correct
 
     /* Set up TSS */
-    // TSS - contains process state information to restore task
-    tss.ss0 = KERNEL_DS; // segment selector for kernel data segment
+    // TSS - contains process state information of the parent task to restore it
+    tss.ss0 = USER_DS; // segment selector for kernel data segment
     // tss.esp0 = ; // offset of kernel stack segment -- TODO: idk what this should be
 
     // set ss0 and esp0
     // needs to point to bottom of 4MB page (i think)
 
-    // TODO: add iret, asm volatile here
+    // TODO BEN: add iret, asm volatile here
     // set up DS, ESP, EFLAGS, CS, EIP
+    asm volatile("              \
+        ")
     
     return 0;
 }
@@ -135,6 +137,11 @@ int32_t execute (const uint8_t* command) {
 /* NO NEED TO IMPLEMENT YET(CHECKPOINT 3.2 COMMENT) */
 int32_t halt (uint8_t status) {
     // When closing, do I need to check if current PCB has any child PCBs?
+    pcb_t * pcb = get_pcb_ptr();
+    int i;
+    for (i = 0; i < MAX_FILE_DESC; i++) {
+        pcb->file_desc_arr[i].flags = 0;
+    }
 
     // TODO: jump back to execute handler
     return -1;

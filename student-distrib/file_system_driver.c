@@ -179,12 +179,12 @@ int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
         - We need to iterate through the existing dentrys and return them
           the buffer (ls)
     */
-   /* 
+    /* 
         Note that we don't care what fd or nbytes are: we already know that dir_read got called which means
         syscall operations table is set to the dir_ops_ptr for this entry, as for nbytes we need to display 
         all of the entry names anyway we nbytes can't be specified by the caller
     */
-   pcb_t * pcb = get_pcb_ptr();
+    pcb_t * pcb = get_pcb_ptr();
     if (pcb->file_desc_arr[fd].file_pos == boot_block_ptr->num_dirs) return 0;
 
    char buffer[80];
