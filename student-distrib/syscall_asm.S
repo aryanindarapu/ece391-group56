@@ -5,8 +5,15 @@ sys_call_table:
     .long 0x0, halt, execute, read, write, open, close, getargs, vidmap, set_handler, sigreturn
 
 system_call_handler:
+    # save regs other than return reg since we do call the jump table that points to a C symbol
+    pushl %ebx
+    pushl %ecx
+    pushl %edx
+    pushl %esi 
+    pushl %edi
+    pushl %ebp
+    pushl %esp
     
-
     # Check the value of EAX to make sure it is valid
     # ensure the opcode is at least one
     cmpl $0, %eax
@@ -24,15 +31,27 @@ system_call_handler:
 
     # EAX is valid range so now we call jump table
     # Jump Table symbols are in C so we can program more easily
-    jmp *sys_call_table(, %eax, 4)
+    call *sys_call_table(, %eax, 4)
+    jmp end_sys_call
 
-    # Bound was invalid so we return -1
-    INVALID:
-        movl $-1, %eax 
-        # release args from the stack
-        popl %ebx
-        popl %ecx
-        popl %edx
-        ret
+# Bound was invalid so we return -1
+INVALID:
+    movl $-1, %eax 
+    # release args from the stack
+    popl %ebx
+    popl %ecx
+    popl %edx
+
+end_sys_call:
+    # callee teardown (from jumptable C function)
+    popl %esp
+    popl %ebp
+    popl %edi
+    popl %esi
+    popl %edx
+    popl %ecx
+    popl %ebx
+    # return from interrupt handler
+    iret
 
 

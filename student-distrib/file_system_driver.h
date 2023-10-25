@@ -97,36 +97,10 @@ int32_t empty_write(int32_t fd, const void* buf, int32_t nbytes);
 void init_ops_tables();
 
 template_ops_table_t dir_ops_table;
-// template_ops_table_t dir_ops_table = {
-//     dir_open,
-//     dir_close,
-//     dir_read,
-//     dir_write
-// };
 
  template_ops_table_t terminal_ops_table;
-// template_ops_table_t terminal_ops_table = {
-//     empty_open,
-//     empty_close,
-//     empty_read,
-//     terminal_write
-// };
 
 template_ops_table_t file_ops_table;
-// template_ops_table_t file_ops_table = {
-//     file_open,
-//     file_close,
-//     file_read,
-//     file_write
-// };
-
-// // TODO: is this correct? -- do we need fake function that returns -1 instead of NULL?
-// template_ops_table_t keyboard_ops_table = {
-//     NULL,
-//     NULL,
-//     terminal_read,
-//     NULL
-// };
 
 /* file system instantiation */
 boot_block_t * boot_block_ptr; // Pointer to our boot block
