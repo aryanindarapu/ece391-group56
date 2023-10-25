@@ -26,6 +26,8 @@ i8259.o: devices/i8259.c devices/i8259.h devices/../types.h \
   devices/../lib.h devices/../types.h devices/../x86_desc.h
 keyboard.o: devices/keyboard.c devices/../lib.h devices/../types.h \
   devices/../x86_desc.h devices/keyboard.h devices/i8259.h \
-  devices/../types.h devices/../terminal.h
+  devices/../types.h devices/../terminal.h devices/../lib.h \
+  devices/../file_system_driver.h devices/../devices/rtc.h \
+  devices/../devices/../types.h devices/../terminal.h
 rtc.o: devices/rtc.c devices/i8259.h devices/../types.h devices/../lib.h \
   devices/../types.h devices/../x86_desc.h devices/rtc.h

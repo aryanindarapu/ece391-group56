@@ -1,6 +1,5 @@
 #include "terminal.h"
-#include "lib.h"
-#include "file_system_driver.h"
+
 
 static unsigned int buffer_idx = 0;
 static char line_buffer[LINE_BUFFER_SIZE];
@@ -173,3 +172,4 @@ int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
     sti();
     return nbytes;
 }
+

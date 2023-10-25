@@ -1,6 +1,4 @@
 #include "file_system_driver.h"
-#include "lib.h"
-#include "types.h"
 
 /* 
  * init_file_system
@@ -15,6 +13,7 @@ void init_file_system(void) {
     // Boot block pointer set in kernel.c
     inode_ptr = (inode_t *)(boot_block_ptr + 1); // increase by size of pointer 
     data_block_ptr = (data_block_t *)(inode_ptr + boot_block_ptr->num_inodes);
+    init_ops_tables();
 }
 
 /* 
@@ -166,7 +165,7 @@ int32_t file_open(const uint8_t * filename) {
  *   RETURN VALUE: 0 if success, -1 if failure
  *   SIDE EFFECTS: removes from file descriptor array
  */
-int32_t file_close(uint32_t fd) {
+int32_t file_close(int32_t fd) {
     // make the file unreadable and remove its pointers to operation functions
     file_desc_arr[fd].flags = 0;
     return 0;
@@ -182,7 +181,7 @@ int32_t file_close(uint32_t fd) {
  *   RETURN VALUE: 0 if success, -1 if failure
  *   SIDE EFFECTS: none
  */
-int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes) {
+int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
     if (file_desc_arr[fd].flags == 0) return -1;
 
     file_desc_t file_desc = file_desc_arr[fd];
@@ -194,7 +193,7 @@ int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes) {
     return status;
 }
 
-int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes) {
+int32_t file_write(int32_t fd, const void* buf, int32_t nbytes) {
     return -1;
 }
 
@@ -243,7 +242,7 @@ int32_t dir_open(const uint8_t * filename) {
  *   RETURN VALUE: 0 if success, -1 if failure
  *   SIDE EFFECTS: removes from file descriptor array
  */
-int32_t dir_close(uint32_t fd) {
+int32_t dir_close(int32_t fd) {
     //clear the flag and remove the file operations pointers for this process
     file_desc_arr[fd].flags = 0;
     return 0;
@@ -259,7 +258,7 @@ int32_t dir_close(uint32_t fd) {
  *   RETURN VALUE: 0 if success, -1 if failure
  *   SIDE EFFECTS: none
  */
-int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
+int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
     /* Directory read is really what separates file from dir operations 
         - We need to iterate through the existing dentrys and return them
           the buffer (ls)
@@ -359,6 +358,39 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
  *   RETURN VALUE: 0 if success, -1 if failure
  *   SIDE EFFECTS: none
  */
-int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes) {
+int32_t dir_write(int32_t fd, const void* buf, int32_t nbytes) {
     return -1;
+}
+
+int32_t empty_open(const uint8_t * filename){
+    return -1;
+}
+
+int32_t empty_close(int32_t fd){
+    return -1;
+}
+
+int32_t empty_read(int32_t fd, void* buf, int32_t nbytes){
+    return -1;
+}
+
+int32_t empty_write(int32_t fd, const void* buf, int32_t nbytes){
+    return -1;
+}
+
+void init_ops_tables(){
+    dir_ops_table.open = dir_open;
+    dir_ops_table.close = dir_close;
+    dir_ops_table.read = dir_read;
+    dir_ops_table.write = dir_write;
+
+    terminal_ops_table.open = empty_open;
+    terminal_ops_table.close = empty_close;
+    terminal_ops_table.read = empty_read;
+    terminal_ops_table.write = terminal_write;
+
+    file_ops_table.open = file_open;
+    file_ops_table.close = file_close;
+    file_ops_table.read = file_read;
+    file_ops_table.write = file_write;
 }
