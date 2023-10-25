@@ -271,7 +271,7 @@ int test_verylarge() {
 	init_file_system();
 
 	printf("Reading verylargetextwithverylongname.txt.\n");
-	if (file_open((const uint8_t *) "verylargetextwithverylongname.txt") == -1) return FAIL;
+	if (file_open((const uint8_t *) "verylargetextwithverylongname.tx") == -1) return FAIL;
 
 	char file_buffer[VERYLARGE_SIZE];
 	if (file_read(0, (void *) file_buffer, VERYLARGE_SIZE) == -1) return FAIL;
@@ -387,6 +387,49 @@ int test_terminal_driver() {
 };
 
 /* Checkpoint 3 tests */
+
+int test_sys_calls() {
+	// Testing open for our system calls
+	// asm volatile("movl $5, %eax");
+	// asm volatile("");
+	const uint8_t buf[128];
+	int rval;
+	init_file_system();
+	rval = stdin(&buf);
+	if(rval == -1) return FAIL;
+	rval = stdout(&buf);
+	if(rval == -1) return FAIL;
+
+	asm volatile ("INT $0x80" : "=a" (rval) : "a" (6), "b" (0));
+	if(rval == -1) return FAIL;
+	
+	return PASS;
+};
+
+int stdin(char* buf)
+{
+	uint32_t rval;
+	asm volatile ("INT $0x80" : "=a" (rval) : "a" (3), "b" (0), "c" (buf), "d" (6));
+	// asm volatile ("pushl $128");
+	// asm volatile ("pushl 8(%ebp)");
+	// asm volatile ("pushl $0");
+	// asm volatile ("int 0x80");
+	return rval;
+}
+
+int stdout(char* buf)
+{
+	uint32_t rval;
+	asm volatile ("INT $0x80" : "=a" (rval) : "a" (4), "b" (1), "c" (buf), "d" (6));
+	// asm volatile ("pushl $128");
+	// asm volatile ("pushl 8(%ebp)");
+	// asm volatile ("pushl $1");
+	// asm volatile ("int 0x80");
+	return rval;
+}
+
+
+
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
 
@@ -414,7 +457,10 @@ void launch_tests() {
 	//TEST_OUTPUT("Test frame1.txt", test_frame1());
 	// TEST_OUTPUT("Test hello executable", test_hello());
 	// TEST_OUTPUT("Test verylargetextwithverylongname.txt", test_verylarge());
-	TEST_OUTPUT("Test directory read.", test_directory_ls());
+	//TEST_OUTPUT("Test directory read.", test_directory_ls());
 	// TEST_OUTPUT("Testing RTC Driver", test_rtc_driver());
 	// TEST_OUTPUT("Testing Terminal Driver", test_terminal_driver());
+
+	/* Checkpoint 3 Tests */
+	TEST_OUTPUT("Test system call", test_sys_calls());
 }

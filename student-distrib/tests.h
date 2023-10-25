@@ -29,4 +29,7 @@ int test_directory_ls();
 int test_rtc_driver();
 int test_terminal_driver();
 
+int stdin(char* buf);
+int stdout(char* buf);
+
 #endif /* TESTS_H */

@@ -1,6 +1,5 @@
 #include "terminal.h"
-#include "lib.h"
-#include "file_system_driver.h"
+
 
 static unsigned int buffer_idx = 0;
 static char line_buffer[LINE_BUFFER_SIZE];
@@ -85,9 +84,7 @@ int32_t terminal_open(const uint8_t* filename) {
  * Return Value: 0 for sucess always
  * Function: resets buffer_idx */
 int32_t terminal_close(int32_t fd) {
-    // TODO: what should i return here, probably -1 bc should never close
-    buffer_idx = 0;
-    return 0;
+    return -1;
 }
 
 /* terminal_read
@@ -96,6 +93,9 @@ int32_t terminal_close(int32_t fd) {
  * Function: waits until enter is pressed then writes all bytes in buffer(including new ling) to input buf */
 int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // NOTE: this is a blocking call, so it can't be interrupted
+    // printf("ACCESSED TERMINAL READ");
+    sti();
+    
     while (enter_flag_pressed != 1);
     
     cli();
@@ -141,3 +141,4 @@ int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
     sti();
     return nbytes;
 }
+

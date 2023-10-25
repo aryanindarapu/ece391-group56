@@ -96,12 +96,12 @@ int32_t execute (const uint8_t* command) {
     pcb->pid = new_pid_idx; // TODO: do i even need this field, can probably just use pid
 
     // TODO: fill in stdin and out to fd arr
-    // pcb->file_desc_arr[0].ops_ptr = stdin_ops_table;
+    pcb->file_desc_arr[0].ops_ptr = stdin_ops_table;
     pcb->file_desc_arr[0].inode = -1;
     pcb->file_desc_arr[0].flags = 1;
     pcb->file_desc_arr[0].file_pos = 0;
 
-    // pcb->file_desc_arr[1].ops_ptr = stdout_ops_table;
+    pcb->file_desc_arr[1].ops_ptr = stdout_ops_table;
     pcb->file_desc_arr[1].inode = -1;
     pcb->file_desc_arr[1].flags = 1;
     pcb->file_desc_arr[1].file_pos = 0;

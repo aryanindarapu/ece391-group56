@@ -35,7 +35,7 @@ int32_t file_open(const uint8_t * filename) {
     int file_desc_index;
     
     // ensure the filename is valid
-    if (filename == NULL) {
+    if (filename == NULL || strlen(filename) > 32) {
         return -1;
     }
 
@@ -106,7 +106,7 @@ int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes) {
     return status;
 }
 
-int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes) {
+int32_t file_write(int32_t fd, const void* buf, int32_t nbytes) {
     return -1;
 }
 
@@ -156,7 +156,7 @@ int32_t dir_open(const uint8_t * filename) {
  *   RETURN VALUE: 0 if success, -1 if failure
  *   SIDE EFFECTS: removes from file descriptor array
  */
-int32_t dir_close(uint32_t fd) {
+int32_t dir_close(int32_t fd) {
     //clear the flag and remove the file operations pointers for this process
     pcb_t * pcb = get_pcb_ptr();
 
@@ -174,7 +174,7 @@ int32_t dir_close(uint32_t fd) {
  *   RETURN VALUE: 0 if success, -1 if failure
  *   SIDE EFFECTS: none
  */
-int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
+int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
     /* Directory read is really what separates file from dir operations 
         - We need to iterate through the existing dentrys and return them
           the buffer (ls)
@@ -275,6 +275,44 @@ int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes) {
  *   RETURN VALUE: 0 if success, -1 if failure
  *   SIDE EFFECTS: none
  */
-int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes) {
+int32_t dir_write(int32_t fd, const void* buf, int32_t nbytes) {
     return -1;
+}
+
+int32_t empty_open(const uint8_t * filename){
+    return -1;
+}
+
+int32_t empty_close(int32_t fd){
+    return -1;
+}
+
+int32_t empty_read(int32_t fd, void* buf, int32_t nbytes){
+    return -1;
+}
+
+int32_t empty_write(int32_t fd, const void* buf, int32_t nbytes){
+    return -1;
+}
+
+void init_ops_tables(){
+    dir_ops_table.open = dir_open;
+    dir_ops_table.close = dir_close;
+    dir_ops_table.read = dir_read;
+    dir_ops_table.write = dir_write;
+
+    stdin_ops_table.open = empty_open;
+    stdin_ops_table.close = empty_close;
+    stdin_ops_table.read = terminal_read;
+    stdin_ops_table.write = empty_write;
+    
+    stdout_ops_table.open = empty_open;
+    stdout_ops_table.close = empty_close;
+    stdout_ops_table.read = empty_read;
+    stdout_ops_table.write = terminal_write;
+    
+    file_ops_table.open = file_open;
+    file_ops_table.close = file_close;
+    file_ops_table.read = file_read;
+    file_ops_table.write = file_write;
 }

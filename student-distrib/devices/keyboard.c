@@ -144,10 +144,10 @@ void keyboard_driver() {
             }
             return;
         case ALT_P:
-            printf(" ALT_PRESSED ");
+            // printf(" ALT_PRESSED ");
             return;
         case ALT_R:
-            printf(" ALT_RELEASED ");
+            // printf(" ALT_RELEASED ");
             return;
         case BACKSPACE:
             if(get_buffer_fill() == 0) return;
