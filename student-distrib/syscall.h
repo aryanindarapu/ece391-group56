@@ -8,7 +8,8 @@
 #define EIGHT_MB 0x800000
 #define FOUR_MB 0x400000
 #define EIGHT_KB 0x2000
-#define USER_MEM_VIRTUAL_ADDR 0x08000000 // 128 MB
+#define USER_MEM_VIRTUAL_ADDR 0x8000000 // 128 MB
+#define PROGRAM_START 0x08048000
 #define EIP_START 24
 
 #define MAGIC_BYTE_0 0x7F
@@ -48,7 +49,7 @@ typedef struct pcb {
 
 int pid = 0;
 
-uint8_t process_flags[MAX_NUM_PROGRAMS];
+uint8_t pcb_flags[MAX_NUM_PROGRAMS];
 
 #endif /* ASM */
 

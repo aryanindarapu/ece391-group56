@@ -3,6 +3,7 @@
 #include "syscall_helpers.h"
 #include "paging.h"
 #include "lib.h"
+#include "x86_desc.h"
 
 // TODO: add init system calls the sets up stdin and stdout file entries
 void init_syscall() {
@@ -16,16 +17,21 @@ int32_t execute (const uint8_t* command) {
 
     // NOTE: all of this is probably out of order, need to rearrange
     
+    // Assuming: filname cmd1 cmd2
+    // NOTE: this doesn't allow for preceding spaces, but that's fine for now
     int i;
     char filename[128]; // TODO: get filename here
     for (i = 0; i < strlen((const int8_t *) command); i++) {
         if (command[i] == ' ') {
             break;
         }
+
+        filename[i] = command[i];
     }
 
-    // TODO: check commands here, use getargs
+    filename[i] = '\0';
 
+    // TODO: check commands here, use getargs
 
     // TODO: copy file from kernel memory to user memory (need to set up 4 MB page)
     // this happens at 128 MB (find in doc)
@@ -52,7 +58,7 @@ int32_t execute (const uint8_t* command) {
     // TODO: does startup set up a PCB on init?
     int new_pid_idx;
     for (new_pid_idx = 0; new_pid_idx < MAX_NUM_PROGRAMS; pid++) {
-        if (process_flags[new_pid_idx] == 0) {
+        if (pcb_flags[new_pid_idx] == 0) {
             break;
         }
     }
@@ -71,19 +77,19 @@ int32_t execute (const uint8_t* command) {
     new_page_dir.pcd = 0;
     new_page_dir.a = 0;
     new_page_dir.res = 0;
-    new_page_dir.ps = 1;
+    new_page_dir.ps = 1; // 1 - set to 4 MB page
     new_page_dir.g = 0; // TODO: check this
     new_page_dir.avail = 0;
-    new_page_dir.table_base_addr = ((pid * FOUR_MB) + EIGHT_MB) / FOUR_KB; // TODO: set to bottom of entry
-    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir; // TODO: set to bottom of entry
-    // TODO: flush TLB here (page is set up)
+    new_page_dir.table_base_addr = ((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB; // TODO: set to bottom of entry
+    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir; // TODO: set to bottom of entry, also is the address start correct?
+    flush_tlb();
 
     /* Copy to user memory */
-    read_data(exec_dentry.inode_num, 0, (uint8_t *) USER_MEM_VIRTUAL_ADDR, (inode_t *)(inode_ptr + exec_dentry.inode_num)->length); // TODO: check this
-        
-
+    // TODO: should this be at 128 MB or 128 MB + offset?
+    read_data(exec_dentry.inode_num, 0, (uint8_t *) PROGRAM_START, (inode_t *)(inode_ptr + exec_dentry.inode_num)->length); // TODO: check this
+    
     /* Set up PCB */
-    process_flags[new_pid_idx] = 1; // enable PCB block
+    pcb_flags[new_pid_idx] = 1; // enable PCB block
     // TODO: add commands to PCB
     // TODO: do we need to keep track of EIP?
     pcb_t * pcb = (pcb_t *)(EIGHT_MB - (new_pid_idx + 1) * EIGHT_KB); // puts PCB pointer at bottom of kernel memory
@@ -112,21 +118,29 @@ int32_t execute (const uint8_t* command) {
     read_data(exec_dentry.inode_num, EIP_START, eip_ptr, sizeof(uint32_t));
     pcb->eip_reg = *((uint32_t *) eip_ptr); // TODO: check if this is correct
 
+    /* Set up TSS */
+    // TSS - contains process state information to restore task
+    tss.ss0 = KERNEL_DS; // segment selector for kernel data segment
+    // tss.esp0 = ; // offset of kernel stack segment -- TODO: idk what this should be
 
-
-    // TODO: set TSS entry to KERNEL_DS ???
+    // set ss0 and esp0
     // needs to point to bottom of 4MB page (i think)
 
     // TODO: add iret, asm volatile here
+    // set up DS, ESP, EFLAGS, CS, EIP
     
-    
+    return 0;
 }
 
 /* NO NEED TO IMPLEMENT YET(CHECKPOINT 3.2 COMMENT) */
 int32_t halt (uint8_t status) {
+    // When closing, do I need to check if current PCB has any child PCBs?
+
+    // TODO: jump back to execute handler
     return -1;
 }
 
+// TODO: this seems to do the exact same things as file open and dir open, need to check for overlap
 int32_t open (const uint8_t* filename) {
     dentry_t file_dentry;
     uint32_t fd;

@@ -34,6 +34,9 @@ extern void load_page_dir(unsigned int *);
 */
 extern void enable_paging();
 
+// Flushes the TLB
+extern void flush_tlb();
+
 
 /* Page directory descriptor */
 typedef union page_dir_desc_t {

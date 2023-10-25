@@ -99,5 +99,14 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 
 // TODO: comment
 pcb_t * get_pcb_ptr() {
-    return (pcb_t *)(EIGHT_MB - (pid + 1) * EIGHT_KB);
+    // TODO: should this actually be ANDing ESP bitmask?
+    // https://www.cs.columbia.edu/~junfeng/10sp-w4118/lectures/l07-proc-linux.pdf
+    pcb_t * pcb_ptr;
+    asm volatile (
+        "andl %%esp, %%eax;"
+        : "=a" (pcb_ptr)
+        :
+        : "cc", "memory"
+    );
+    return pcb_ptr;
 }
