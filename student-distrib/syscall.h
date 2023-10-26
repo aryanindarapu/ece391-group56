@@ -39,15 +39,13 @@ int32_t set_handler (uint32_t signum, void* handler_address);
 int32_t sigreturn (void);
 
 typedef struct pcb {
-    uint32_t pid; 
-    uint32_t esp_reg;
-    uint32_t eip_reg;
+    int32_t pid; 
+    int32_t parent_pid;
+    uint32_t esp;
+    uint32_t eip;
     uint8_t * commands;
-    pcb_t * parent_pcb_ptr;
     file_desc_t file_desc_arr[MAX_FILE_DESC];
 } pcb_t;
-
-int pid = 0;
 
 uint8_t pcb_flags[MAX_NUM_PROGRAMS];
 

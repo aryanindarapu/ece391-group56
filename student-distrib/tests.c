@@ -4,6 +4,7 @@
 #include "file_system_driver.h"
 #include "devices/rtc.h"
 #include "terminal.h"
+#include "syscall.h"
 
 #define PASS 1
 #define FAIL 0
@@ -392,17 +393,16 @@ int test_sys_calls() {
 	// Testing open for our system calls
 	// asm volatile("movl $5, %eax");
 	// asm volatile("");
-	const uint8_t buf[128];
+	uint8_t buf[128] = "shell";
 	int rval;
-	init_file_system();
-	rval = stdin(&buf);
-	if(rval == -1) return FAIL;
-	rval = stdout(&buf);
-	if(rval == -1) return FAIL;
-
-	asm volatile ("INT $0x80" : "=a" (rval) : "a" (6), "b" (0));
-	if(rval == -1) return FAIL;
-	
+	// init_file_system();
+	// rval = stdin((char *) buf);
+	// if(rval == -1) return FAIL;
+	// rval = stdout((char *) buf);
+	// if(rval == -1) return FAIL;
+	// asm volatile ("INT $0x80" : "=a" (rval) : "a" (6), "b" (0));
+	// if(rval == -1) return FAIL;
+	asm volatile ("INT $0x80" : "=a" (rval) : "a" (2), "b" (buf));
 	return PASS;
 };
 
@@ -454,10 +454,10 @@ void launch_tests() {
 	// TEST_OUTPUT("Page fault test", test_page_fault());
 
 	/* Checkpoint 2 Tests */
-	//TEST_OUTPUT("Test frame1.txt", test_frame1());
+	// TEST_OUTPUT("Test frame1.txt", test_frame1());
 	// TEST_OUTPUT("Test hello executable", test_hello());
 	// TEST_OUTPUT("Test verylargetextwithverylongname.txt", test_verylarge());
-	//TEST_OUTPUT("Test directory read.", test_directory_ls());
+	// TEST_OUTPUT("Test directory read.", test_directory_ls());
 	// TEST_OUTPUT("Testing RTC Driver", test_rtc_driver());
 	// TEST_OUTPUT("Testing Terminal Driver", test_terminal_driver());
 

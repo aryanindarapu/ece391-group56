@@ -88,12 +88,10 @@ int32_t empty_write(int32_t fd, const void* buf, int32_t nbytes);
 void init_ops_tables();
 
 template_ops_table_t dir_ops_table;
-
 template_ops_table_t stdin_ops_table;
-
 template_ops_table_t stdout_ops_table;
-
 template_ops_table_t file_ops_table;
+template_ops_table_t rtc_ops_table;
 
 /* file system instantiation */
 boot_block_t * boot_block_ptr; // Pointer to our boot block

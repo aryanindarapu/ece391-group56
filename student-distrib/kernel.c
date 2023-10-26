@@ -161,6 +161,7 @@ void entry(unsigned long magic, unsigned long addr) {
     init_keyboard();
     init_rtc();
     init_paging();
+    init_file_system();
     
     clear();
     /* Enable interrupts */
@@ -168,7 +169,7 @@ void entry(unsigned long magic, unsigned long addr) {
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
     // printf("Enabling Interrupts\n");
-
+    // TODO: execute shell here 
     
     // printf("\n\n");  
     //printf("[Terminal]$ ");

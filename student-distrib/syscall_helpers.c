@@ -104,10 +104,16 @@ pcb_t * get_pcb_ptr() {
     pcb_t * pcb_ptr;
     // AND ESP WITH PCB_BITMASK
     asm volatile (
-        "movl %%esp, %%eax      ;\
-         andl $0xFFFFE000, %%eax   ;\
+        "movl %%esp, %%eax;\
+         andl %%ebx, %%eax;\
         "
         : "=a" (pcb_ptr)
+        : "b" (PCB_BITMASK)
+        // : "memory"
     );
     return pcb_ptr;
+}
+
+pcb_t * get_pcb(int32_t pid) {
+    return (pcb_t *)(EIGHT_MB - (pid + 1) * EIGHT_KB);
 }

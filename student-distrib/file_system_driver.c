@@ -1,8 +1,8 @@
 #include "file_system_driver.h"
-#include "syscall_helpers.h"
 #include "lib.h"
 #include "types.h"
 #include "syscall.h"
+#include "syscall_helpers.h"
 
 /* 
  * init_file_system
@@ -29,41 +29,42 @@ void init_file_system(void) {
  *   SIDE EFFECTS: adds to file descriptor array
  */
 int32_t file_open(const uint8_t * filename) {
-    pcb_t * pcb = get_pcb_ptr();
+    return 0;
+    // pcb_t * pcb = get_pcb_ptr();
 
-    dentry_t file_dentry;
-    int file_desc_index;
+    // dentry_t file_dentry;
+    // int file_desc_index;
     
-    // ensure the filename is valid
-    if (filename == NULL || strlen(filename) > 32) {
-        return -1;
-    }
+    // // ensure the filename is valid
+    // if (filename == NULL || strlen(filename) > 32) {
+    //     return -1;
+    // }
 
-    // ensure the file desc has space AND find the index to emplace this file
-    for (file_desc_index = 2; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
-        //is the index empty?
-        if (pcb->file_desc_arr[file_desc_index].flags == 0) {
-            //https://stackoverflow.com/questions/9932212/jump-table-examples-in-c
-            break; // this file_desc_index is the one we will emplace the file to 
-        }
-    }
+    // // ensure the file desc has space AND find the index to emplace this file
+    // for (file_desc_index = 2; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
+    //     //is the index empty?
+    //     if (pcb->file_desc_arr[file_desc_index].flags == 0) {
+    //         //https://stackoverflow.com/questions/9932212/jump-table-examples-in-c
+    //         break; // this file_desc_index is the one we will emplace the file to 
+    //     }
+    // }
 
-    // Ensure there was space left
-    if (file_desc_index >= MAX_FILE_DESC) {
-        return -1;
-    }
+    // // Ensure there was space left
+    // if (file_desc_index >= MAX_FILE_DESC) {
+    //     return -1;
+    // }
 
-    /* Let read_dentry_by_name populate our dentry, or tell us that the dentry doesn't exist in our filesystem */
-    if (read_dentry_by_name (filename, &file_dentry) == -1) { 
-        return -1; //file doesn't exist
-    }
+    // /* Let read_dentry_by_name populate our dentry, or tell us that the dentry doesn't exist in our filesystem */
+    // if (read_dentry_by_name (filename, &file_dentry) == -1) { 
+    //     return -1; //file doesn't exist
+    // }
     
-    /* this fd index is now taken */
-    pcb->file_desc_arr[file_desc_index].inode = file_dentry.inode_num;
-    pcb->file_desc_arr[file_desc_index].flags = 1;
-    pcb->file_desc_arr[file_desc_index].file_pos = 0;
+    // /* this fd index is now taken */
+    // pcb->file_desc_arr[file_desc_index].inode = file_dentry.inode_num;
+    // pcb->file_desc_arr[file_desc_index].flags = 1;
+    // pcb->file_desc_arr[file_desc_index].file_pos = 0;
 
-    return file_desc_index;
+    // return file_desc_index;
 }
 
 /* 
@@ -74,7 +75,7 @@ int32_t file_open(const uint8_t * filename) {
  *   RETURN VALUE: 0 if success, -1 if failure
  *   SIDE EFFECTS: removes from file descriptor array
  */
-int32_t file_close(uint32_t fd) {
+int32_t file_close(int32_t fd) {
     pcb_t * pcb = get_pcb_ptr();
 
     // make the file unreadable and remove its pointers to operation functions
@@ -92,7 +93,7 @@ int32_t file_close(uint32_t fd) {
  *   RETURN VALUE: 0 if success, -1 if failure
  *   SIDE EFFECTS: none
  */
-int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes) {
+int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
     pcb_t * pcb = get_pcb_ptr();
 
     if (pcb->file_desc_arr[fd].flags == 0) return -1;
@@ -119,33 +120,34 @@ int32_t file_write(int32_t fd, const void* buf, int32_t nbytes) {
  *   SIDE EFFECTS: adds to file descriptor array
  */
 int32_t dir_open(const uint8_t * filename) {
-    int file_desc_index;
-    dentry_t dir_dentry;
-    pcb_t * pcb = get_pcb_ptr();
+    return 0;
+    // int file_desc_index;
+    // dentry_t dir_dentry;
+    // pcb_t * pcb = get_pcb_ptr();
 
-    // ensure the file desc has space AND find the index to emplace this file
-    for (file_desc_index = 2; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
-        //is the index empty?
-        if (pcb->file_desc_arr[file_desc_index].flags == 0) {
-            break; //this file_desc_index is the one we will emplace the file to 
-        }
-    }
+    // // ensure the file desc has space AND find the index to emplace this file
+    // for (file_desc_index = 2; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
+    //     //is the index empty?
+    //     if (pcb->file_desc_arr[file_desc_index].flags == 0) {
+    //         break; //this file_desc_index is the one we will emplace the file to 
+    //     }
+    // }
 
-    // Ensure there was space left
-    if (file_desc_index >= MAX_FILE_DESC) {
-        return -1;
-    }
+    // // Ensure there was space left
+    // if (file_desc_index >= MAX_FILE_DESC) {
+    //     return -1;
+    // }
 
-    /* Let read_dentry_by_name populate our dentry, or tell us that the dentry doesn't exist in our filesystem */
-    if (read_dentry_by_name (filename, &dir_dentry) == -1) { 
-        return -1; //file doesn't exist
-    }
+    // /* Let read_dentry_by_name populate our dentry, or tell us that the dentry doesn't exist in our filesystem */
+    // if (read_dentry_by_name (filename, &dir_dentry) == -1) { 
+    //     return -1; //file doesn't exist
+    // }
 
-    pcb->file_desc_arr[file_desc_index].flags = 1;
-    pcb->file_desc_arr[file_desc_index].inode = dir_dentry.inode_num;
-    pcb->file_desc_arr[file_desc_index].file_pos = 0;
+    // pcb->file_desc_arr[file_desc_index].flags = 1;
+    // pcb->file_desc_arr[file_desc_index].inode = dir_dentry.inode_num;
+    // pcb->file_desc_arr[file_desc_index].file_pos = 0;
 
-    return file_desc_index;
+    // return file_desc_index;
 }
 
 /* 
@@ -295,7 +297,7 @@ int32_t empty_write(int32_t fd, const void* buf, int32_t nbytes){
     return -1;
 }
 
-void init_ops_tables(){
+void init_ops_tables() {
     dir_ops_table.open = dir_open;
     dir_ops_table.close = dir_close;
     dir_ops_table.read = dir_read;
@@ -315,4 +317,9 @@ void init_ops_tables(){
     file_ops_table.close = file_close;
     file_ops_table.read = file_read;
     file_ops_table.write = file_write;
+
+    file_ops_table.open = rtc_open;
+    file_ops_table.close = rtc_close;
+    file_ops_table.read = rtc_read;
+    file_ops_table.write = rtc_write;
 }
