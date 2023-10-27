@@ -119,7 +119,7 @@ int32_t execute (const uint8_t* command) {
     tss.esp0 = (uint32_t) new_pcb + EIGHT_KB - STACK_FENCE_SIZE; // offset of kernel stack segment -- TODO: idk what this should be
     
     uint32_t user_eip = *((uint32_t *) eip_ptr);
-    uint32_t user_esp = USER_MEM_VIRTUAL_ADDR + FOUR_KB - STACK_FENCE_SIZE; // TODO: how is this something that we arrived at?
+    uint32_t user_esp = PROGRAM_START - STACK_FENCE_SIZE; // TODO: how is this something that we arrived at?
 
     // asm volatile("movl %%esp, %0" : "=r" (esp));
     // asm volatile("movl %%ebp, %0" : "=r" (ebp));
@@ -160,7 +160,7 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
 
-    return output;
+    return 0;
 }
 
 /* NO NEED TO IMPLEMENT YET(CHECKPOINT 3.2 COMMENT) */
@@ -249,14 +249,14 @@ int32_t open (const uint8_t* filename) {
             status = file_open(filename);
             if (fd < 0) return -1;
             pcb->file_desc_arr[fd].ops_ptr = file_ops_table;
-            pcb->file_desc_arr[fd].inode = file_dentry.inode_num;
-            pcb->file_desc_arr[fd].file_pos = 0;
             break;
         default:
             return -1;
     }
 
     pcb->file_desc_arr[fd].flags = 1;
+    pcb->file_desc_arr[fd].inode = file_dentry.inode_num;
+    pcb->file_desc_arr[fd].file_pos = 0;
     return fd;
 }
 

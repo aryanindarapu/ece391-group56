@@ -101,6 +101,7 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     cli();
     
     line_buffer[save_buffer_idx] = '\n';
+    line_buffer[save_buffer_idx + 1] = '\0';
     save_buffer_idx++;
     enter_flag_pressed = 0;
     //save_buffer_idx = buffer_idx;
@@ -111,7 +112,7 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     }
     else
     {
-        memcpy(buf, line_buffer, save_buffer_idx);
+        memcpy(buf, line_buffer, save_buffer_idx + 1);
         sti();
         return save_buffer_idx;
     }
