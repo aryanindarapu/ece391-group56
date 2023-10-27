@@ -76,7 +76,7 @@ int32_t execute (const uint8_t* command) {
     new_page_dir.pwt = 0;
     new_page_dir.pcd = 0;
     new_page_dir.a = 0;
-    new_page_dir.res = 0;
+    new_page_dir.d = 0;
     new_page_dir.ps = 1; // 1 - set to 4 MB page
     new_page_dir.g = 1; // TODO: check this, global flag
     new_page_dir.avail = 0;
@@ -85,7 +85,8 @@ int32_t execute (const uint8_t* command) {
     flush_tlb();
 
     /* Copy to user memory */
-    read_data(exec_dentry.inode_num, 0, (uint8_t *) PROGRAM_START, ((inode_t *)(inode_ptr + exec_dentry.inode_num))->length); // TODO: check this
+    int status = read_data(exec_dentry.inode_num, 0, (uint8_t *) PROGRAM_START, ((inode_t *)(inode_ptr + exec_dentry.inode_num))->length); // TODO: check this
+    // int status = read_data(exec_dentry.inode_num, 0, (uint8_t *) USER_MEM_VIRTUAL_ADDR, ((inode_t *)(inode_ptr + exec_dentry.inode_num))->length); // TODO: check this
     
     /* Set up PCB */
     pcb_flags[new_pid_idx] = 1; // enable PCB block
@@ -121,7 +122,7 @@ int32_t execute (const uint8_t* command) {
     /* Set up TSS */
     // TSS - contains process state information of the parent task to restore it
     tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
-    tss.esp0 = (uint32_t) (new_pcb + EIGHT_KB - 4); // - sizeof(pcb_t); // offset of kernel stack segment -- TODO: idk what this should be
+    tss.esp0 = (uint32_t) (new_pcb + EIGHT_KB); // - sizeof(pcb_t); // offset of kernel stack segment -- TODO: idk what this should be
     // TODO: may need to set up memory "fence" if any of our code will overwrite original mem struct (4 mem addrs)
     
     uint32_t esp, eip;
@@ -139,18 +140,55 @@ int32_t execute (const uint8_t* command) {
     // TODO BEN: add iret, asm volatile here
     // set up DS, ESP, EFLAGS, CS, EIP
     uint32_t output;
-    asm volatile (
-        "pushl %%eax;"
-        "pushl %%ebx;"
-        "pushfl;"
-        "pushl %%ecx;"
-        "pushl %%edx;"
-        "iret;"
-        : "=a" (output)
-        : "a" (USER_DS), "b" (esp), "c" (USER_CS), "d" (eip)
-        : "memory"
-    );
-    
+    // asm volatile("pushl %%eax   \n");
+    // https://stackoverflow.com/questions/6892421/switching-to-user-mode-using-iret
+    cli();
+    // asm volatile ("andl $0x00FF, %%eax" : : "a" (USER_DS));
+    // asm volatile ("movw %ax, %ds");
+    asm volatile ("pushl %%eax" : : "a" (USER_DS));
+    // asm volatile ("pushl %eax");
+    asm volatile ("pushl %%ebx" : : "b" (esp));
+    asm volatile ("pushfl");
+    asm volatile ("popl %edi");
+    asm volatile ("orl $0x3200, (%edi)");
+    asm volatile ("pushl %edi");
+    asm volatile ("pushl %%ecx" : : "c" (USER_CS));
+    asm volatile ("pushl %%edx" : : "d" (eip));
+    asm volatile ("iret" );
+
+    //: "=a" (output)
+    // asm volatile ("\
+    //     pushl %%eax             ;\
+    //     pushl %%ebx             ;\
+    //     pushfl                  ;\
+    //     orl $0x0200, %%edi      ;\
+    //     pushl %%edi             ;\
+    //     pushl %%ecx             ;\
+    //     pushl %%edx             ;\
+    //     iret                    ;\
+    //     "
+    //     : "=a" (output) : "a" (USER_DS), "b" (esp) "c" (USER_CS) "d" (eip) );
+
+    // asm volatile ("pushl %%eax" : : "a" (USER_DS));
+    // asm volatile ("pushl %%ebx" : : "b" (esp));
+    // asm volatile ("pushfl");
+    // asm volatile ("pushl %%ecx" : : "c" (USER_CS));
+    // asm volatile ("pushl %%edx" : : "d" (eip));
+    // asm volatile ("iret" : "=a" (output));
+
+
+    // asm volatile (
+    //     "pushl %%eax    \n"
+    //     "pushl %%ebx    \n"
+    //     "pushfl         \n"
+    //     "pushl %%ecx    \n"
+    //     "pushl %%edx    \n"
+    //     "iret           \n"
+    //     : "=a" (output)
+    //     : "a" (USER_DS), "b" (esp), "c" (USER_CS), "d" (eip)
+    //     : "memory"
+    // );
+    sti();
     return output;
 }
 
@@ -211,9 +249,7 @@ int32_t open (const uint8_t* filename) {
             status = dir_open(filename);
             if (fd < 0) return -1;
             pcb->file_desc_arr[fd].ops_ptr = dir_ops_table;
-            pcb->file_desc_arr[fd].inode = -1;
             pcb->file_desc_arr[fd].flags = 1;
-            pcb->file_desc_arr[fd].file_pos = 0;
             break;
         case 2: // file
             status = file_open(filename);

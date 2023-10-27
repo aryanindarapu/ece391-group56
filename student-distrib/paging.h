@@ -51,9 +51,9 @@ typedef union page_dir_desc_t {
         /* page size: this one is important,
         if 1 --> 4MB pages, if 0 --> 4kB pages */
         uint32_t a : 1; // read or has been written to
-        uint32_t res : 1; // reserved and automatically set to 0
+        uint32_t d : 1; // dirty
         uint32_t ps : 1; // size of page whetehr it is 4KB or 4MB
-        uint32_t g : 1; // indicates a page is global
+        uint32_t g : 1; // ind  icates a page is global
         uint32_t avail : 3; // free 3 bits
         uint32_t table_base_addr : 20; // [12:31] --> points to a page table
     } __attribute__ ((packed));
@@ -72,7 +72,6 @@ typedef union page_table_desc_t {
         uint32_t pcd : 1; // cache disabled
         uint32_t a : 1; // read or has been written to
         uint32_t d : 1; // Changed when you are holding onto the page, first time when accessed for write
-        /* Page Table Attribute Index */
         uint32_t pat : 1; // Page attribute table
         uint32_t g : 1; // Indicates page is global
         uint32_t avail : 3; // 3 available bits

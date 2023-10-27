@@ -23,7 +23,7 @@ void init_paging () {
                 page_dir[i].pwt = 0;
                 page_dir[i].pcd = 0;
                 page_dir[i].a = 0;
-                page_dir[i].res = 0;
+                page_dir[i].d = 0;
                 page_dir[i].ps = 0;
                 page_dir[i].g = 0;
                 page_dir[i].avail = 0;
@@ -36,7 +36,7 @@ void init_paging () {
                 page_dir[i].pwt = 0;
                 page_dir[i].pcd = 1;
                 page_dir[i].a = 0;
-                page_dir[i].res = 0;
+                page_dir[i].d = 0;
                 page_dir[i].ps = 1;
                 page_dir[i].g = 1;
                 page_dir[i].avail = 0;
@@ -49,7 +49,7 @@ void init_paging () {
                 page_dir[i].pwt = 0;
                 page_dir[i].pcd = 0;
                 page_dir[i].a = 0;
-                page_dir[i].res = 0;
+                page_dir[i].d = 0;
                 page_dir[i].ps = 0;
                 page_dir[i].g = 0;
                 page_dir[i].avail = 0;
