@@ -122,7 +122,9 @@ int32_t execute (const uint8_t* command) {
     /* Set up TSS */
     // TSS - contains process state information of the parent task to restore it
     tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
-    tss.esp0 = (uint32_t) (new_pcb + EIGHT_KB); // - sizeof(pcb_t); // offset of kernel stack segment -- TODO: idk what this should be
+
+    // tss.esp0 = (uint32_t) (new_pcb + EIGHT_KB); // - sizeof(pcb_t); // offset of kernel stack segment -- TODO: idk what this should be
+    tss.esp0 = (uint32_t) (EIGHT_MB - (new_pid_idx * EIGHT_KB) - 4); // - sizeof(pcb_t); // offset of kernel stack segment -- TODO: idk what this should be
     // TODO: may need to set up memory "fence" if any of our code will overwrite original mem struct (4 mem addrs)
     
     uint32_t esp, eip;
@@ -180,6 +182,7 @@ int32_t execute (const uint8_t* command) {
         "
         :
         : "a" (USER_DS), "b" (esp), "c" (USER_CS), "d" (eip) 
+        : "memory"
     );
 
     return 0;
