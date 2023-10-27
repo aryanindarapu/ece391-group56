@@ -43,6 +43,8 @@ typedef struct pcb {
     int32_t parent_pid;
     uint32_t esp;
     uint32_t eip;
+    // uint32_t kern_ebp;
+    // uint32_t kern_esp;
     uint8_t * commands;
     file_desc_t file_desc_arr[MAX_FILE_DESC];
 } pcb_t;

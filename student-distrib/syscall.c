@@ -127,7 +127,16 @@ int32_t execute (const uint8_t* command) {
     
     uint32_t esp, eip;
     eip = *((uint32_t *) eip_ptr);
-    esp = ((new_pid_idx + 1) * FOUR_MB) + EIGHT_MB - 4;
+    // eip = *((int *) eip_ptr);
+    // esp = ((new_pid_idx + 1) * FOUR_MB) + EIGHT_MB - 4;
+    esp = USER_MEM_VIRTUAL_ADDR + FOUR_KB - sizeof(int32_t);
+    // asm volatile("\t movl %%esp, %0" : "=r" (esp));
+    // asm volatile("\t movl %%ebp, %0" : "=r" (ebp));
+    // new_pcb->kern_esp = esp;
+    // new_pcb->kern_ebp = ebp;
+    // eh idk 
+
+
     // set ss0 and esp0
     // needs to point to bottom of 4MB page (i think)
 
@@ -142,54 +151,38 @@ int32_t execute (const uint8_t* command) {
     uint32_t output;
     // asm volatile("pushl %%eax   \n");
     // https://stackoverflow.com/questions/6892421/switching-to-user-mode-using-iret
-    cli();
-    // asm volatile ("andl $0x00FF, %%eax" : : "a" (USER_DS));
-    // asm volatile ("movw %ax, %ds");
-    asm volatile ("pushl %%eax" : : "a" (USER_DS));
-    // asm volatile ("pushl %eax");
-    asm volatile ("pushl %%ebx" : : "b" (esp));
-    asm volatile ("pushfl");
-    asm volatile ("popl %edi");
-    asm volatile ("orl $0x3200, (%edi)");
-    asm volatile ("pushl %edi");
-    asm volatile ("pushl %%ecx" : : "c" (USER_CS));
-    asm volatile ("pushl %%edx" : : "d" (eip));
-    asm volatile ("iret" );
-
-    //: "=a" (output)
-    // asm volatile ("\
-    //     pushl %%eax             ;\
-    //     pushl %%ebx             ;\
-    //     pushfl                  ;\
-    //     orl $0x0200, %%edi      ;\
-    //     pushl %%edi             ;\
-    //     pushl %%ecx             ;\
-    //     pushl %%edx             ;\
-    //     iret                    ;\
-    //     "
-    //     : "=a" (output) : "a" (USER_DS), "b" (esp) "c" (USER_CS) "d" (eip) );
-
+    // cli(); why CLI that stops interrupts we want to enable them
     // asm volatile ("pushl %%eax" : : "a" (USER_DS));
     // asm volatile ("pushl %%ebx" : : "b" (esp));
     // asm volatile ("pushfl");
+    // asm volatile ("popl %edi");
+    // asm volatile ("orl $0x3200, (%edi)");
+    // asm volatile ("pushl %edi");
     // asm volatile ("pushl %%ecx" : : "c" (USER_CS));
     // asm volatile ("pushl %%edx" : : "d" (eip));
-    // asm volatile ("iret" : "=a" (output));
+    // asm volatile ("iret" );
+    //: "=a" (output)
 
-
-    // asm volatile (
-    //     "pushl %%eax    \n"
-    //     "pushl %%ebx    \n"
-    //     "pushfl         \n"
-    //     "pushl %%ecx    \n"
-    //     "pushl %%edx    \n"
-    //     "iret           \n"
-    //     : "=a" (output)
-    //     : "a" (USER_DS), "b" (esp), "c" (USER_CS), "d" (eip)
-    //     : "memory"
-    // );
     sti();
-    return output;
+
+    asm volatile ("\
+        andl $0x00FF, %%eax      ;\
+        movw %%ax, %%ds         ;\
+        pushl %%eax             ;\
+        pushl %%ebx             ;\
+        pushfl                  ;\
+        popl %%ebx              ;\
+        orl $0x0200, %%ebx      ;\
+        pushl %%ebx             ;\
+        pushl %%ecx             ;\
+        pushl %%edx             ;\
+        iret                    ;\
+        "
+        :
+        : "a" (USER_DS), "b" (esp), "c" (USER_CS), "d" (eip) 
+    );
+
+    return 0;
 }
 
 /* NO NEED TO IMPLEMENT YET(CHECKPOINT 3.2 COMMENT) */
