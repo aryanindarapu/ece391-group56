@@ -48,7 +48,7 @@ typedef struct pcb {
     file_desc_t file_desc_arr[MAX_FILE_DESC];
 } pcb_t;
 
-uint8_t pcb_flags[MAX_NUM_PROGRAMS];
+uint32_t pcb_flags[MAX_NUM_PROGRAMS];
 
 #endif /* ASM */
 

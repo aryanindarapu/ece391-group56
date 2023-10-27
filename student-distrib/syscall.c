@@ -12,19 +12,20 @@ int32_t execute (const uint8_t* command) {
 
     // NOTE: all of this is probably out of order, need to rearrange
     
-    // Assuming: filename cmd1 cmd2
+    // Assuming: filename arg1 arg2
     // NOTE: this doesn't allow for preceding spaces, but that's fine for now
     int i;
-    uint8_t filename[128]; // TODO BEN: get filename here
-    for (i = 0; i < strlen((const int8_t *) command); i++) {
-        if (command[i] == ' ') {
+    uint8_t filename[128];
+    for (i = 0; i < 128; i++) {
+        if (command[i] == ' ' || command[i] == '\0') {
+            filename[i] = '\0';
             break;
         }
 
         filename[i] = command[i];
     }
 
-    filename[i] = '\0';
+    // filename[idx + 1] = '\0';
 
     // TODO: check commands here, use getargs
 
@@ -84,7 +85,7 @@ int32_t execute (const uint8_t* command) {
     if (new_pid_idx == 0) { // i.e. the PCB is for the initial shell
         new_pcb->parent_pid = -1;
     } else {
-        new_pcb->parent_pid = new_pid_idx; // point to parent PCB pointer
+        new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
     }
 
     /* Set up 4MB page for user program */
@@ -97,7 +98,7 @@ int32_t execute (const uint8_t* command) {
     new_page_dir.a = 0;
     new_page_dir.d = 0;
     new_page_dir.ps = 1; // 1 - set to 4 MB page
-    new_page_dir.g = 1; // TODO: check this, global flag
+    new_page_dir.g = 0; // TODO: check this, global flag
     new_page_dir.avail = 0;
     new_page_dir.table_base_addr = ((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB; // TODO: set to bottom of entry
     page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir; // TODO: set to bottom of entry, also is the address start correct?
@@ -137,6 +138,7 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
 
+    // sti();
     // TODO BEN: add iret, asm volatile here
     // set up DS, ESP, EFLAGS, CS, EIP
     uint32_t output;
@@ -160,6 +162,7 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
 
+    asm volatile ("ret_from_halt: \n");
     return 0;
 }
 
@@ -188,14 +191,15 @@ int32_t halt (uint8_t status) {
     tss.esp0 = (uint32_t) parent_pcb + EIGHT_KB - STACK_FENCE_SIZE;
 
     // Change physical memory page address
-    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = ((parent_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB;
+    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = (((parent_pcb->pid) * FOUR_MB) + EIGHT_MB) / FOUR_KB;
     // ebp, esp, status
     asm volatile (
         "movl %0, %%esp;"
         "movl %1, %%ebp;"
         "movl %2, %%eax;"
+        "jmp ret_from_halt;"
         : 
-        :"r" (pcb->kernel_esp), "r" (pcb->kernel_ebp), "r" ((uint32_t) status)
+        :"r" (parent_pcb->kernel_esp), "r" (parent_pcb->kernel_ebp), "r" ((uint32_t) status)
         
     );
 
@@ -287,6 +291,10 @@ int32_t vidmap (uint8_t** screen_start) {
     return -1;
 }
 
+int32_t getargs (uint8_t* buf, uint32_t nbytes) {
+    return -1;
+}
+
 /* EXTRA CREDIT SYSTEM CALLS */
 int32_t set_handler (uint32_t signum, void* handler_address) {
     return -1;
@@ -295,8 +303,3 @@ int32_t set_handler (uint32_t signum, void* handler_address) {
 int32_t sigreturn (void) {
     return -1;
 }
-
-int32_t getargs (uint8_t* buf, uint32_t nbytes) {
-    return -1;
-}
-

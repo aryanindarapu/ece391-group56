@@ -22,8 +22,8 @@ system_call_handler:
     pushl %esi 
     pushl %edi
     pushl %ebp
-    pushl %eax
-    pushfl
+    # pushl %eax
+    # pushfl
 
     # send arguments in ebx ecx and edx onto stack for the jump symbols function
     pushl %edx # third arg
@@ -41,8 +41,8 @@ end_sys_call:
     addl $12, %esp
     
     # callee teardown (from jumptable C function)
-    popfl
-    popl %eax
+    # popfl
+    # popl %eax
     popl %ebp
     popl %edi
     popl %esi

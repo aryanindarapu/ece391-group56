@@ -126,7 +126,9 @@ int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
         all of the entry names anyway we nbytes can't be specified by the caller
     */
     pcb_t * pcb = get_curr_pcb_ptr();
-    if (pcb->file_desc_arr[fd].file_pos == boot_block_ptr->num_dirs) return 0;
+    if (pcb->file_desc_arr[fd].file_pos >= boot_block_ptr->num_dirs) {
+        return 0;
+    }
 
    char buffer[80];
    char temp[10];
@@ -199,7 +201,7 @@ int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
 
     /* buffer is now prepared to send to buf */
     buffer[79] = '\n';
-    memcpy(buf,(void *)buffer, 80 );
+    memcpy(buf,(void *)buffer, nbytes);
     //buf = (void *)buffer;
     pcb->file_desc_arr[fd].file_pos++;
 

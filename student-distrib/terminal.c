@@ -2,7 +2,7 @@
 
 
 static unsigned int buffer_idx = 0;
-static char line_buffer[LINE_BUFFER_SIZE];
+static uint8_t line_buffer[LINE_BUFFER_SIZE];
 static volatile int enter_flag_pressed = 0;
 static unsigned int save_buffer_idx = 0;
 
@@ -101,18 +101,17 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     cli();
     
     line_buffer[save_buffer_idx] = '\n';
-    line_buffer[save_buffer_idx + 1] = '\0';
     save_buffer_idx++;
     enter_flag_pressed = 0;
     //save_buffer_idx = buffer_idx;
     if (nbytes < save_buffer_idx) {
-        memcpy(buf, line_buffer, nbytes);
+        memcpy(buf, (const void *) line_buffer, nbytes);
         sti();
         return nbytes;
     }
     else
     {
-        memcpy(buf, line_buffer, save_buffer_idx + 1);
+        memcpy(buf, (const void *) line_buffer, save_buffer_idx);
         sti();
         return save_buffer_idx;
     }

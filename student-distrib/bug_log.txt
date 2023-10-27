@@ -109,3 +109,7 @@ BUG: Test cases do not properly call terminal_read and terminal_write.
 DIFFICULTY: 2 hours
 SOLUTION: We were checking to make sure if fd was >= 2 which was incorrect since stdin and stdout are 0 and 1 respectively.
 -----------------
+- fourth character gets replaced by a NULL
+- ls program only prints the first line
+- ls program prints the correct lines, returns 0, then page faults
+- opening shell within shell doesn't do anything
