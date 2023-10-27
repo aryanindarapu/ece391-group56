@@ -98,7 +98,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 }
 
 // TODO BEN: comment
-pcb_t * get_pcb_ptr() {
+pcb_t * get_curr_pcb_ptr() {
     // TODO: should this actually be ANDing ESP bitmask?
     // https://www.cs.columbia.edu/~junfeng/10sp-w4118/lectures/l07-proc-linux.pdf
     pcb_t * pcb_ptr;
@@ -114,6 +114,6 @@ pcb_t * get_pcb_ptr() {
     return pcb_ptr;
 }
 
-pcb_t * get_pcb(int32_t pid) {
+pcb_t * get_pcb_ptr(int32_t pid) {
     return (pcb_t *)(EIGHT_MB - (pid + 1) * EIGHT_KB);
 }

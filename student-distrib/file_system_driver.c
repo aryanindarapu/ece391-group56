@@ -18,6 +18,7 @@ void init_file_system(void) {
     // Boot block pointer set in kernel.c
     inode_ptr = (inode_t *)(boot_block_ptr + 1); // increase by size of pointer 
     data_block_ptr = (data_block_t *)(inode_ptr + boot_block_ptr->num_inodes);
+    init_ops_tables();
 }
 
 /* 
@@ -30,41 +31,6 @@ void init_file_system(void) {
  */
 int32_t file_open(const uint8_t * filename) {
     return 0;
-    // pcb_t * pcb = get_pcb_ptr();
-
-    // dentry_t file_dentry;
-    // int file_desc_index;
-    
-    // // ensure the filename is valid
-    // if (filename == NULL || strlen(filename) > 32) {
-    //     return -1;
-    // }
-
-    // // ensure the file desc has space AND find the index to emplace this file
-    // for (file_desc_index = 2; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
-    //     //is the index empty?
-    //     if (pcb->file_desc_arr[file_desc_index].flags == 0) {
-    //         //https://stackoverflow.com/questions/9932212/jump-table-examples-in-c
-    //         break; // this file_desc_index is the one we will emplace the file to 
-    //     }
-    // }
-
-    // // Ensure there was space left
-    // if (file_desc_index >= MAX_FILE_DESC) {
-    //     return -1;
-    // }
-
-    // /* Let read_dentry_by_name populate our dentry, or tell us that the dentry doesn't exist in our filesystem */
-    // if (read_dentry_by_name (filename, &file_dentry) == -1) { 
-    //     return -1; //file doesn't exist
-    // }
-    
-    // /* this fd index is now taken */
-    // pcb->file_desc_arr[file_desc_index].inode = file_dentry.inode_num;
-    // pcb->file_desc_arr[file_desc_index].flags = 1;
-    // pcb->file_desc_arr[file_desc_index].file_pos = 0;
-
-    // return file_desc_index;
 }
 
 /* 
@@ -76,7 +42,7 @@ int32_t file_open(const uint8_t * filename) {
  *   SIDE EFFECTS: removes from file descriptor array
  */
 int32_t file_close(int32_t fd) {
-    pcb_t * pcb = get_pcb_ptr();
+    pcb_t * pcb = get_curr_pcb_ptr();
 
     // make the file unreadable and remove its pointers to operation functions
     pcb->file_desc_arr[fd].flags = 0;
@@ -94,7 +60,7 @@ int32_t file_close(int32_t fd) {
  *   SIDE EFFECTS: none
  */
 int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
-    pcb_t * pcb = get_pcb_ptr();
+    pcb_t * pcb = get_curr_pcb_ptr();
 
     if (pcb->file_desc_arr[fd].flags == 0) return -1;
 
@@ -121,33 +87,6 @@ int32_t file_write(int32_t fd, const void* buf, int32_t nbytes) {
  */
 int32_t dir_open(const uint8_t * filename) {
     return 0;
-    // int file_desc_index;
-    // dentry_t dir_dentry;
-    // pcb_t * pcb = get_pcb_ptr();
-
-    // // ensure the file desc has space AND find the index to emplace this file
-    // for (file_desc_index = 2; file_desc_index < MAX_FILE_DESC; file_desc_index++) {
-    //     //is the index empty?
-    //     if (pcb->file_desc_arr[file_desc_index].flags == 0) {
-    //         break; //this file_desc_index is the one we will emplace the file to 
-    //     }
-    // }
-
-    // // Ensure there was space left
-    // if (file_desc_index >= MAX_FILE_DESC) {
-    //     return -1;
-    // }
-
-    // /* Let read_dentry_by_name populate our dentry, or tell us that the dentry doesn't exist in our filesystem */
-    // if (read_dentry_by_name (filename, &dir_dentry) == -1) { 
-    //     return -1; //file doesn't exist
-    // }
-
-    // pcb->file_desc_arr[file_desc_index].flags = 1;
-    // pcb->file_desc_arr[file_desc_index].inode = dir_dentry.inode_num;
-    // pcb->file_desc_arr[file_desc_index].file_pos = 0;
-
-    // return file_desc_index;
 }
 
 /* 
@@ -160,7 +99,7 @@ int32_t dir_open(const uint8_t * filename) {
  */
 int32_t dir_close(int32_t fd) {
     //clear the flag and remove the file operations pointers for this process
-    pcb_t * pcb = get_pcb_ptr();
+    pcb_t * pcb = get_curr_pcb_ptr();
 
     pcb->file_desc_arr[fd].flags = 0;
     return 0;
@@ -186,7 +125,7 @@ int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
         syscall operations table is set to the dir_ops_ptr for this entry, as for nbytes we need to display 
         all of the entry names anyway we nbytes can't be specified by the caller
     */
-    pcb_t * pcb = get_pcb_ptr();
+    pcb_t * pcb = get_curr_pcb_ptr();
     if (pcb->file_desc_arr[fd].file_pos == boot_block_ptr->num_dirs) return 0;
 
    char buffer[80];

@@ -5,11 +5,6 @@
 #include "lib.h"
 #include "x86_desc.h"
 
-// TODO: add init system calls the sets up stdin and stdout file entries
-void init_syscall() {
-    // TODO: initialize array of PID flags
-}
-
 int32_t execute (const uint8_t* command) {
     if (command == NULL) return -1;
     // Do iret to go to user memory
@@ -68,26 +63,6 @@ int32_t execute (const uint8_t* command) {
     }
 
     /////////////// POINT OF NO RETURN ///////////////
-    /* Set up 4MB page for user program */
-    page_dir_desc_t new_page_dir;
-    new_page_dir.p = 1;
-    new_page_dir.rw = 1; // TODO: check this
-    new_page_dir.us = 1; // TODO: check this
-    new_page_dir.pwt = 0;
-    new_page_dir.pcd = 0;
-    new_page_dir.a = 0;
-    new_page_dir.d = 0;
-    new_page_dir.ps = 1; // 1 - set to 4 MB page
-    new_page_dir.g = 1; // TODO: check this, global flag
-    new_page_dir.avail = 0;
-    new_page_dir.table_base_addr = ((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB; // TODO: set to bottom of entry
-    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir; // TODO: set to bottom of entry, also is the address start correct?
-    flush_tlb();
-
-    /* Copy to user memory */
-    int status = read_data(exec_dentry.inode_num, 0, (uint8_t *) PROGRAM_START, ((inode_t *)(inode_ptr + exec_dentry.inode_num))->length); // TODO: check this
-    // int status = read_data(exec_dentry.inode_num, 0, (uint8_t *) USER_MEM_VIRTUAL_ADDR, ((inode_t *)(inode_ptr + exec_dentry.inode_num))->length); // TODO: check this
-    
     /* Set up PCB */
     pcb_flags[new_pid_idx] = 1; // enable PCB block
     // TODO: add commands to PCB
@@ -112,63 +87,63 @@ int32_t execute (const uint8_t* command) {
         new_pcb->parent_pid = new_pid_idx; // point to parent PCB pointer
     }
 
-    /* Save regs needed for PCB */
-    uint8_t eip_ptr[4]; // TODO: replace with #define
+    /* Set up 4MB page for user program */
+    page_dir_desc_t new_page_dir;
+    new_page_dir.p = 1;
+    new_page_dir.rw = 1; // TODO: check this
+    new_page_dir.us = 1; // TODO: check this
+    new_page_dir.pwt = 0;
+    new_page_dir.pcd = 0;
+    new_page_dir.a = 0;
+    new_page_dir.d = 0;
+    new_page_dir.ps = 1; // 1 - set to 4 MB page
+    new_page_dir.g = 1; // TODO: check this, global flag
+    new_page_dir.avail = 0;
+    new_page_dir.table_base_addr = ((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB; // TODO: set to bottom of entry
+    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir; // TODO: set to bottom of entry, also is the address start correct?
+    flush_tlb();
+
+    /* Copy to user memory */
+    read_data(exec_dentry.inode_num, 0, (uint8_t *) PROGRAM_START, ((inode_t *)(inode_ptr + exec_dentry.inode_num))->length);
     
+    /* Save regs needed for PCB */
     // Read bytes 24 - 27 to get eip
+    uint8_t eip_ptr[sizeof(uint32_t)];
     read_data(exec_dentry.inode_num, EIP_START, eip_ptr, sizeof(uint32_t));
+
     // new_pcb->eip_reg = *((uint32_t *) eip_ptr); // TODO: check if this is correct
     // new_pcb->esp_reg = 
-    /* Set up TSS */
-    // TSS - contains process state information of the parent task to restore it
-    tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
 
-    // tss.esp0 = (uint32_t) (new_pcb + EIGHT_KB); // - sizeof(pcb_t); // offset of kernel stack segment -- TODO: idk what this should be
-    tss.esp0 = (uint32_t) (EIGHT_MB - (new_pid_idx * EIGHT_KB) - 4); // - sizeof(pcb_t); // offset of kernel stack segment -- TODO: idk what this should be
-    // TODO: may need to set up memory "fence" if any of our code will overwrite original mem struct (4 mem addrs)
+    /* Set up TSS */ // TSS - contains process state information of the parent task to restore it
+    tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
+    tss.esp0 = (uint32_t) new_pcb + EIGHT_KB - STACK_FENCE_SIZE; // offset of kernel stack segment -- TODO: idk what this should be
     
-    uint32_t esp, eip;
-    eip = *((uint32_t *) eip_ptr);
-    // eip = *((int *) eip_ptr);
-    // esp = ((new_pid_idx + 1) * FOUR_MB) + EIGHT_MB - 4;
-    esp = USER_MEM_VIRTUAL_ADDR + FOUR_KB - sizeof(int32_t);
-    // asm volatile("\t movl %%esp, %0" : "=r" (esp));
-    // asm volatile("\t movl %%ebp, %0" : "=r" (ebp));
+    uint32_t user_eip = *((uint32_t *) eip_ptr);
+    uint32_t user_esp = USER_MEM_VIRTUAL_ADDR + FOUR_KB - STACK_FENCE_SIZE; // TODO: how is this something that we arrived at?
+
+    // asm volatile("movl %%esp, %0" : "=r" (esp));
+    // asm volatile("movl %%ebp, %0" : "=r" (ebp));
     // new_pcb->kern_esp = esp;
     // new_pcb->kern_ebp = ebp;
     // eh idk 
 
-
-    // set ss0 and esp0
-    // needs to point to bottom of 4MB page (i think)
-
-    // asm volatile (
-    //     "movl %%esp, %%eax"
-    //     : "=a" (new_pcb->esp)
-    //     : 
-    // )
+    // TODO: store kernel esp
+    asm volatile (
+        "movl %%esp, %%eax   ;\
+         movl %%ebp, %%ebx   ;\
+        "
+        : "=a" (new_pcb->kernel_esp), "=b" (new_pcb->kernel_ebp)
+        :
+        : "memory"
+    );
 
     // TODO BEN: add iret, asm volatile here
     // set up DS, ESP, EFLAGS, CS, EIP
     uint32_t output;
-    // asm volatile("pushl %%eax   \n");
     // https://stackoverflow.com/questions/6892421/switching-to-user-mode-using-iret
-    // cli(); why CLI that stops interrupts we want to enable them
-    // asm volatile ("pushl %%eax" : : "a" (USER_DS));
-    // asm volatile ("pushl %%ebx" : : "b" (esp));
-    // asm volatile ("pushfl");
-    // asm volatile ("popl %edi");
-    // asm volatile ("orl $0x3200, (%edi)");
-    // asm volatile ("pushl %edi");
-    // asm volatile ("pushl %%ecx" : : "c" (USER_CS));
-    // asm volatile ("pushl %%edx" : : "d" (eip));
-    // asm volatile ("iret" );
-    //: "=a" (output)
-
-    sti();
 
     asm volatile ("\
-        andl $0x00FF, %%eax      ;\
+        andl $0x00FF, %%eax     ;\
         movw %%ax, %%ds         ;\
         pushl %%eax             ;\
         pushl %%ebx             ;\
@@ -180,26 +155,51 @@ int32_t execute (const uint8_t* command) {
         pushl %%edx             ;\
         iret                    ;\
         "
-        :
-        : "a" (USER_DS), "b" (esp), "c" (USER_CS), "d" (eip) 
+        : "=a" (output)
+        : "a" (USER_DS), "b" (user_esp), "c" (USER_CS), "d" (user_eip) 
         : "memory"
     );
 
-    return 0;
+    return output;
 }
 
 /* NO NEED TO IMPLEMENT YET(CHECKPOINT 3.2 COMMENT) */
 int32_t halt (uint8_t status) {
     // When closing, do I need to check if current PCB has any child PCBs?
-    // pcb_t * pcb = get_pcb_ptr();
-    // int i;
-    // for (i = 0; i < MAX_FILE_DESC; i++) {
-    //     pcb->file_desc_arr[i].flags = 0;
-    // }
-    // set pcb flags = 0
+    pcb_t * pcb = get_curr_pcb_ptr();
+    pcb_t * parent_pcb = get_pcb_ptr(pcb->parent_pid);
 
-    // TODO: jump back to execute handler
-    return -1;
+    if (pcb->pid == 0) {
+        // this means they tried to halt base program (i.e. shell)
+        return -1;
+    }
+
+    // remove everything from FD array
+    int i;
+    for (i = 0; i < MAX_FILE_DESC; i++) {
+        pcb->file_desc_arr[i].flags = 0;
+    } 
+
+    // remove current pcb from 
+    pcb_flags[pcb->pid] = 0;
+    
+    // Set TSS again
+    tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
+    tss.esp0 = (uint32_t) parent_pcb + EIGHT_KB - STACK_FENCE_SIZE;
+
+    // Change physical memory page address
+    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = ((parent_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB;
+    // ebp, esp, status
+    asm volatile (
+        "movl %0, %%esp;"
+        "movl %1, %%ebp;"
+        "movl %2, %%eax;"
+        : 
+        :"r" (pcb->kernel_esp), "r" (pcb->kernel_ebp), "r" ((uint32_t) status)
+        
+    );
+
+    return status;
 }
 
 // TODO: this seems to do the exact same things as file open and dir open, need to check for overlap
@@ -211,7 +211,8 @@ int32_t open (const uint8_t* filename) {
     if (filename == NULL || strlen((const int8_t *) filename) > 32) {
         return -1;
     }
-    pcb_t * pcb = get_pcb_ptr();
+
+    pcb_t * pcb = get_curr_pcb_ptr();
     // ensure the file desc has space AND find the index to emplace this file
     for (fd = 2; fd < MAX_FILE_DESC; fd++) {
         // is the index empty?
@@ -237,58 +238,51 @@ int32_t open (const uint8_t* filename) {
         case 0: // rtc driver
             status = rtc_open(filename);
             if (fd < 0) return -1;
-            // TODO: need to make rtc_ops_table
-            // pcb->file_desc_arr[fd].ops_ptr = rtc_ops_table;
-            pcb->file_desc_arr[fd].flags = 1;
+            pcb->file_desc_arr[fd].ops_ptr = rtc_ops_table;
             return 0;
         case 1: // dir
             status = dir_open(filename);
             if (fd < 0) return -1;
             pcb->file_desc_arr[fd].ops_ptr = dir_ops_table;
-            pcb->file_desc_arr[fd].flags = 1;
             break;
         case 2: // file
             status = file_open(filename);
             if (fd < 0) return -1;
             pcb->file_desc_arr[fd].ops_ptr = file_ops_table;
             pcb->file_desc_arr[fd].inode = file_dentry.inode_num;
-            pcb->file_desc_arr[fd].flags = 1;
             pcb->file_desc_arr[fd].file_pos = 0;
             break;
         default:
             return -1;
     }
 
+    pcb->file_desc_arr[fd].flags = 1;
     return fd;
 }
 
 int32_t close (uint32_t fd) {
-    if (fd <= 1 || fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
-    pcb_t * pcb = get_pcb_ptr();
+    if (fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
+    pcb_t * pcb = get_curr_pcb_ptr();
     if (!pcb->file_desc_arr[fd].flags) return -1; // Checks if fd is inactive
     return pcb->file_desc_arr[fd].ops_ptr.close(fd);
 }
 
 int32_t read (uint32_t fd, void* buf, uint32_t nbytes) {
-    if (fd <= 1 || fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
-    pcb_t * pcb = get_pcb_ptr();
+    if (fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
+    pcb_t * pcb = get_curr_pcb_ptr();
     if (!pcb->file_desc_arr[fd].flags) return -1; // Checks if fd is inactive
     return pcb->file_desc_arr[fd].ops_ptr.read(fd, buf, nbytes);
 }
 
 int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
-    if (fd <= 1 || fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
-    pcb_t * pcb = get_pcb_ptr();
+    if (fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
+    pcb_t * pcb = get_curr_pcb_ptr();
     if (!pcb->file_desc_arr[fd].flags) return -1; // Checks if fd is inactive
     return pcb->file_desc_arr[fd].ops_ptr.write(fd, buf, nbytes);
 }
 
 
 /* NO NEED TO IMPLEMENT YET (CHECKPOINT 3.4)*/
-// uint32_t getargs (uint8_t* buf, uint32_t nbytes){
-
-// }
-
 int32_t vidmap (uint8_t** screen_start) {
     return -1;
 }

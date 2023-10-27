@@ -11,6 +11,7 @@
 #define USER_MEM_VIRTUAL_ADDR 0x8000000 // 128 MB
 #define PROGRAM_START 0x08048000
 #define EIP_START 24
+#define STACK_FENCE_SIZE 4
 
 #define MAGIC_BYTE_0 0x7F
 #define MAGIC_BYTE_1 0x45
@@ -41,10 +42,8 @@ int32_t sigreturn (void);
 typedef struct pcb {
     int32_t pid; 
     int32_t parent_pid;
-    uint32_t esp;
-    uint32_t eip;
-    // uint32_t kern_ebp;
-    // uint32_t kern_esp;
+    uint32_t kernel_ebp;
+    uint32_t kernel_esp;
     uint8_t * commands;
     file_desc_t file_desc_arr[MAX_FILE_DESC];
 } pcb_t;
