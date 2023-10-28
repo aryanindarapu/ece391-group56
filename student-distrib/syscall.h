@@ -45,6 +45,7 @@ typedef struct pcb {
     uint32_t kernel_ebp;
     uint32_t kernel_esp;
     uint8_t * commands;
+    uint32_t return_addr;
     file_desc_t file_desc_arr[MAX_FILE_DESC];
 } pcb_t;
 

@@ -5,6 +5,8 @@
 #include "lib.h"
 #include "x86_desc.h"
 
+// static int halt_flag = 0;
+
 int32_t execute (const uint8_t* command) {
     if (command == NULL) return -1;
     // Do iret to go to user memory
@@ -101,7 +103,8 @@ int32_t execute (const uint8_t* command) {
     new_page_dir.g = 0; // TODO: check this, global flag
     new_page_dir.avail = 0;
     new_page_dir.table_base_addr = ((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB; // TODO: set to bottom of entry
-    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir; // TODO: set to bottom of entry, also is the address start correct?
+    // page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir; // TODO: set to bottom of entry, also is the address start correct?
+    page_dir[32] = new_page_dir; // TODO: set to bottom of entry, also is the address start correct?
     flush_tlb();
 
     /* Copy to user memory */
@@ -123,9 +126,13 @@ int32_t execute (const uint8_t* command) {
     uint32_t user_eip = *((uint32_t *) eip_ptr);
     uint32_t user_esp = PROGRAM_START - STACK_FENCE_SIZE; // TODO: how is this something that we arrived at?
 
-    asm volatile("movl %%esp, %0" : "=r" (new_pcb->kernel_esp));
-    asm volatile("movl %%ebp, %0" : "=r" (new_pcb->kernel_ebp));
+    // asm volatile("movl %%esp, %0" : "=r" (new_pcb->kernel_esp));
+    // asm volatile("movl %%ebp, %0" : "=r" (new_pcb->kernel_ebp));
     
+    // if(halt_flag){
+    //     halt_flag = 0;
+    //     return 0;
+    // }
     // eh idk 
 
     // TODO: store kernel esp
@@ -144,37 +151,52 @@ int32_t execute (const uint8_t* command) {
     uint32_t output;
     // https://stackoverflow.com/questions/6892421/switching-to-user-mode-using-iret
 
-    tss.esp0 = (uint32_t) EIGHT_MB - new_pid_idx*EIGHT_KB; //new_pcb + EIGHT_KB - STACK_FENCE_SIZE; // offset of kernel stack segment -- TODO: idk what this should be
+    tss.esp0 = (uint32_t) EIGHT_MB - new_pid_idx * EIGHT_KB - STACK_FENCE_SIZE; // new_pcb + EIGHT_KB - STACK_FENCE_SIZE; // offset of kernel stack segment -- TODO: idk what this should be
     
-    asm volatile ("\
-        andl $0x00FF, %%eax     ;\
-        movw %%ax, %%ds         ;\
-        pushl %%eax             ;\
-        pushl %%ebx             ;\
-        pushfl                  ;\
-        popl %%ebx              ;\
-        orl $0x0200, %%ebx      ;\
-        pushl %%ebx             ;\
-        pushl %%ecx             ;\
-        pushl %%edx             ;\
-        iret                    ;\
+    asm volatile("\
+        movl %%esp, %0          ;\
+        movl %%ebp, %1          ;\
         "
-        : "=a" (output)
-        : "a" (USER_DS), "b" (user_esp), "c" (USER_CS), "d" (user_eip) 
-        : "memory"
+        : "=r" (new_pcb->kernel_esp), "=r" (new_pcb->kernel_ebp)
     );
 
-    asm volatile ("ret_from_halt: \n"); // cannot access memory at 0x4????
-    output = 1;
-    asm volatile ("leave \n");
-    output = 2;
-    asm volatile ("ret\n");
-    //return 0; //TODO: RETURN status
+    asm volatile("")
+
+    // asm volatile ("\
+
+    //     pushal                  ;\
+    //     pushfl                  ;\
+    //     andl $0x00FF, %%eax     ;\
+    //     movw %%ax, %%ds         ;\
+    //     pushl %%eax             ;\
+    //     pushl %%ebx             ;\
+    //     pushfl                  ;\
+    //     popl %%ebx              ;\
+    //     orl $0x0200, %%ebx      ;\
+    //     pushl %%ebx             ;\
+    //     pushl %%ecx             ;\
+    //     pushl %%edx             ;\
+    //     iret                    ;\
+    //     ret_from_halt:          ;\
+    //     popfl                   ;\
+    //     popal                   ;\
+    //     "
+    //     : "=r" (new_pcb->return_addr), "=a" (output)
+    //     : "a" (USER_DS), "b" (user_esp), "c" (USER_CS), "d" (user_eip) 
+    //     : "memory"
+    // );
+        // leal ret_from_halt, %%eax  ;\
+        // movl %%eax, %2          ;\
+ 
+
+    return 0; //TODO: RETURN status
 }
 
 /* NO NEED TO IMPLEMENT YET(CHECKPOINT 3.2 COMMENT) */
 int32_t halt (uint8_t status) {
     // When closing, do I need to check if current PCB has any child PCBs?
+    // halt_flag = 1;
+
     pcb_t * pcb = get_curr_pcb_ptr();
     
     if (pcb->pid == 0) {
@@ -197,21 +219,26 @@ int32_t halt (uint8_t status) {
     //tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
     
     // Change physical memory page address
-    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = (((parent_pcb->pid) * FOUR_MB) + EIGHT_MB) / FOUR_KB;
+    // page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = (((parent_pcb->pid) * FOUR_MB) + EIGHT_MB) / FOUR_KB;
+    page_dir[32].table_base_addr = (((parent_pcb->pid) * FOUR_MB) + EIGHT_MB) / FOUR_KB;
+    flush_tlb();
     // ebp, esp, status
-    tss.esp0 = (uint32_t) parent_pcb->kernel_esp; // EIGHT_MB - parent_pcb->pid*EIGHT_KB;
+    tss.esp0 = (uint32_t) EIGHT_MB - (parent_pcb->pid) * EIGHT_KB - STACK_FENCE_SIZE;  //  parent_pcb->kernel_esp; // 
 
-    asm volatile (
-        "movl %0, %%esp;"
-        "movl %1, %%ebp;"
-        "movl %2, %%eax;"
-        "jmp ret_from_halt;"
-        : 
-        :"r" (parent_pcb->kernel_esp), "r" (parent_pcb->kernel_ebp), "r" ((uint32_t) status)
+    
+    // asm volatile ("\
+    //     movl %0, %%esp     ;\
+    //     movl %1, %%ebp     ;\
+    //     jmp *%2            ;\
+    //     "
+    //     : 
+    //     :"r" (parent_pcb->kernel_esp), "r" (parent_pcb->kernel_ebp), "r" (parent_pcb->return_addr)
         
-    );
+    // );
 
-    return status;
+    //asm volatile ("jmp ret_from_halt");
+
+    return 0;
 }
 
 // TODO: this seems to do the exact same things as file open and dir open, need to check for overlap

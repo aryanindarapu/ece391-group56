@@ -58,5 +58,3 @@ INVALID:
     movl $-1, %eax 
     
     iret
-
-
