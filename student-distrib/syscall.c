@@ -88,7 +88,7 @@ int32_t execute (const uint8_t* command) {
         new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
     }
 
-    /* Set up 4MB page for user program */
+    /* Set up 4MB page for user program */ // TODO: move to helper fnc
     page_dir_desc_t new_page_dir;
     new_page_dir.p = 1;
     new_page_dir.rw = 1; // TODO: check this
@@ -116,27 +116,27 @@ int32_t execute (const uint8_t* command) {
     // new_pcb->esp_reg = 
 
     /* Set up TSS */ // TSS - contains process state information of the parent task to restore it
-    tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
-    tss.esp0 = (uint32_t) new_pcb + EIGHT_KB - STACK_FENCE_SIZE; // offset of kernel stack segment -- TODO: idk what this should be
+    //tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
     
+    
+
     uint32_t user_eip = *((uint32_t *) eip_ptr);
     uint32_t user_esp = PROGRAM_START - STACK_FENCE_SIZE; // TODO: how is this something that we arrived at?
 
-    // asm volatile("movl %%esp, %0" : "=r" (esp));
-    // asm volatile("movl %%ebp, %0" : "=r" (ebp));
-    // new_pcb->kern_esp = esp;
-    // new_pcb->kern_ebp = ebp;
+    asm volatile("movl %%esp, %0" : "=r" (new_pcb->kernel_esp));
+    asm volatile("movl %%ebp, %0" : "=r" (new_pcb->kernel_ebp));
+    
     // eh idk 
 
     // TODO: store kernel esp
-    asm volatile (
-        "movl %%esp, %%eax   ;\
-         movl %%ebp, %%ebx   ;\
-        "
-        : "=a" (new_pcb->kernel_esp), "=b" (new_pcb->kernel_ebp)
-        :
-        : "memory"
-    );
+    // asm volatile (
+    //     "movl %%esp, %%eax   ;\
+    //      movl %%ebp, %%ebx   ;\
+    //     "
+    //     : "=a" (new_pcb->kernel_esp), "=b" (new_pcb->kernel_ebp)
+    //     :
+    //     : "memory"
+    // );
 
     // sti();
     // TODO BEN: add iret, asm volatile here
@@ -144,6 +144,8 @@ int32_t execute (const uint8_t* command) {
     uint32_t output;
     // https://stackoverflow.com/questions/6892421/switching-to-user-mode-using-iret
 
+    tss.esp0 = (uint32_t) EIGHT_MB - new_pid_idx*EIGHT_KB; //new_pcb + EIGHT_KB - STACK_FENCE_SIZE; // offset of kernel stack segment -- TODO: idk what this should be
+    
     asm volatile ("\
         andl $0x00FF, %%eax     ;\
         movw %%ax, %%ds         ;\
@@ -162,20 +164,25 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
 
-    asm volatile ("ret_from_halt: \n");
-    return 0;
+    asm volatile ("ret_from_halt: \n"); // cannot access memory at 0x4????
+    output = 1;
+    asm volatile ("leave \n");
+    output = 2;
+    asm volatile ("ret\n");
+    //return 0; //TODO: RETURN status
 }
 
 /* NO NEED TO IMPLEMENT YET(CHECKPOINT 3.2 COMMENT) */
 int32_t halt (uint8_t status) {
     // When closing, do I need to check if current PCB has any child PCBs?
     pcb_t * pcb = get_curr_pcb_ptr();
-    pcb_t * parent_pcb = get_pcb_ptr(pcb->parent_pid);
-
+    
     if (pcb->pid == 0) {
         // this means they tried to halt base program (i.e. shell)
         return -1;
     }
+
+    pcb_t * parent_pcb = get_pcb_ptr(pcb->parent_pid);
 
     // remove everything from FD array
     int i;
@@ -187,12 +194,13 @@ int32_t halt (uint8_t status) {
     pcb_flags[pcb->pid] = 0;
     
     // Set TSS again
-    tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
-    tss.esp0 = (uint32_t) parent_pcb + EIGHT_KB - STACK_FENCE_SIZE;
-
+    //tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
+    
     // Change physical memory page address
     page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = (((parent_pcb->pid) * FOUR_MB) + EIGHT_MB) / FOUR_KB;
     // ebp, esp, status
+    tss.esp0 = (uint32_t) parent_pcb->kernel_esp; // EIGHT_MB - parent_pcb->pid*EIGHT_KB;
+
     asm volatile (
         "movl %0, %%esp;"
         "movl %1, %%ebp;"
