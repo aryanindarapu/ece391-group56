@@ -12,6 +12,7 @@
 #define PROGRAM_START 0x08048000
 #define EIP_START 24
 #define STACK_FENCE_SIZE 4
+#define PHYSICAL_MEMORY 2
 
 #define MAGIC_BYTE_0 0x7F
 #define MAGIC_BYTE_1 0x45
@@ -21,6 +22,7 @@
 #ifndef ASM
 
 extern void system_call_handler();
+extern void end_halt(uint32_t, uint32_t, uint8_t);
 
 /* DONT NEED TO IMPLEMENT YET */
 int32_t halt (uint8_t status);
@@ -44,6 +46,8 @@ typedef struct pcb {
     int32_t parent_pid;
     uint32_t kernel_ebp;
     uint32_t kernel_esp;
+    uint32_t user_space_esp;
+    uint32_t user_space_eip;
     uint8_t * commands;
     file_desc_t file_desc_arr[MAX_FILE_DESC];
 } pcb_t;

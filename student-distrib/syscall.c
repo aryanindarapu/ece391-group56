@@ -122,6 +122,10 @@ int32_t execute (const uint8_t* command) {
     uint32_t user_eip = *((uint32_t *) eip_ptr);
     uint32_t user_esp = PROGRAM_START - STACK_FENCE_SIZE; // TODO: how is this something that we arrived at?
 
+    /* push the user eip and esp to the cur pcb so we can restore context */
+    new_pcb->user_space_eip = user_eip;
+    new_pcb->user_space_esp = user_esp;
+
     // asm volatile("movl %%esp, %0" : "=r" (esp));
     // asm volatile("movl %%ebp, %0" : "=r" (ebp));
     // new_pcb->kern_esp = esp;
@@ -170,12 +174,32 @@ int32_t execute (const uint8_t* command) {
 int32_t halt (uint8_t status) {
     // When closing, do I need to check if current PCB has any child PCBs?
     pcb_t * pcb = get_curr_pcb_ptr();
-    pcb_t * parent_pcb = get_pcb_ptr(pcb->parent_pid);
 
+    /* push user context if its base shell */
     if (pcb->pid == 0) {
-        // this means they tried to halt base program (i.e. shell)
-        return -1;
+        uint32_t esp = pcb->user_space_esp;
+        uint32_t eip = pcb->user_space_eip;
+        // recover context from halt(esp, eip, USER_CS, USER_DS);
+        asm volatile ("\
+            andl    $0x00FF, %%ebx  ;\
+            movw    %%bx, %%ds      ;\
+            pushl   %%ebx           ;\
+            pushl   %%edx           ;\
+            pushfl                  ;\
+            popl    %%edx           ;\
+            orl     $0x0200, %%edx  ;\
+            pushl   %%edx           ;\
+            pushl   %%ecx           ;\
+            pushl   %%eax           ;\
+            iret                    ;\
+            "
+            :
+            : "a"(eip), "b"(USER_DS), "c"(USER_CS), "d"(esp)
+            : "memory"
+        );
     }
+
+    pcb_t * parent_pcb = get_pcb_ptr(pcb->parent_pid);
 
     // remove everything from FD array
     int i;
@@ -191,19 +215,16 @@ int32_t halt (uint8_t status) {
     tss.esp0 = (uint32_t) parent_pcb + EIGHT_KB - STACK_FENCE_SIZE;
 
     // Change physical memory page address
-    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = (((parent_pcb->pid) * FOUR_MB) + EIGHT_MB) / FOUR_KB;
-    // ebp, esp, status
-    asm volatile (
-        "movl %0, %%esp;"
-        "movl %1, %%ebp;"
-        "movl %2, %%eax;"
-        "jmp ret_from_halt;"
-        : 
-        :"r" (parent_pcb->kernel_esp), "r" (parent_pcb->kernel_ebp), "r" ((uint32_t) status)
-        
-    );
+    // page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = (((parent_pcb->pid) * FOUR_MB) + EIGHT_MB) / FOUR_KB;
 
-    return status;
+    /* Restore parent paging */
+    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = ((PHYSICAL_MEMORY + pcb->parent_pid) * FOUR_MB)/FOUR_KB;
+    flush_tlb(); // need to update the paging structure
+
+    end_halt(pcb->kernel_ebp, pcb->kernel_esp, status);
+
+    //if we get control back then we return fail(we shouldn't ever get control back)
+    return -1;
 }
 
 // TODO: this seems to do the exact same things as file open and dir open, need to check for overlap
