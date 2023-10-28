@@ -60,7 +60,7 @@ INVALID:
     
     iret
 
-# helper functions for halt, probably could be achieved in asm volatile
+# helper function for halt, probably could be achieved in asm volatile
 end_halt:
     pushl %ebp
     movl %esp, %ebp

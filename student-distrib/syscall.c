@@ -5,6 +5,8 @@
 #include "lib.h"
 #include "x86_desc.h"
 
+// static int halt_flag = 0;
+
 int32_t execute (const uint8_t* command) {
     if (command == NULL) return -1;
     // Do iret to go to user memory
@@ -88,7 +90,7 @@ int32_t execute (const uint8_t* command) {
         new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
     }
 
-    /* Set up 4MB page for user program */
+    /* Set up 4MB page for user program */ // TODO: move to helper fnc
     page_dir_desc_t new_page_dir;
     new_page_dir.p = 1;
     new_page_dir.rw = 1; // TODO: check this
@@ -101,7 +103,8 @@ int32_t execute (const uint8_t* command) {
     new_page_dir.g = 0; // TODO: check this, global flag
     new_page_dir.avail = 0;
     new_page_dir.table_base_addr = ((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB; // TODO: set to bottom of entry
-    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir; // TODO: set to bottom of entry, also is the address start correct?
+    // page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir; // TODO: set to bottom of entry, also is the address start correct?
+    page_dir[32] = new_page_dir; // TODO: set to bottom of entry, also is the address start correct?
     flush_tlb();
 
     /* Copy to user memory */
@@ -112,12 +115,9 @@ int32_t execute (const uint8_t* command) {
     uint8_t eip_ptr[sizeof(uint32_t)];
     read_data(exec_dentry.inode_num, EIP_START, eip_ptr, sizeof(uint32_t));
 
-    // new_pcb->eip_reg = *((uint32_t *) eip_ptr); // TODO: check if this is correct
-    // new_pcb->esp_reg = 
-
     /* Set up TSS */ // TSS - contains process state information of the parent task to restore it
-    tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
-    tss.esp0 = (uint32_t) new_pcb + EIGHT_KB - STACK_FENCE_SIZE; // offset of kernel stack segment -- TODO: idk what this should be
+    tss.ss0 = (uint16_t) KERNEL_DS;
+    tss.esp0 = (uint32_t) EIGHT_MB - new_pid_idx * EIGHT_KB - STACK_FENCE_SIZE; // new_pcb + EIGHT_KB - STACK_FENCE_SIZE; // offset of kernel stack segment -- TODO: idk what this should be
     
     uint32_t user_eip = *((uint32_t *) eip_ptr);
     uint32_t user_esp = PROGRAM_START - STACK_FENCE_SIZE; // TODO: how is this something that we arrived at?
@@ -126,12 +126,13 @@ int32_t execute (const uint8_t* command) {
     new_pcb->user_space_eip = user_eip;
     new_pcb->user_space_esp = user_esp;
 
-    // asm volatile("movl %%esp, %0" : "=r" (esp));
-    // asm volatile("movl %%ebp, %0" : "=r" (ebp));
-    // new_pcb->kern_esp = esp;
-    // new_pcb->kern_ebp = ebp;
-    // eh idk 
+    // sti();
+    // TODO BEN: add iret, asm volatile here
+    // set up DS, ESP, EFLAGS, CS, EIP
+    uint32_t output;
+    // https://stackoverflow.com/questions/6892421/switching-to-user-mode-using-iret
 
+    
     // TODO: store kernel esp
     asm volatile (
         "movl %%esp, %%eax   ;\
@@ -145,7 +146,6 @@ int32_t execute (const uint8_t* command) {
     // sti();
     // TODO BEN: add iret, asm volatile here
     // set up DS, ESP, EFLAGS, CS, EIP
-    uint32_t output;
     // https://stackoverflow.com/questions/6892421/switching-to-user-mode-using-iret
 
     asm volatile ("\
@@ -212,8 +212,8 @@ int32_t halt (uint8_t status) {
     
     // Set TSS again
     tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
-    tss.esp0 = (uint32_t) parent_pcb + EIGHT_KB - STACK_FENCE_SIZE;
-
+    tss.esp0 = (uint32_t) EIGHT_MB - (parent_pcb->pid) * EIGHT_KB - STACK_FENCE_SIZE;  //  parent_pcb->kernel_esp; // 
+    
     // Change physical memory page address
     // page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = (((parent_pcb->pid) * FOUR_MB) + EIGHT_MB) / FOUR_KB;
 
