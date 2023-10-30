@@ -1,5 +1,4 @@
 .global system_call_handler
-.global end_halt
 
 # note that the first jump table entry is 0x0 since 0 isn't a system call entry number
 sys_call_table:
@@ -23,8 +22,6 @@ system_call_handler:
     pushl %esi 
     pushl %edi
     pushl %ebp
-    # pushl %eax
-    # pushfl
 
     # send arguments in ebx ecx and edx onto stack for the jump symbols function
     pushl %edx # third arg
@@ -42,8 +39,6 @@ end_sys_call:
     addl $12, %esp
     
     # callee teardown (from jumptable C function)
-    # popfl
-    # popl %eax
     popl %ebp
     popl %edi
     popl %esi
@@ -59,30 +54,3 @@ INVALID:
     movl $-1, %eax 
     
     iret
-
-# helper function for halt, probably could be achieved in asm volatile
-end_halt:
-    pushl %ebp
-    movl %esp, %ebp
-
-    # clear regs and get arguments
-    xorl %ebx, %ebx
-    xorl %ecx, %ecx
-    xorl %edx, %edx
-    movl 8(%ebp), %ebx      # grab ebp
-    movl 12(%ebp), %ecx    # grab esp
-    movl 16(%ebp), %edx     # grab status
-    
-    # emplace args to proper register to restore execute function context
-    movl %ebx, %ebp
-    movl %ecx, %esp   
-    movl %edx, %eax # return status
-
-    leave
-    # notice this isn't iret since we are just return back to execute
-    ret
-
-# recover_context_from_halt:
-
-
-

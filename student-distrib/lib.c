@@ -200,7 +200,10 @@ int32_t puts(int8_t* s) {
     return index;
 }
 
-// TODO: write comments
+/* void move_screen_up(void);
+ * Inputs: void
+ * Return Value: none
+ * Function: moves the screen up by one line */
 void move_screen_up(void) { 
     int32_t i;
     cli();

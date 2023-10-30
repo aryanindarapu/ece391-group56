@@ -74,8 +74,6 @@ void terminal_enter()
  * Return Value: 0 success always
  * Function: sets terminal start setttings */
 int32_t terminal_open(const uint8_t* filename) {
-    // TODO: will this ever be called? also, fix
-    // TODO: may want to init buf to 0s, but that's handled anyways, so not necessary
     return -1;
 }
 

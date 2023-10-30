@@ -11,3 +11,5 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 
 pcb_t * get_curr_pcb_ptr (void);
 pcb_t * get_pcb_ptr(int32_t pid);
+
+void setup_new_dir(uint32_t table_addr);

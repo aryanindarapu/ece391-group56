@@ -321,7 +321,7 @@ int test_directory_ls() {
 	
 	dir_close(0);
 	putc('\n');
-	if(dir_read(0, (void *) file_buffer, 80) == -1) {
+	if (dir_read(0, (void *) file_buffer, 80) == -1) {
 		/* should return negative one because we closed the file */
 		return PASS;
 	} else {

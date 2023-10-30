@@ -52,16 +52,11 @@ typedef struct data_block_t {
 
 // file descriptor struct
 typedef struct file_desc_t {
-    template_ops_table_t ops_ptr; // TODO: do we need a pointer
+    template_ops_table_t ops_ptr;
     uint32_t inode;
     uint32_t file_pos;
     uint32_t flags;
 } file_desc_t;
-
-//THIS CODE IS CAUSING SOME PROBLEMS I THINK
-//TODO: ary help me debug the errors i'm getting on the current build, I really don't know whats going on and its
-// not even an assembly issue
-// TODO: ask TA if this is correct
 
 /* file system initialization */
 void init_file_system(void);

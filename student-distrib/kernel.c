@@ -67,7 +67,7 @@ void entry(unsigned long magic, unsigned long addr) {
         int mod_count = 0;
         int i;
         module_t* mod = (module_t*)mbi->mods_addr;
-        boot_block_ptr = (boot_block_t *) mod->mod_start; // TODO: this works?
+        boot_block_ptr = (boot_block_t *) mod->mod_start;
         while (mod_count < mbi->mods_count) {
             printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
             printf("Module %d ends at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_end);
@@ -167,18 +167,8 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
-     * without showing you any output */
-    // printf("Enabling Interrupts\n");
-    // TODO: execute shell here 
-    
-    // printf("\n\n");  
-    //printf("[Terminal]$ ");
-    //printf(" ***BEGIN***\n");
-    
-    
+     * without showing you any output */   
     sti();
-    
-
 #ifdef RUN_TESTS
     /* Run tests */
     launch_tests();

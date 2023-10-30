@@ -113,3 +113,10 @@ SOLUTION: We were checking to make sure if fd was >= 2 which was incorrect since
 - ls program only prints the first line
 - ls program prints the correct lines, returns 0, then page faults
 - opening shell within shell doesn't do anything
+-----------------
+FILE/FUNCTION: syscall.c 
+BUG: halt causing a page fault
+DIFFICULTY: 1 day
+SOLUTION: Incorrect usage and understanding of IRET vs RET in asm volatile. Calling ret and returning to previous process
+frame when there are still remaining processes. Then IRET is used when there are no processes remaining and we are in the base frame.
+-----------------

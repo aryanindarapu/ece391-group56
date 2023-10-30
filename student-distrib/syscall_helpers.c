@@ -1,4 +1,5 @@
 #include "syscall_helpers.h"
+#include "paging.h"
 
 /* 
  * read_dentry_by_name
@@ -25,7 +26,6 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
     
     // File not found
     return -1;
-
 }
 
 /* 
@@ -97,12 +97,17 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     return length;
 }
 
-// TODO BEN: comment
+/* 
+ * get_curr_pcb_ptr
+ *   DESCRIPTION: Gets the current pcb pointer
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: pcb pointer
+ *   SIDE EFFECTS: none
+*/
 pcb_t * get_curr_pcb_ptr() {
-    // TODO: should this actually be ANDing ESP bitmask?
     // https://www.cs.columbia.edu/~junfeng/10sp-w4118/lectures/l07-proc-linux.pdf
     pcb_t * pcb_ptr;
-    // AND ESP WITH PCB_BITMASK
     asm volatile (
         "movl %%esp, %%eax;\
          andl %%ebx, %%eax;\
@@ -114,6 +119,31 @@ pcb_t * get_curr_pcb_ptr() {
     return pcb_ptr;
 }
 
+/* 
+ * get_pcb_ptr
+ *   DESCRIPTION: Gets the pcb pointer given a pid
+ *   INPUTS: pid - process id
+ *   OUTPUTS: none
+ *   RETURN VALUE: pcb pointer
+ *   SIDE EFFECTS: none
+*/
 pcb_t * get_pcb_ptr(int32_t pid) {
-    return (pcb_t *)(EIGHT_MB - (pid + 1) * EIGHT_KB);
+    return (pcb_t *) (EIGHT_MB - (pid + 1) * EIGHT_KB);
+}
+
+void setup_new_dir(uint32_t base_31_22) {
+    page_dir_desc_t new_page_dir;
+    new_page_dir.p = 1;
+    new_page_dir.rw = 1;
+    new_page_dir.us = 1; 
+    new_page_dir.pwt = 0;
+    new_page_dir.pcd = 0;
+    new_page_dir.a = 0;
+    new_page_dir.d = 0;
+    new_page_dir.ps = 1; // 1 - set to 4 MB page
+    new_page_dir.g = 0; 
+    new_page_dir.avail = 0;
+    new_page_dir.table_base_addr = base_31_22;
+    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir;
+    flush_tlb();
 }

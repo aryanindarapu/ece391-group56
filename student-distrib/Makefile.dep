@@ -35,4 +35,8 @@ keyboard.o: devices/keyboard.c devices/../lib.h devices/../types.h \
   devices/../file_system_driver.h devices/../devices/rtc.h \
   devices/../devices/../types.h devices/../terminal.h
 rtc.o: devices/rtc.c devices/i8259.h devices/../types.h devices/../lib.h \
-  devices/../types.h devices/../x86_desc.h devices/rtc.h
+  devices/../types.h devices/../x86_desc.h devices/rtc.h \
+  devices/../syscall_helpers.h devices/../file_system_driver.h \
+  devices/../devices/rtc.h devices/../devices/../types.h \
+  devices/../terminal.h devices/../lib.h devices/../syscall.h \
+  devices/../paging.h

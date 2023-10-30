@@ -5,12 +5,16 @@
 #include "lib.h"
 #include "x86_desc.h"
 
-// static int halt_flag = 0;
-
+/* 
+ * execute
+ *   DESCRIPTION: Executes a program with the given arguments. 
+ *   INPUTS: command - the command to execute
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 to 255 on sucess, 256 on die by exception, -1 on failure
+ *   SIDE EFFECTS: sets up user page, changes tss, and initializes a new pcb
+ */
 int32_t execute (const uint8_t* command) {
     if (command == NULL) return -1;
-    // Do iret to go to user memory
-    // start program at given value in user memory
 
     // NOTE: all of this is probably out of order, need to rearrange
     
@@ -31,12 +35,6 @@ int32_t execute (const uint8_t* command) {
 
     // TODO: check commands here, use getargs
 
-    // TODO: copy file from kernel memory to user memory (need to set up 4 MB page)
-    // this happens at 128 MB (find in doc)
-
-    // also need to set up page that points to physical memory (8MB, then 12, then 16, ...)
-    // this means the only thing we would change in the page is the table_base_addr --> use helper function
-
     /* Check if file is valid */
     dentry_t exec_dentry;
     if (read_dentry_by_name((const uint8_t *) filename, &exec_dentry) == -1) {
@@ -53,7 +51,6 @@ int32_t execute (const uint8_t* command) {
     }
 
     /* Check if PCBs are available */
-    // TODO: does startup set up a PCB on init?
     uint32_t new_pid_idx;
     for (new_pid_idx = 0; new_pid_idx < MAX_NUM_PROGRAMS; new_pid_idx++) {
         if (pcb_flags[new_pid_idx] == 0) {
@@ -69,11 +66,9 @@ int32_t execute (const uint8_t* command) {
     /* Set up PCB */
     pcb_flags[new_pid_idx] = 1; // enable PCB block
     // TODO: add commands to PCB
-    // TODO: do we need to keep track of EIP?
     pcb_t * new_pcb = (pcb_t *)(EIGHT_MB - (new_pid_idx + 1) * EIGHT_KB); // puts PCB pointer at bottom of kernel memory
-    new_pcb->pid = new_pid_idx; // TODO: do i even need this field, can probably just use pid
+    new_pcb->pid = new_pid_idx; 
 
-    // TODO: fill in stdin and out to fd arr
     new_pcb->file_desc_arr[0].ops_ptr = stdin_ops_table;
     new_pcb->file_desc_arr[0].inode = -1;
     new_pcb->file_desc_arr[0].flags = 1;
@@ -90,25 +85,11 @@ int32_t execute (const uint8_t* command) {
         new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
     }
 
-    /* Set up 4MB page for user program */ // TODO: move to helper fnc
-    page_dir_desc_t new_page_dir;
-    new_page_dir.p = 1;
-    new_page_dir.rw = 1; // TODO: check this
-    new_page_dir.us = 1; // TODO: check this
-    new_page_dir.pwt = 0;
-    new_page_dir.pcd = 0;
-    new_page_dir.a = 0;
-    new_page_dir.d = 0;
-    new_page_dir.ps = 1; // 1 - set to 4 MB page
-    new_page_dir.g = 0; // TODO: check this, global flag
-    new_page_dir.avail = 0;
-    new_page_dir.table_base_addr = ((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB; // TODO: set to bottom of entry
-    // page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir; // TODO: set to bottom of entry, also is the address start correct?
-    page_dir[32] = new_page_dir; // TODO: set to bottom of entry, also is the address start correct?
-    flush_tlb();
+    /* Set up 4MB page for user program */
+    setup_new_dir(((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB);
 
     /* Copy to user memory */
-    read_data(exec_dentry.inode_num, 0, (uint8_t *) PROGRAM_START, ((inode_t *)(inode_ptr + exec_dentry.inode_num))->length);
+    read_data(exec_dentry.inode_num, 0, (uint8_t *) PROGRAM_START, ((inode_t *) (inode_ptr + exec_dentry.inode_num))->length);
     
     /* Save regs needed for PCB */
     // Read bytes 24 - 27 to get eip
@@ -117,23 +98,16 @@ int32_t execute (const uint8_t* command) {
 
     /* Set up TSS */ // TSS - contains process state information of the parent task to restore it
     tss.ss0 = (uint16_t) KERNEL_DS;
-    tss.esp0 = (uint32_t) EIGHT_MB - new_pid_idx * EIGHT_KB - STACK_FENCE_SIZE; // new_pcb + EIGHT_KB - STACK_FENCE_SIZE; // offset of kernel stack segment -- TODO: idk what this should be
+    tss.esp0 = (uint32_t) new_pcb + EIGHT_KB - STACK_FENCE_SIZE; // offset of kernel stack segment
     
     uint32_t user_eip = *((uint32_t *) eip_ptr);
-    uint32_t user_esp = PROGRAM_START - STACK_FENCE_SIZE; // TODO: how is this something that we arrived at?
+    uint32_t user_esp = PROGRAM_START - STACK_FENCE_SIZE;
 
     /* push the user eip and esp to the cur pcb so we can restore context */
-    new_pcb->user_space_eip = user_eip;
-    new_pcb->user_space_esp = user_esp;
-
-    // sti();
-    // TODO BEN: add iret, asm volatile here
-    // set up DS, ESP, EFLAGS, CS, EIP
-    uint32_t output;
-    // https://stackoverflow.com/questions/6892421/switching-to-user-mode-using-iret
-
+    new_pcb->user_esp = user_esp;
+    new_pcb->user_eip = user_eip;
     
-    // TODO: store kernel esp
+    // store kernel esp and ebp in the pcb
     asm volatile (
         "movl %%esp, %%eax   ;\
          movl %%ebp, %%ebx   ;\
@@ -143,20 +117,17 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
 
-    // sti();
-    // TODO BEN: add iret, asm volatile here
-    // set up DS, ESP, EFLAGS, CS, EIP
-    // https://stackoverflow.com/questions/6892421/switching-to-user-mode-using-iret
-
+    int32_t output;
+    
+    /* enable interrupts*/
+    sti();
+    // sets up DS, ESP, EFLAGS, CS, EIP onto stack for context switch
     asm volatile ("\
         andl $0x00FF, %%eax     ;\
         movw %%ax, %%ds         ;\
         pushl %%eax             ;\
         pushl %%ebx             ;\
         pushfl                  ;\
-        popl %%ebx              ;\
-        orl $0x0200, %%ebx      ;\
-        pushl %%ebx             ;\
         pushl %%ecx             ;\
         pushl %%edx             ;\
         iret                    ;\
@@ -166,68 +137,89 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
 
-    asm volatile ("ret_from_halt: \n");
-    return 0;
+    return output;
 }
 
-/* NO NEED TO IMPLEMENT YET(CHECKPOINT 3.2 COMMENT) */
+/* 
+ * halt
+ *   DESCRIPTION: Halts the currently executing program
+ *   INPUTS: status - the status to return to the parent
+ *   OUTPUTS: none
+ *   RETURN VALUE: -1 on failure
+ *   SIDE EFFECTS: removes current pcb, restores parent paging, and jumps to parent stack
+ */
 int32_t halt (uint8_t status) {
     // When closing, do I need to check if current PCB has any child PCBs?
     pcb_t * pcb = get_curr_pcb_ptr();
 
-    /* push user context if its base shell */
+    /* push user context if its base shell since we have no processes left */
     if (pcb->pid == 0) {
-        uint32_t esp = pcb->user_space_esp;
-        uint32_t eip = pcb->user_space_eip;
         // recover context from halt(esp, eip, USER_CS, USER_DS);
+        // 0x00FF - clears the bottom 8 bytes of the return value
+        // 0x0200 - turns on bit of EFLAGS
+        sti();
         asm volatile ("\
-            andl    $0x00FF, %%ebx  ;\
-            movw    %%bx, %%ds      ;\
-            pushl   %%ebx           ;\
-            pushl   %%edx           ;\
+            andl $0x00FF, %%eax     ;\
+            movw %%ax, %%ds         ;\
+            pushl %%eax             ;\
+            pushl %%ebx             ;\
             pushfl                  ;\
-            popl    %%edx           ;\
-            orl     $0x0200, %%edx  ;\
-            pushl   %%edx           ;\
-            pushl   %%ecx           ;\
-            pushl   %%eax           ;\
+            pushl %%ecx             ;\
+            pushl %%edx             ;\
             iret                    ;\
             "
-            :
-            : "a"(eip), "b"(USER_DS), "c"(USER_CS), "d"(esp)
+            : 
+            : "a" (USER_DS), "b" (pcb->user_esp), "c" (USER_CS), "d" (pcb->user_eip) 
             : "memory"
         );
     }
 
+    /* get pcb from cur pcbs parent PID*/
     pcb_t * parent_pcb = get_pcb_ptr(pcb->parent_pid);
 
-    // remove everything from FD array
+    // release FD array for this pcb
     int i;
     for (i = 0; i < MAX_FILE_DESC; i++) {
         pcb->file_desc_arr[i].flags = 0;
     } 
 
-    // remove current pcb from 
+    /* remove current pcb from present flags */
     pcb_flags[pcb->pid] = 0;
     
-    // Set TSS again
+    /* Set TSS again */
     tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
-    tss.esp0 = (uint32_t) EIGHT_MB - (parent_pcb->pid) * EIGHT_KB - STACK_FENCE_SIZE;  //  parent_pcb->kernel_esp; // 
+    tss.esp0 = (uint32_t) EIGHT_MB - (parent_pcb->pid) * EIGHT_KB - STACK_FENCE_SIZE; 
     
-    // Change physical memory page address
-    // page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = (((parent_pcb->pid) * FOUR_MB) + EIGHT_MB) / FOUR_KB;
+    /* Restore parent paging and flush tlb to update paging structure */
+    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = ((parent_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB;
+    flush_tlb(); 
 
-    /* Restore parent paging */
-    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = ((PHYSICAL_MEMORY + pcb->parent_pid) * FOUR_MB)/FOUR_KB;
-    flush_tlb(); // need to update the paging structure
+    /* Save process context (ebp, esp) then return to execute the next process */
+    asm volatile ("\
+        pushl %%ebp            ;\
+        movl %%esp, %%ebp      ;\
+        movl %%ebx, %%ebp      ;\
+        movl %%ecx, %%esp      ;\
+        movl %%edx, %%eax      ;\
+        leave                  ;\
+        ret                    ;\
+        "
+        : 
+        : "b" (pcb->kernel_ebp), "c" (pcb->kernel_esp), "d" (status)
+    );
 
-    end_halt(pcb->kernel_ebp, pcb->kernel_esp, status);
-
-    //if we get control back then we return fail(we shouldn't ever get control back)
+    // if we get control back then we return fail(we shouldn't ever get control back)
     return -1;
 }
 
-// TODO: this seems to do the exact same things as file open and dir open, need to check for overlap
+/* 
+* open
+*   DESCRIPTION: Opens the file with the given filename
+*   INPUTS: filename - the name of the file to open
+*   OUTPUTS: none
+*   RETURN VALUE: file descriptor index or -1 on failure
+*   SIDE EFFECTS: modifies file descriptor array in pcb
+*/
 int32_t open (const uint8_t* filename) {
     dentry_t file_dentry;
     uint32_t fd;
@@ -285,6 +277,14 @@ int32_t open (const uint8_t* filename) {
     return fd;
 }
 
+/* 
+* close
+*   DESCRIPTION: Closes the file with the given file descriptor
+*   INPUTS: fd - the file descriptor to close
+*   OUTPUTS: none
+*   RETURN VALUE: 0 on success, -1 on failure
+*   SIDE EFFECTS: modifies file descriptor array in pcb
+*/
 int32_t close (uint32_t fd) {
     if (fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
     pcb_t * pcb = get_curr_pcb_ptr();
@@ -292,6 +292,16 @@ int32_t close (uint32_t fd) {
     return pcb->file_desc_arr[fd].ops_ptr.close(fd);
 }
 
+/* 
+* read
+*   DESCRIPTION: Reads nbytes from the file with the given file descriptor
+*   INPUTS: fd - the file descriptor to read from
+*           buf - the buffer to read into
+*           nbytes - the number of bytes to read
+*   OUTPUTS: none
+*   RETURN VALUE: number of bytes read on success, -1 on failure
+*   SIDE EFFECTS: none
+*/
 int32_t read (uint32_t fd, void* buf, uint32_t nbytes) {
     if (fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
     pcb_t * pcb = get_curr_pcb_ptr();
@@ -299,6 +309,16 @@ int32_t read (uint32_t fd, void* buf, uint32_t nbytes) {
     return pcb->file_desc_arr[fd].ops_ptr.read(fd, buf, nbytes);
 }
 
+/* 
+* write
+*   DESCRIPTION: Writes nbytes to the file with the given file descriptor
+*   INPUTS: fd - the file descriptor to write to
+*           buf - the buffer to write from
+*           nbytes - the number of bytes to write
+*   OUTPUTS: none
+*   RETURN VALUE: number of bytes written on success, -1 on failure
+*   SIDE EFFECTS: none
+*/
 int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
     if (fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
     pcb_t * pcb = get_curr_pcb_ptr();
@@ -307,7 +327,7 @@ int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
 }
 
 
-/* NO NEED TO IMPLEMENT YET (CHECKPOINT 3.4)*/
+/* NO NEED TO IMPLEMENT YET (CHECKPOINT 3.4) */
 int32_t vidmap (uint8_t** screen_start) {
     return -1;
 }

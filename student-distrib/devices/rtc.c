@@ -12,6 +12,7 @@ IMPORTANT: What is important is that if register C is not read after an IRQ 8, t
 #include "../lib.h"
 #include "../x86_desc.h"
 #include "rtc.h"
+#include "../syscall_helpers.h"
 
 
 volatile int clock_count;
@@ -89,23 +90,28 @@ void rtc_handler() {
  * Return Value: 0
  * Function: sets starting settings */
 int32_t rtc_open(const uint8_t * filename) {
-    // TODO: fix to return fd 
-    wait_count = RTC_MAX_FREQ/RTC_INIT_FREQ;
+    wait_count = RTC_MAX_FREQ / RTC_INIT_FREQ;
     clock_count = 0;
     // copy stuff and set up dentry for rtc.
     return 0;
 }
 
-/* rtc_close
- * Inputs: fd
- * Return Value: 0
- * Function: doesn't really do much TODO: this should never close? */
-int32_t rtc_close(int32_t fd){
-    // remove dentry
+/* 
+ * rtc_close
+ *   DESCRIPTION: closes the rtc
+ *   INPUTS: fd - file descriptor
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 if success, -1 if failure
+ *   SIDE EFFECTS: modifies the file descriptor array
+ */
+int32_t rtc_close(int32_t fd) {
+    pcb_t * pcb = get_curr_pcb_ptr();
+    pcb->file_desc_arr[fd].flags = 0;
     return 0;
 }
 
-/* rtc_read
+/* 
+ * rtc_read
  * Inputs: fd, buf, nbytes
  * Return Value: 0, always suceeds
  * Function: holds and returns when an RTC interupt occurs */
