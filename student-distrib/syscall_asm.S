@@ -6,7 +6,6 @@ sys_call_table:
     .long 0x0, halt, execute, read, write, open, close, getargs, vidmap, set_handler, sigreturn
 
 system_call_handler:
-    
     # Check the value of EAX to make sure it is valid
     # ensure the opcode is at least one
     cmpl $0, %eax
