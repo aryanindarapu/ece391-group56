@@ -131,7 +131,15 @@ pcb_t * get_pcb_ptr(int32_t pid) {
     return (pcb_t *) (EIGHT_MB - (pid + 1) * EIGHT_KB);
 }
 
-void setup_new_dir(uint32_t base_31_22) {
+/* 
+ * setup_new_dir
+ *   DESCRIPTION: Sets up a new directory entry
+ *   INPUTS: base_31_12 - table address
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: Sets up a new directory entry to use
+*/
+void setup_user_page(uint32_t base_31_12) {
     page_dir_desc_t new_page_dir;
     new_page_dir.p = 1;
     new_page_dir.rw = 1;
@@ -143,7 +151,7 @@ void setup_new_dir(uint32_t base_31_22) {
     new_page_dir.ps = 1; // 1 - set to 4 MB page
     new_page_dir.g = 0; 
     new_page_dir.avail = 0;
-    new_page_dir.table_base_addr = base_31_22;
+    new_page_dir.base_31_12 = base_31_12;
     page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir;
     flush_tlb();
 }

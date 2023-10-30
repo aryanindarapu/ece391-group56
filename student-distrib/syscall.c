@@ -86,7 +86,7 @@ int32_t execute (const uint8_t* command) {
     }
 
     /* Set up 4MB page for user program */
-    setup_new_dir(((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB);
+    setup_user_page(((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB);
 
     /* Copy to user memory */
     read_data(exec_dentry.inode_num, 0, (uint8_t *) PROGRAM_START, ((inode_t *) (inode_ptr + exec_dentry.inode_num))->length);
@@ -191,8 +191,9 @@ int32_t halt (uint8_t status) {
     tss.esp0 = (uint32_t) EIGHT_MB - (parent_pcb->pid) * EIGHT_KB - STACK_FENCE_SIZE; 
     
     /* Restore parent paging and flush tlb to update paging structure */
-    page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = ((parent_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB;
-    flush_tlb(); 
+    // page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = ((parent_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB;
+    setup_user_page(((parent_pcb->pid  * FOUR_MB) + EIGHT_MB) / FOUR_KB);
+    // flush_tlb(); 
 
     /* Save process context (ebp, esp) then return to execute the next process */
     asm volatile ("\

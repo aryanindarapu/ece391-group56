@@ -55,7 +55,7 @@ typedef union page_dir_desc_t {
         uint32_t ps : 1; // size of page whetehr it is 4KB or 4MB
         uint32_t g : 1; // ind  icates a page is global
         uint32_t avail : 3; // free 3 bits
-        uint32_t table_base_addr : 20; // [12:31] --> points to a page table
+        uint32_t base_31_12 : 20; // [12:31] --> points to a page table
     } __attribute__ ((packed));
 } page_dir_desc_t;
 
@@ -75,7 +75,7 @@ typedef union page_table_desc_t {
         uint32_t pat : 1; // Page attribute table
         uint32_t g : 1; // Indicates page is global
         uint32_t avail : 3; // 3 available bits
-        uint32_t page_base_addr : 20; // [12:31]
+        uint32_t base_31_12 : 20; // [12:31]
     } __attribute__ ((packed));
 } page_table_desc_t;
 
