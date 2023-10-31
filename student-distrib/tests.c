@@ -462,5 +462,5 @@ void launch_tests() {
 	// TEST_OUTPUT("Testing Terminal Driver", test_terminal_driver());
 
 	/* Checkpoint 3 Tests */
-	TEST_OUTPUT("Test system call", test_sys_calls());
+	// TEST_OUTPUT("Test system call", test_sys_calls());
 }

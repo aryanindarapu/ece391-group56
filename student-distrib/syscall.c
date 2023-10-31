@@ -4,6 +4,7 @@
 #include "paging.h"
 #include "lib.h"
 #include "x86_desc.h"
+#include "exceptions.h"
 
 /* 
  * execute
@@ -22,6 +23,10 @@ int32_t execute (const uint8_t* command) {
     // NOTE: this doesn't allow for preceding spaces, but that's fine for now
     int i;
     uint8_t filename[128];
+    // for (j = 0; j < LINE_BUFFER_SIZE; j++){
+    // /* save old commands */
+    //      old_commands[j] = commands[j];
+    // }
     for (i = 0; i < 128; i++) {
         if (command[i] == ' ' || command[i] == '\0') {
             filename[i] = '\0';
@@ -31,10 +36,8 @@ int32_t execute (const uint8_t* command) {
         filename[i] = command[i];
     }
 
-    // filename[idx + 1] = '\0';
-
-    // TODO: check commands here, use getargs
-
+    i++;
+    
     /* Check if file is valid */
     dentry_t exec_dentry;
     if (read_dentry_by_name((const uint8_t *) filename, &exec_dentry) == -1) {
@@ -67,6 +70,11 @@ int32_t execute (const uint8_t* command) {
     pcb_flags[new_pid_idx] = 1; // enable PCB block
     // TODO: add commands to PCB
     pcb_t * new_pcb = (pcb_t *)(EIGHT_MB - (new_pid_idx + 1) * EIGHT_KB); // puts PCB pointer at bottom of kernel memory
+    int offset = i;
+    for (; i < LINE_BUFFER_SIZE; i++) {
+        new_pcb->commands[i - offset] = command[i];
+    }
+
     new_pcb->pid = new_pid_idx; 
 
     new_pcb->file_desc_arr[0].ops_ptr = stdin_ops_table;
@@ -137,6 +145,11 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
 
+    // if (exception_raised_flag) {
+    //     exception_raised_flag = 0;
+    //     return EXCEPTION_OCCURRED_VAL; 
+    // }
+
     return output;
 }
 
@@ -191,9 +204,7 @@ int32_t halt (uint8_t status) {
     tss.esp0 = (uint32_t) EIGHT_MB - (parent_pcb->pid) * EIGHT_KB - STACK_FENCE_SIZE; 
     
     /* Restore parent paging and flush tlb to update paging structure */
-    // page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB].table_base_addr = ((parent_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB;
     setup_user_page(((parent_pcb->pid  * FOUR_MB) + EIGHT_MB) / FOUR_KB);
-    // flush_tlb(); 
 
     /* Save process context (ebp, esp) then return to execute the next process */
     asm volatile ("\
@@ -257,7 +268,7 @@ int32_t open (const uint8_t* filename) {
             status = rtc_open(filename);
             if (fd < 0) return -1;
             pcb->file_desc_arr[fd].ops_ptr = rtc_ops_table;
-            return 0;
+            break;
         case 1: // dir
             status = dir_open(filename);
             if (fd < 0) return -1;
@@ -327,14 +338,30 @@ int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
     return pcb->file_desc_arr[fd].ops_ptr.write(fd, buf, nbytes);
 }
 
-
 /* NO NEED TO IMPLEMENT YET (CHECKPOINT 3.4) */
 int32_t vidmap (uint8_t** screen_start) {
     return -1;
 }
 
 int32_t getargs (uint8_t* buf, uint32_t nbytes) {
-    return -1;
+    // Grab current pcb pointer
+    pcb_t * pcb = get_curr_pcb_ptr();
+    int i;
+
+    // If there are no arguments in command line, return -1
+    // Also need to check to make sure we have enough space on our buf for the command + NULL terminating character
+    // So, command line can't be longer than 127
+    if (strlen((const int8_t *) pcb->commands) == 0) return -1;
+    
+    // If there are more than 128 bytes for nbytes, we cap it off at the length of the command line
+    if (nbytes > strlen((const int8_t *) pcb->commands)) nbytes = strlen((const int8_t *) pcb->commands);
+    // Loop through pcb commands and copy it to the buf
+    for (i = 0; i < nbytes; i++) {
+        buf[i] = pcb->commands[i];
+    }
+
+    // Return the number of bytes read
+    return 0;
 }
 
 /* EXTRA CREDIT SYSTEM CALLS */

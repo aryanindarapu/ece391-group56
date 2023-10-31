@@ -10,6 +10,7 @@
 #include "idt.h"
 #include "paging.h"
 #include "file_system_driver.h"
+#include "syscall.h"
 
 #include "devices/i8259.h"
 #include "devices/keyboard.h"
@@ -174,6 +175,7 @@ void entry(unsigned long magic, unsigned long addr) {
     launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
+    execute((const uint8_t *) "shell");
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
 }

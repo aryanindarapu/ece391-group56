@@ -3,6 +3,7 @@
 
 static unsigned int buffer_idx = 0;
 static uint8_t line_buffer[LINE_BUFFER_SIZE];
+static uint8_t saved_line_buffer[LINE_BUFFER_SIZE];
 static volatile int enter_flag_pressed = 0;
 static unsigned int save_buffer_idx = 0;
 
@@ -63,6 +64,10 @@ void terminal_clear() {
  * Function: saves buffer idx for terminal_read and resets it, sets flag to allow read */
 void terminal_enter()
 {
+    int i;
+    for (i = 0; i < LINE_BUFFER_SIZE; i++){
+        saved_line_buffer[i] = line_buffer[i];
+    }
     enter_flag_pressed = 1;
     save_buffer_idx = buffer_idx;
     buffer_idx = 0;

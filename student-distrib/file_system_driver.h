@@ -13,8 +13,6 @@
 #define DATA_BLOCKS_PER_INODE 1023
 #define FORMATTER_LENGTH 11
 
-int rtc_interrupt_flag;
-
 typedef struct template_ops_table {
     int32_t (*open) (const uint8_t* filename);
     int32_t (*close) (int32_t fd);

@@ -19,6 +19,8 @@
 #define MAGIC_BYTE_2 0x4C
 #define MAGIC_BYTE_3 0x46
 
+#define EXCEPTION_OCCURRED_VAL 256
+
 #ifndef ASM
 
 extern void system_call_handler();
@@ -47,9 +49,10 @@ typedef struct pcb {
     uint32_t kernel_esp;
     uint32_t user_esp;
     uint32_t user_eip;
-    uint8_t * commands;
+    uint8_t commands[LINE_BUFFER_SIZE];
     uint32_t return_addr;
     file_desc_t file_desc_arr[MAX_FILE_DESC];
+    // uint8_t old_commands[LINE_BUFFER_SIZE];
 } pcb_t;
 
 uint32_t pcb_flags[MAX_NUM_PROGRAMS];

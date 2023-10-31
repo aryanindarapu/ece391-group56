@@ -67,6 +67,7 @@ void rtc_handler() {
     //printf("%d\n", clock_count);
     rtc_int_flag = 1;
     clock_count++;
+    
     // if (clock_count == freq)
     // {
     //     clock_count = 0;
@@ -115,7 +116,7 @@ int32_t rtc_close(int32_t fd) {
  * Inputs: fd, buf, nbytes
  * Return Value: 0, always suceeds
  * Function: holds and returns when an RTC interupt occurs */
-int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes){
+int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
     while (clock_count <= wait_count); // wait to get response
     cli();
     clock_count = 0; //reset

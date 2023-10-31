@@ -237,8 +237,8 @@ void init_ops_tables() {
     file_ops_table.read = file_read;
     file_ops_table.write = file_write;
 
-    file_ops_table.open = rtc_open;
-    file_ops_table.close = rtc_close;
-    file_ops_table.read = rtc_read;
-    file_ops_table.write = rtc_write;
+    rtc_ops_table.open = rtc_open;
+    rtc_ops_table.close = rtc_close;
+    rtc_ops_table.read = rtc_read;
+    rtc_ops_table.write = rtc_write;
 }

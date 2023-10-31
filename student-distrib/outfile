@@ -1,0 +1,21 @@
+gcc  -nostdinc -g  -c -o boot.o boot.S
+gcc  -nostdinc -g  -c -o asm_linkage.o asm_linkage.S
+gcc  -nostdinc -g  -c -o paging_asm.o paging_asm.S
+gcc  -nostdinc -g  -c -o syscall_asm.o syscall_asm.S
+gcc  -nostdinc -g  -c -o x86_desc.o x86_desc.S
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o exceptions.o exceptions.c
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o file_system_driver.o file_system_driver.c
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o idt.o idt.c
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o kernel.o kernel.c
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o lib.o lib.c
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o paging.o paging.c
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o syscall.o syscall.c
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o syscall_helpers.o syscall_helpers.c
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o terminal.o terminal.c
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o tests.o tests.c
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o devices/i8259.o devices/i8259.c
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o devices/keyboard.o devices/keyboard.c
+gcc -Wall -fno-builtin -fno-stack-protector -nostdlib -nostdinc -g  -c -o devices/rtc.o devices/rtc.c
+rm -f bootimg
+gcc -nostdlib -static boot.o asm_linkage.o paging_asm.o syscall_asm.o x86_desc.o exceptions.o file_system_driver.o idt.o kernel.o lib.o paging.o syscall.o syscall_helpers.o terminal.o tests.o devices/i8259.o devices/keyboard.o devices/rtc.o -Ttext=0x400000 -o bootimg
+sudo ./debug.sh

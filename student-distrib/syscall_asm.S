@@ -4,6 +4,12 @@
 sys_call_table:
     .long 0x0, halt, execute, read, write, open, close, getargs, vidmap, set_handler, sigreturn
 
+# system_call_handler
+#   DESCRIPTION: Handler for system call. Reroutes the call to the corresponding C function.
+#   INPUTS: none
+#   OUTPUTS: none
+#   RETURN VALUE: none
+#   SIDE EFFECTS: none
 system_call_handler:
     # Check the value of EAX to make sure it is valid
     # ensure the opcode is at least one

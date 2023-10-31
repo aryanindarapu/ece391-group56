@@ -1,7 +1,9 @@
 #include "exceptions.h"
 #include "lib.h"
+#include "syscall.h"
 
 /* Handlers for exceptions in IDT in order of vector number*/
+
 
 /*
  *   divide_error
@@ -14,6 +16,8 @@
 int divide_error() {
     // cli();
     printf("Divide error occurred\n");
+    // exception_raised_flag = 1;
+    // return 256;
     while (1);
 }
 
@@ -27,6 +31,7 @@ int divide_error() {
  */ 
 int debug() {
     printf("Debug interrupt occurred\n");
+    // return 256;
     while (1);
 }
 
@@ -40,6 +45,7 @@ int debug() {
  */ 
 int nmi_interrupt() {
     printf("NMI interrupt occured\n");
+    // return 256;
     while (1);
 }
 
@@ -53,6 +59,7 @@ int nmi_interrupt() {
  */ 
 int breakpoint() {
     printf("Breakpoint interrupt occurred\n");
+    // return 256;
     while (1);
 }
 
@@ -197,8 +204,9 @@ int general_protection() {
  */ 
 int page_fault() {
     printf("Page fault occurred\n");
+    // exception_raised_flag = 1;
     while (1);
-    // cli();
+    halt(0);
     return 256;
 }
 
