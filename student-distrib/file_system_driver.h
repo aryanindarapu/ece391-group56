@@ -6,7 +6,6 @@
 #include "types.h"
 #include "lib.h"
 
-
 #define FILENAME_SIZE 32
 #define DATA_BLOCK_SIZE 4096
 #define MAX_FILE_DESC 8 

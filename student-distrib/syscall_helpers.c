@@ -76,8 +76,8 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     int within_data_block_idx;
     for (curr_byte_idx = offset; curr_byte_idx < length + offset; curr_byte_idx++) {
         // reached end of file
-        if (curr_byte_idx - offset >= curr_inode->length) {
-            return 0;
+        if (curr_byte_idx >= curr_inode->length) {
+            break;
         }
 
         // Get indices for data block and within data block
@@ -94,7 +94,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
         buf[curr_byte_idx - offset] = data_block->data[within_data_block_idx];
     }
 
-    return length;
+    return curr_byte_idx - offset;
 }
 
 /* 

@@ -66,7 +66,7 @@ int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
     int32_t status = read_data(file_desc.inode, file_desc.file_pos, (uint8_t *) buf, nbytes);
 
     if (status == -1) return -1;
-    file_desc.file_pos += status;
+    pcb->file_desc_arr[fd].file_pos += status;
 
     return status;
 }

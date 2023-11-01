@@ -16,17 +16,9 @@
  */
 int32_t execute (const uint8_t* command) {
     if (command == NULL) return -1;
-
-    // NOTE: all of this is probably out of order, need to rearrange
-    
-    // Assuming: filename arg1 arg2
-    // NOTE: this doesn't allow for preceding spaces, but that's fine for now
     int i;
+    
     uint8_t filename[128];
-    // for (j = 0; j < LINE_BUFFER_SIZE; j++){
-    // /* save old commands */
-    //      old_commands[j] = commands[j];
-    // }
     for (i = 0; i < 128; i++) {
         if (command[i] == ' ' || command[i] == '\0') {
             filename[i] = '\0';
@@ -68,8 +60,9 @@ int32_t execute (const uint8_t* command) {
     /////////////// POINT OF NO RETURN ///////////////
     /* Set up PCB */
     pcb_flags[new_pid_idx] = 1; // enable PCB block
-    // TODO: add commands to PCB
     pcb_t * new_pcb = (pcb_t *)(EIGHT_MB - (new_pid_idx + 1) * EIGHT_KB); // puts PCB pointer at bottom of kernel memory
+
+    // Set commands
     int offset = i;
     for (; i < LINE_BUFFER_SIZE; i++) {
         new_pcb->commands[i - offset] = command[i];
@@ -185,7 +178,7 @@ int32_t halt (uint8_t status) {
             : "a" (USER_DS), "b" (pcb->user_esp), "c" (USER_CS), "d" (pcb->user_eip) 
             : "memory"
         );
-    }
+    } 
 
     /* get pcb from cur pcbs parent PID*/
     pcb_t * parent_pcb = get_pcb_ptr(pcb->parent_pid);
@@ -194,7 +187,9 @@ int32_t halt (uint8_t status) {
     int i;
     for (i = 0; i < MAX_FILE_DESC; i++) {
         pcb->file_desc_arr[i].flags = 0;
-    } 
+    }
+
+    // release 
 
     /* remove current pcb from present flags */
     pcb_flags[pcb->pid] = 0;
@@ -318,6 +313,10 @@ int32_t read (uint32_t fd, void* buf, uint32_t nbytes) {
     if (fd >= MAX_FILE_DESC) return -1; // Checks if fd is 0 or 1
     pcb_t * pcb = get_curr_pcb_ptr();
     if (!pcb->file_desc_arr[fd].flags) return -1; // Checks if fd is inactive
+    // file_desc_t file_desc = pcb->file_desc_arr[fd];
+    // inode_t * curr_inode = inode_ptr + file_desc.inode;
+
+    // if (file_desc.file_pos >= curr_inode->length) return 0;
     return pcb->file_desc_arr[fd].ops_ptr.read(fd, buf, nbytes);
 }
 
@@ -343,7 +342,7 @@ int32_t vidmap (uint8_t** screen_start) {
     // check if screen start is valid 
     if (screen_start == NULL) return -1;
 
-    if ((uint32_t) screen_start < USER_MEM_VIRTUAL_ADDR || (uint32_t) screen_start > (USER_MEM_VIRTUAL_ADDR + FOUR_MB)) return -1;
+    // if ((uint32_t) screen_start < USER_MEM_VIRTUAL_ADDR || (uint32_t) screen_start > (USER_MEM_VIRTUAL_ADDR + FOUR_MB)) return -1;
 
     // set up page as 4kb pages
     // TODO: change permission level from 0 to 1. Do we do this for all page table entries, or just the one that we add?
@@ -358,6 +357,7 @@ int32_t vidmap (uint8_t** screen_start) {
     flush_tlb();
 
     // *screen_start = (uint32_t *) ((&video_memory_page_table[i])) / FOUR_KB;
+    *screen_start = (uint8_t *) (FOUR_KB * i);
     return 0;
 }
 
@@ -372,13 +372,13 @@ int32_t getargs (uint8_t* buf, uint32_t nbytes) {
     if (strlen((const int8_t *) pcb->commands) == 0) return -1;
     
     // If there are more than 128 bytes for nbytes, we cap it off at the length of the command line
-    if (nbytes > strlen((const int8_t *) pcb->commands)) nbytes = strlen((const int8_t *) pcb->commands);
+    // if (nbytes > strlen((const int8_t *) pcb->commands)) nbytes = strlen((const int8_t *) pcb->commands);
     // Loop through pcb commands and copy it to the buf
     for (i = 0; i < nbytes; i++) {
-        buf[i] = pcb->commands[i];
+        if (i < strlen((const int8_t *) pcb->commands)) buf[i] = pcb->commands[i];
+        else buf[i] = '\0';
     }
 
-    // Return the number of bytes read
     return 0;
 }
 
