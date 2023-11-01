@@ -12,6 +12,7 @@ IMPORTANT: What is important is that if register C is not read after an IRQ 8, t
 #include "../lib.h"
 #include "../x86_desc.h"
 #include "rtc.h"
+#include "../syscall_helpers.h"
 
 
 volatile int clock_count;
@@ -42,7 +43,7 @@ void init_rtc() {
 
     // Standard rate value is 6, it can be between 2 to 15 ranging from 2Hz to 32,xxx Hz
     // Higher rate means slower clock, the rate is fed into bits 0-3 in register A
-    int rate = 0x06; // TODO :  set to max freq to virtualize
+    int rate = 0x06; // set to max freq to virtualize
     outb(0x0A, RTC_PORT_COMMAND); // Might need to make this 8A but we want to reenable NMIs
     outb((prev & 0xF0) | rate, RTC_PORT_DATA); //write only our rate to A. Note, rate is the bottom 4 bits.
 
@@ -66,6 +67,7 @@ void rtc_handler() {
     //printf("%d\n", clock_count);
     rtc_int_flag = 1;
     clock_count++;
+    
     // if (clock_count == freq)
     // {
     //     clock_count = 0;
@@ -88,27 +90,33 @@ void rtc_handler() {
  * Inputs: filename
  * Return Value: 0
  * Function: sets starting settings */
-int32_t rtc_open(const uint8_t * filename){
-    wait_count = RTC_MAX_FREQ/RTC_INIT_FREQ;
+int32_t rtc_open(const uint8_t * filename) {
+    wait_count = RTC_MAX_FREQ / RTC_INIT_FREQ;
     clock_count = 0;
     // copy stuff and set up dentry for rtc.
     return 0;
 }
 
-/* rtc_close
- * Inputs: fd
- * Return Value: 0
- * Function: doesn't really do much TODO: check? */
-int32_t rtc_close(int32_t fd){
-    // remove dentry
+/* 
+ * rtc_close
+ *   DESCRIPTION: closes the rtc
+ *   INPUTS: fd - file descriptor
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 if success, -1 if failure
+ *   SIDE EFFECTS: modifies the file descriptor array
+ */
+int32_t rtc_close(int32_t fd) {
+    pcb_t * pcb = get_curr_pcb_ptr();
+    pcb->file_desc_arr[fd].flags = 0;
     return 0;
 }
 
-/* rtc_read
+/* 
+ * rtc_read
  * Inputs: fd, buf, nbytes
  * Return Value: 0, always suceeds
  * Function: holds and returns when an RTC interupt occurs */
-int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes){
+int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
     while (clock_count <= wait_count); // wait to get response
     cli();
     clock_count = 0; //reset

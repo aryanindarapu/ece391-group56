@@ -1,7 +1,9 @@
 #include "exceptions.h"
 #include "lib.h"
+#include "syscall.h"
 
 /* Handlers for exceptions in IDT in order of vector number*/
+
 
 /*
  *   divide_error
@@ -9,12 +11,14 @@
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
-//  *   SIDE EFFECTS: for now just prints the current exception that has occurred
+ *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void divide_error() {
+int divide_error() {
     // cli();
     printf("Divide error occurred\n");
-    while (1);    
+    // exception_raised_flag = 1;
+    // return 256;
+    while (1);
 }
 
 /*
@@ -25,8 +29,9 @@ void divide_error() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void debug() {
+int debug() {
     printf("Debug interrupt occurred\n");
+    // return 256;
     while (1);
 }
 
@@ -38,8 +43,9 @@ void debug() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void nmi_interrupt() {
+int nmi_interrupt() {
     printf("NMI interrupt occured\n");
+    // return 256;
     while (1);
 }
 
@@ -51,8 +57,9 @@ void nmi_interrupt() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void breakpoint() {
+int breakpoint() {
     printf("Breakpoint interrupt occurred\n");
+    // return 256;
     while (1);
 }
 
@@ -64,7 +71,7 @@ void breakpoint() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void overflow() {
+int overflow() {
     printf("Overflow error occurred\n"); 
     while (1);
 }
@@ -77,7 +84,7 @@ void overflow() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void bound_range_exceeded() {
+int bound_range_exceeded() {
     printf("Bound range error occurred\n");
     while (1);
 }
@@ -90,7 +97,7 @@ void bound_range_exceeded() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void invalid_opcode() {
+int invalid_opcode() {
     printf("Invalid opcode error occurred\n");
     while (1);
     
@@ -104,7 +111,7 @@ void invalid_opcode() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void device_not_available() {
+int device_not_available() {
     printf("Device not available\n");
     while (1);
 }
@@ -117,7 +124,7 @@ void device_not_available() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void double_fault() {
+int double_fault() {
     printf("Double fault error occurred\n");
     while (1);
 }
@@ -130,7 +137,7 @@ void double_fault() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void coprocessor_segment_overrun() {
+int coprocessor_segment_overrun() {
     printf("Coprocessor segment overrun error occurred\n");
     while (1);
 }
@@ -143,7 +150,7 @@ void coprocessor_segment_overrun() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void invalid_tss() {
+int invalid_tss() {
     printf("Invalid tts error occurred\n");
     while (1);  
 }
@@ -156,7 +163,7 @@ void invalid_tss() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void segment_not_present() {
+int segment_not_present() {
     printf("***segment not present***\n");
     while (1);
 }
@@ -169,7 +176,7 @@ void segment_not_present() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void stack_segment_fault() {
+int stack_segment_fault() {
     printf("***stack segment fault***\n");
     while (1);
 }
@@ -182,7 +189,7 @@ void stack_segment_fault() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void general_protection() {
+int general_protection() {
     printf("General protection fault\n");
     while (1);
 }
@@ -195,9 +202,12 @@ void general_protection() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void page_fault() {
+int page_fault() {
     printf("Page fault occurred\n");
+    // exception_raised_flag = 1;
     while (1);
+    halt(0);
+    return 256;
 }
 
 /*
@@ -208,7 +218,7 @@ void page_fault() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void reserved() {
+int reserved() {
     printf("Reserved interrupt occurred\n");
     while (1);
 }
@@ -221,7 +231,7 @@ void reserved() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void x87_fpu_floating_point_error() {
+int x87_fpu_floating_point_error() {
     printf("x87 fpu floating point error occurred\n");
     while (1);
 }
@@ -234,7 +244,7 @@ void x87_fpu_floating_point_error() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void alignment_check() {
+int alignment_check() {
     printf("Alignment check interrupt occurred\n");
     while (1);
 }
@@ -247,7 +257,7 @@ void alignment_check() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void machine_check() {
+int machine_check() {
     printf("Machine alignment interrupt occurred\n");
     while (1);
 }
@@ -260,7 +270,7 @@ void machine_check() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void simd_floating_point_exception() {
+int simd_floating_point_exception() {
     printf("Simd floating point exception occurred\n");
     while (1);
 }
@@ -273,7 +283,7 @@ void simd_floating_point_exception() {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
-void user_defined() {
+int user_defined() {
     printf("User defined interrupt occurred\n");
     while (1);
 }

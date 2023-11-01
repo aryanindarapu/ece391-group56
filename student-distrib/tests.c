@@ -4,6 +4,7 @@
 #include "file_system_driver.h"
 #include "devices/rtc.h"
 #include "terminal.h"
+#include "syscall.h"
 
 #define PASS 1
 #define FAIL 0
@@ -271,7 +272,7 @@ int test_verylarge() {
 	init_file_system();
 
 	printf("Reading verylargetextwithverylongname.txt.\n");
-	if (file_open((const uint8_t *) "verylargetextwithverylongname.txt") == -1) return FAIL;
+	if (file_open((const uint8_t *) "verylargetextwithverylongname.tx") == -1) return FAIL;
 
 	char file_buffer[VERYLARGE_SIZE];
 	if (file_read(0, (void *) file_buffer, VERYLARGE_SIZE) == -1) return FAIL;
@@ -311,7 +312,7 @@ int test_directory_ls() {
 	int j;
 	char file_buffer[80];
 
-	for (i = 0; i < 16; i++){
+	for (i = 0; i < 17; i++){
 		dir_read(0, (void *) file_buffer, 80);
 		for (j = 0; j < 80; j++) {
 	 		putc(file_buffer[j]);
@@ -320,8 +321,8 @@ int test_directory_ls() {
 	
 	dir_close(0);
 	putc('\n');
-	if(dir_read(0, (void *) file_buffer, 80) == -1) {
-		// printf("FAIL\n");
+	if (dir_read(0, (void *) file_buffer, 80) == -1) {
+		/* should return negative one because we closed the file */
 		return PASS;
 	} else {
 		return FAIL;
@@ -375,6 +376,7 @@ int test_rtc_driver() {
  *   SIDE EFFECTS: none
  */
 int test_terminal_driver() {
+<<<<<<< HEAD
 	
 	// char buf[128];
 	// int num_char;
@@ -13019,6 +13021,16 @@ int test_terminal_driver() {
 		// rtc_read(0, &blank_buf, 1);
 		// rtc_read(0, &blank_buf, 1);
 		
+=======
+	char buf[128];
+	int num_char;
+	uint8_t filename[32];
+	terminal_open(filename);
+	while(1) {
+		num_char = terminal_read(0, &buf, 128);
+		printf("You typed %d chars: ", num_char);
+		terminal_write(0, &buf, num_char);
+>>>>>>> 4b66fe4c4519b4e5f3d994459c02daecdc66566e
 	}
 
 	return 0;
@@ -13071,6 +13083,48 @@ int test_terminal_driver() {
 // }
 
 /* Checkpoint 3 tests */
+
+int test_sys_calls() {
+	// Testing open for our system calls
+	// asm volatile("movl $5, %eax");
+	// asm volatile("");
+	uint8_t buf[128] = "shell";
+	int rval;
+	// init_file_system();
+	// rval = stdin((char *) buf);
+	// if(rval == -1) return FAIL;
+	// rval = stdout((char *) buf);
+	// if(rval == -1) return FAIL;
+	// asm volatile ("INT $0x80" : "=a" (rval) : "a" (6), "b" (0));
+	// if(rval == -1) return FAIL;
+	asm volatile ("INT $0x80" : "=a" (rval) : "a" (2), "b" (buf));
+	return PASS;
+};
+
+int stdin(char* buf)
+{
+	uint32_t rval;
+	asm volatile ("INT $0x80" : "=a" (rval) : "a" (3), "b" (0), "c" (buf), "d" (6));
+	// asm volatile ("pushl $128");
+	// asm volatile ("pushl 8(%ebp)");
+	// asm volatile ("pushl $0");
+	// asm volatile ("int 0x80");
+	return rval;
+}
+
+int stdout(char* buf)
+{
+	uint32_t rval;
+	asm volatile ("INT $0x80" : "=a" (rval) : "a" (4), "b" (1), "c" (buf), "d" (6));
+	// asm volatile ("pushl $128");
+	// asm volatile ("pushl 8(%ebp)");
+	// asm volatile ("pushl $1");
+	// asm volatile ("int 0x80");
+	return rval;
+}
+
+
+
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
 
@@ -13095,10 +13149,17 @@ void launch_tests() {
 	// TEST_OUTPUT("Page fault test", test_page_fault());
 
 	/* Checkpoint 2 Tests */
-	//TEST_OUTPUT("Test frame1.txt", test_frame1());
+	// TEST_OUTPUT("Test frame1.txt", test_frame1());
 	// TEST_OUTPUT("Test hello executable", test_hello());
 	// TEST_OUTPUT("Test verylargetextwithverylongname.txt", test_verylarge());
 	// TEST_OUTPUT("Test directory read.", test_directory_ls());
 	// TEST_OUTPUT("Testing RTC Driver", test_rtc_driver());
+<<<<<<< HEAD
 	 TEST_OUTPUT("Testing Terminal Driver", test_terminal_driver());
+=======
+	// TEST_OUTPUT("Testing Terminal Driver", test_terminal_driver());
+
+	/* Checkpoint 3 Tests */
+	// TEST_OUTPUT("Test system call", test_sys_calls());
+>>>>>>> 4b66fe4c4519b4e5f3d994459c02daecdc66566e
 }

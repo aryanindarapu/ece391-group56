@@ -23,11 +23,11 @@ void init_paging () {
                 page_dir[i].pwt = 0;
                 page_dir[i].pcd = 0;
                 page_dir[i].a = 0;
-                page_dir[i].res = 0;
+                page_dir[i].d = 0;
                 page_dir[i].ps = 0;
                 page_dir[i].g = 0;
                 page_dir[i].avail = 0;
-                page_dir[i].table_base_addr = (unsigned int) (&video_memory_page_table) / FOUR_KB;
+                page_dir[i].base_31_12 = (unsigned int) (&video_memory_page_table) / FOUR_KB;
                 break;
             case 1: // Kernel section (single 4mb page)
                 page_dir[i].p = 1;
@@ -36,11 +36,11 @@ void init_paging () {
                 page_dir[i].pwt = 0;
                 page_dir[i].pcd = 1;
                 page_dir[i].a = 0;
-                page_dir[i].res = 0;
+                page_dir[i].d = 0;
                 page_dir[i].ps = 1;
                 page_dir[i].g = 1;
                 page_dir[i].avail = 0;
-                page_dir[i].table_base_addr = KERNEL_ADDRESS / FOUR_KB;
+                page_dir[i].base_31_12 = KERNEL_ADDRESS / FOUR_KB;
                 break;
             default: // 8MB - 4GB
                 page_dir[i].p = 0;
@@ -49,11 +49,11 @@ void init_paging () {
                 page_dir[i].pwt = 0;
                 page_dir[i].pcd = 0;
                 page_dir[i].a = 0;
-                page_dir[i].res = 0;
+                page_dir[i].d = 0;
                 page_dir[i].ps = 0;
                 page_dir[i].g = 0;
                 page_dir[i].avail = 0;
-                page_dir[i].table_base_addr = 0;
+                page_dir[i].base_31_12 = 0;
                 break;
         }
     }
@@ -75,7 +75,7 @@ void init_paging () {
         video_memory_page_table[i].pat = 0;
         video_memory_page_table[i].g = 0;
         video_memory_page_table[i].avail = 0;
-        video_memory_page_table[i].page_base_addr = i;
+        video_memory_page_table[i].base_31_12 = i;
     }
     
     load_page_dir((unsigned int *) (&page_dir));

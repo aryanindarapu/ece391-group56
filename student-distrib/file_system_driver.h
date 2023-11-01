@@ -1,5 +1,11 @@
+#ifndef _FILE_SYSTEM_DRIVER_H
+#define _FILE_SYSTEM_DRIVER_H
+
 #include "devices/rtc.h"
+#include "terminal.h"
 #include "types.h"
+#include "lib.h"
+
 
 #define FILENAME_SIZE 32
 #define DATA_BLOCK_SIZE 4096
@@ -7,7 +13,12 @@
 #define DATA_BLOCKS_PER_INODE 1023
 #define FORMATTER_LENGTH 11
 
-int rtc_interrupt_flag;
+typedef struct template_ops_table {
+    int32_t (*open) (const uint8_t* filename);
+    int32_t (*close) (int32_t fd);
+    int32_t (*read) (int32_t fd, void* buf, int32_t nbytes);
+    int32_t (*write) (int32_t fd, const void* buf, int32_t nbytes);
+} template_ops_table_t;
 
 // within boot block
 typedef struct dentry_t {
@@ -39,36 +50,45 @@ typedef struct data_block_t {
 
 // file descriptor struct
 typedef struct file_desc_t {
-    uint32_t* file_ops_ptr;
+    template_ops_table_t ops_ptr;
     uint32_t inode;
     uint32_t file_pos;
     uint32_t flags;
 } file_desc_t;
 
-/* file system helper functions */
-int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry);
-int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry);
-int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
-
 /* file system initialization */
 void init_file_system(void);
 
 /* file system operations */
-int32_t file_open(const uint8_t * fname);
-int32_t file_close(uint32_t fd);
-int32_t file_read(uint32_t fd, void* buf, uint32_t nbytes);
-int32_t file_write(uint32_t fd, const void* buf, uint32_t nbytes);
+int32_t file_open(const uint8_t * filename);
+int32_t file_close(int32_t fd);
+int32_t file_read(int32_t fd, void* buf, int32_t nbytes);
+int32_t file_write(int32_t fd, const void* buf, int32_t nbytes);
+
 
 /* directory syscall functions */
-int32_t dir_open(const uint8_t * fname);
-int32_t dir_close(uint32_t fd);
-int32_t dir_read(uint32_t fd, void* buf, uint32_t nbytes);
-int32_t dir_write(uint32_t fd, const void* buf, uint32_t nbytes);
+int32_t dir_open(const uint8_t * filename);
+int32_t dir_close(int32_t fd);
+int32_t dir_read(int32_t fd, void* buf, int32_t nbytes);
+int32_t dir_write(int32_t fd, const void* buf, int32_t nbytes);
+
+/* empty functions */
+int32_t empty_open(const uint8_t * filename);
+int32_t empty_close(int32_t fd);
+int32_t empty_read(int32_t fd, void* buf, int32_t nbytes);
+int32_t empty_write(int32_t fd, const void* buf, int32_t nbytes);
+
+void init_ops_tables();
+
+template_ops_table_t dir_ops_table;
+template_ops_table_t stdin_ops_table;
+template_ops_table_t stdout_ops_table;
+template_ops_table_t file_ops_table;
+template_ops_table_t rtc_ops_table;
 
 /* file system instantiation */
 boot_block_t * boot_block_ptr; // Pointer to our boot block
 inode_t * inode_ptr; // List of inodes
 data_block_t * data_block_ptr; // Pointer to our data blocks
 
-/* file descriptor array */
-file_desc_t file_desc_arr[MAX_FILE_DESC];
+#endif /* _FILE_SYSTEM_DRIVER_H */

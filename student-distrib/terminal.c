@@ -1,8 +1,9 @@
 #include "terminal.h"
-#include "lib.h"
+
 
 static unsigned int buffer_idx = 0;
-static char line_buffer[LINE_BUFFER_SIZE];
+static uint8_t line_buffer[LINE_BUFFER_SIZE];
+static uint8_t saved_line_buffer[LINE_BUFFER_SIZE];
 static volatile int enter_flag_pressed = 0;
 static unsigned int save_buffer_idx = 0;
 
@@ -55,7 +56,6 @@ void terminal_backspace()
  * Function: resets buffer_idx */
 void terminal_clear() {
     buffer_idx = 0;
-    // TODO: clear buffer
 }
 
 /* terminal_enter
@@ -64,19 +64,22 @@ void terminal_clear() {
  * Function: saves buffer idx for terminal_read and resets it, sets flag to allow read */
 void terminal_enter()
 {
+    int i;
+    for (i = 0; i < LINE_BUFFER_SIZE; i++){
+        saved_line_buffer[i] = line_buffer[i];
+    }
     enter_flag_pressed = 1;
     save_buffer_idx = buffer_idx;
     buffer_idx = 0;
 }
 
-/* terminal_open
+/* 
+ * terminal_open
  * Inputs: filename
- * Return Value: 0 sucess always
+ * Return Value: 0 success always
  * Function: sets terminal start setttings */
-int32_t terminal_open(const uint8_t * filename) {
-    // TODO: may want to init buf to 0s, but that's handled anyways, so not necessary
-    buffer_idx = 0;
-    return 0;
+int32_t terminal_open(const uint8_t* filename) {
+    return -1;
 }
 
 /* terminal_close
@@ -84,8 +87,7 @@ int32_t terminal_open(const uint8_t * filename) {
  * Return Value: 0 for sucess always
  * Function: resets buffer_idx */
 int32_t terminal_close(int32_t fd) {
-    buffer_idx = 0;
-    return 0;
+    return -1;
 }
 
 /* terminal_read
@@ -94,6 +96,9 @@ int32_t terminal_close(int32_t fd) {
  * Function: waits until enter is pressed then writes all bytes in buffer(including new ling) to input buf */
 int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // NOTE: this is a blocking call, so it can't be interrupted
+    // printf("ACCESSED TERMINAL READ");
+    sti();
+    
     while (enter_flag_pressed != 1);
     
     cli();
@@ -103,13 +108,13 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     enter_flag_pressed = 0;
     //save_buffer_idx = buffer_idx;
     if (nbytes < save_buffer_idx) {
-        memcpy(buf, line_buffer, nbytes);
+        memcpy(buf, (const void *) line_buffer, nbytes);
         sti();
         return nbytes;
     }
     else
     {
-        memcpy(buf, line_buffer, save_buffer_idx);
+        memcpy(buf, (const void *) line_buffer, save_buffer_idx);
         sti();
         return save_buffer_idx;
     }
@@ -139,3 +144,4 @@ int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
     sti();
     return nbytes;
 }
+

@@ -7,7 +7,45 @@ BUG:
 SOLUTION:
 DIFFICULTY:
 -----------------
-
+**************************************** CHECKPOINT 3 ****************************************
+-----------------
+FILE/FUNCTION: syscall.c
+BUG: Test cases do not properly call terminal_read and terminal_write.
+DIFFICULTY: 2 hours
+SOLUTION: We were checking to make sure if fd was >= 2 which was incorrect since stdin and stdout are 0 and 1 respectively.
+-----------------
+FILE/FUNCTION: syscall_asm.S
+BUG: page faulting during return from tasks
+SOLUTION: We were doing iret between tasks, which was incorrect and messing up all the pointers and stacks. We had to instead
+perform normal rets during tasks.
+DIFFICULTY: 6 hours, this was not fun to find
+-----------------
+FILE/FUNCTION: syscall_helper
+BUG: fourth character gets replaced by a NULL
+SOLUTION: We were accidently replacing eax in our asm, by pushing and popping, causing it to completely trash the nbytes to write and use 3 (call # from previous eax input)
+DIFFICULTY: 1 hours
+-----------------
+FILE/FUNCTION: read_directory
+BUG: ls program only prints the first line
+SOLUTION: We realized we were returning 0 somehwere instead of the number of bytes
+DIFFICULTY: 1 hour
+-----------------
+FILE/FUNCTION: syscall
+BUG: opening shell within shell doesn't do anything, misunderstanding
+SOLUTION: We had no idea what we were doing, and we realized our implementation was correct.
+DIFFICULTY: 12 hours
+-----------------
+FILE/FUNCTION: syscall_asm
+BUG: general protection fault
+SOLUTION: while we were trying to fix the page fault we went backwards and caused some general protection faults, This was 
+because we were accessing some kernel data in our user sections
+DIFFICULTY: 1 hour
+-----------------
+FILE/FUNCTION: dir_read
+BUG: running ls executable caused verylargetext.. name to print infinitely.
+SOLUTION: Stopped using strcpy/memcpy and just made a for loop.
+DIFFICULTY: 20 minutes
+-----------------
 **************************************** CHECKPOINT 2 ****************************************
 -----------------
 FILE/FUNCTION: file_read()
@@ -96,13 +134,6 @@ DIFFICULTY:
 SOLUTION:
 -----------------
 **************************************** CHECKPOINT 4 ****************************************
------------------
-FILE/FUNCTION:
-BUG:
-DIFFICULTY: 
-SOLUTION:
------------------
-**************************************** CHECKPOINT 3 ****************************************
 -----------------
 FILE/FUNCTION:
 BUG:

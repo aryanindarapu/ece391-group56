@@ -10,6 +10,7 @@
 #include "idt.h"
 #include "paging.h"
 #include "file_system_driver.h"
+#include "syscall.h"
 
 #include "devices/i8259.h"
 #include "devices/keyboard.h"
@@ -67,7 +68,7 @@ void entry(unsigned long magic, unsigned long addr) {
         int mod_count = 0;
         int i;
         module_t* mod = (module_t*)mbi->mods_addr;
-        boot_block_ptr = (boot_block_t *) mod->mod_start; // TODO: this works?
+        boot_block_ptr = (boot_block_t *) mod->mod_start;
         while (mod_count < mbi->mods_count) {
             printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
             printf("Module %d ends at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_end);
@@ -161,28 +162,20 @@ void entry(unsigned long magic, unsigned long addr) {
     init_keyboard();
     init_rtc();
     init_paging();
+    init_file_system();
     
     clear();
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
-     * without showing you any output */
-    // printf("Enabling Interrupts\n");
-
-    
-    // printf("\n\n");  
-    //printf("[Terminal]$ ");
-    //printf(" ***BEGIN***\n");
-    
-    
+     * without showing you any output */   
     sti();
-    
-
 #ifdef RUN_TESTS
     /* Run tests */
     launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
+    execute((const uint8_t *) "shell");
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
 }

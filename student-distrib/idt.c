@@ -48,7 +48,7 @@ void init_idt() {
             idt[i].seg_selector = KERNEL_CS;
         } else if (i == 0x80) {
             idt[i].present = 1;
-            idt[i].dpl = 3; // set privilege level 1
+            idt[i].dpl = 3; // set privilege level 3
             idt[i].reserved0 = 0;
             idt[i].size = 1; // size of gate - INT gate is a 32 bit gate
             idt[i].reserved1 = 1;
@@ -106,5 +106,5 @@ void init_idt() {
     // RTC PIC Intertupt
     SET_IDT_ENTRY(idt[0x28], rtc_handler_linkage); // PIC INT call
     
-    SET_IDT_ENTRY(idt[0x80], system_call); // INT system call    
+    SET_IDT_ENTRY(idt[0x80], system_call_handler); // INT system call    
 }

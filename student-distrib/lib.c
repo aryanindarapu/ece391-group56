@@ -200,7 +200,11 @@ int32_t puts(int8_t* s) {
     return index;
 }
 
-void move_screen_up(void){ //TODO: write comments
+/* void move_screen_up(void);
+ * Inputs: void
+ * Return Value: none
+ * Function: moves the screen up by one line */
+void move_screen_up(void) { 
     int32_t i;
     cli();
     for (i = 0; i < (NUM_ROWS-1) * NUM_COLS; i++) {

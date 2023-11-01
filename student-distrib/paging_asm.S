@@ -1,5 +1,6 @@
 .global load_page_dir
 .global enable_paging
+.global flush_tlb
 
 
 # load_page_dir
@@ -38,3 +39,15 @@ enable_paging:
     mov %eax, %cr0
     leave
     ret
+
+# flush_tlb
+#   DESCRIPTION: Flushes the TLBs
+#   INPUTS: none
+#   OUTPUTS: none
+#   RETURN VALUE: none
+#   SIDE EFFECTS: flushes the TLBs
+flush_tlb:
+    movl %cr3, %eax
+    movl %eax, %cr3
+    ret
+    
