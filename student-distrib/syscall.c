@@ -138,6 +138,7 @@ int32_t execute (const uint8_t* command) {
         pushfl                  ;\
         pushl %%ecx             ;\
         pushl %%edx             ;\
+        sti                     ;\
         iret                    ;\
         "
         : "=a" (output)

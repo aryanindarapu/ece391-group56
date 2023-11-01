@@ -81,7 +81,7 @@ void rtc_handler() {
     // Therefore, we have to simply read from register C and just throwaway the date since we don't need it
     outb(0x0C, RTC_PORT_COMMAND);	// select register C
     inb(RTC_PORT_DATA);		        // just throw away contents
-
+    
     send_eoi(8);
     rtc_int_flag = 0;
 }
@@ -117,11 +117,14 @@ int32_t rtc_close(int32_t fd) {
  * Return Value: 0, always suceeds
  * Function: holds and returns when an RTC interupt occurs */
 int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
-    while (clock_count <= wait_count); // wait to get response
-    cli();
-    clock_count = 0; //reset
+
     sti();
+    while (clock_count <= wait_count); // wait to get response
+    
+    clock_count = 0; //reset
+    
     while (rtc_int_flag != 0); //wait until not interupting to return
+    
     return 0;
 }
 
