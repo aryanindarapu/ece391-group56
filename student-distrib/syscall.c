@@ -138,7 +138,6 @@ int32_t execute (const uint8_t* command) {
         pushfl                  ;\
         pushl %%ecx             ;\
         pushl %%edx             ;\
-        sti                     ;\
         iret                    ;\
         "
         : "=a" (output)
@@ -146,10 +145,10 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
 
-    // if (exception_raised_flag) {
-    //     exception_raised_flag = 0;
-    //     return EXCEPTION_OCCURRED_VAL; 
-    // }
+    if (exception_raised_flag) {
+        exception_raised_flag = 0;
+        return EXCEPTION_OCCURRED_VAL; 
+    }
 
     return output;
 }
@@ -341,7 +340,25 @@ int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
 
 /* NO NEED TO IMPLEMENT YET (CHECKPOINT 3.4) */
 int32_t vidmap (uint8_t** screen_start) {
-    return -1;
+    // check if screen start is valid 
+    if (screen_start == NULL) return -1;
+
+    if ((uint32_t) screen_start < USER_MEM_VIRTUAL_ADDR || (uint32_t) screen_start > (USER_MEM_VIRTUAL_ADDR + FOUR_MB)) return -1;
+
+    // set up page as 4kb pages
+    // TODO: change permission level from 0 to 1. Do we do this for all page table entries, or just the one that we add?
+    int i;
+    for (i = 0; i < NUM_ENTRIES; i++) {
+        if (video_memory_page_table[i].p == 0) break;
+    }
+
+    // TODO: MP3 doc about not changing privilege levels
+    video_memory_page_table[i].p = 1; 
+    video_memory_page_table[i].us = 1; 
+    flush_tlb();
+
+    // *screen_start = (uint32_t *) ((&video_memory_page_table[i])) / FOUR_KB;
+    return 0;
 }
 
 int32_t getargs (uint8_t* buf, uint32_t nbytes) {

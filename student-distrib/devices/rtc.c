@@ -117,12 +117,11 @@ int32_t rtc_close(int32_t fd) {
  * Return Value: 0, always suceeds
  * Function: holds and returns when an RTC interupt occurs */
 int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
-
     sti();
     while (clock_count <= wait_count); // wait to get response
-    
+    cli();
     clock_count = 0; //reset
-    
+    sti();
     while (rtc_int_flag != 0); //wait until not interupting to return
     
     return 0;

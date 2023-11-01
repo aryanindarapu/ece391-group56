@@ -14,11 +14,10 @@
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int divide_error() {
-    // cli();
     printf("Divide error occurred\n");
-    // exception_raised_flag = 1;
-    // return 256;
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -31,8 +30,9 @@ int divide_error() {
  */ 
 int debug() {
     printf("Debug interrupt occurred\n");
-    // return 256;
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -45,8 +45,9 @@ int debug() {
  */ 
 int nmi_interrupt() {
     printf("NMI interrupt occured\n");
-    // return 256;
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -59,8 +60,9 @@ int nmi_interrupt() {
  */ 
 int breakpoint() {
     printf("Breakpoint interrupt occurred\n");
-    // return 256;
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -73,7 +75,9 @@ int breakpoint() {
  */ 
 int overflow() {
     printf("Overflow error occurred\n"); 
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -86,7 +90,9 @@ int overflow() {
  */ 
 int bound_range_exceeded() {
     printf("Bound range error occurred\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -99,8 +105,10 @@ int bound_range_exceeded() {
  */ 
 int invalid_opcode() {
     printf("Invalid opcode error occurred\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
     
+    return 256;
 }
 
 /*
@@ -113,7 +121,9 @@ int invalid_opcode() {
  */ 
 int device_not_available() {
     printf("Device not available\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -126,7 +136,9 @@ int device_not_available() {
  */ 
 int double_fault() {
     printf("Double fault error occurred\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -139,7 +151,9 @@ int double_fault() {
  */ 
 int coprocessor_segment_overrun() {
     printf("Coprocessor segment overrun error occurred\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -152,7 +166,9 @@ int coprocessor_segment_overrun() {
  */ 
 int invalid_tss() {
     printf("Invalid tts error occurred\n");
-    while (1);  
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);  
+    return 256;
 }
 
 /*
@@ -165,7 +181,9 @@ int invalid_tss() {
  */ 
 int segment_not_present() {
     printf("***segment not present***\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -178,7 +196,9 @@ int segment_not_present() {
  */ 
 int stack_segment_fault() {
     printf("***stack segment fault***\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -191,7 +211,9 @@ int stack_segment_fault() {
  */ 
 int general_protection() {
     printf("General protection fault\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -204,9 +226,8 @@ int general_protection() {
  */ 
 int page_fault() {
     printf("Page fault occurred\n");
-    // exception_raised_flag = 1;
-    while (1);
-    halt(0);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
     return 256;
 }
 
@@ -220,7 +241,9 @@ int page_fault() {
  */ 
 int reserved() {
     printf("Reserved interrupt occurred\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -233,7 +256,9 @@ int reserved() {
  */ 
 int x87_fpu_floating_point_error() {
     printf("x87 fpu floating point error occurred\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -246,7 +271,9 @@ int x87_fpu_floating_point_error() {
  */ 
 int alignment_check() {
     printf("Alignment check interrupt occurred\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -259,7 +286,9 @@ int alignment_check() {
  */ 
 int machine_check() {
     printf("Machine alignment interrupt occurred\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -272,7 +301,9 @@ int machine_check() {
  */ 
 int simd_floating_point_exception() {
     printf("Simd floating point exception occurred\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }
 
 /*
@@ -285,5 +316,7 @@ int simd_floating_point_exception() {
  */ 
 int user_defined() {
     printf("User defined interrupt occurred\n");
-    while (1);
+    exception_raised_flag = 1;
+    halt((uint8_t) 256);
+    return 256;
 }

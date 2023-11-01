@@ -27,7 +27,7 @@ void init_paging () {
                 page_dir[i].ps = 0;
                 page_dir[i].g = 0;
                 page_dir[i].avail = 0;
-                page_dir[i].base_31_12 = (unsigned int) (&video_memory_page_table) / FOUR_KB;
+                page_dir[i].base_31_12 = ((uint32_t) (&video_memory_page_table)) / FOUR_KB;
                 break;
             case 1: // Kernel section (single 4mb page)
                 page_dir[i].p = 1;
@@ -60,7 +60,7 @@ void init_paging () {
 
     /* setup page table for video memory (the one for PDE #0) */
     for (i = 0; i < NUM_ENTRIES; i++) {
-        if(i * FOUR_KB == VIDEO_ADDRESS) {
+        if(i == VIDEO_ADDRESS / FOUR_KB) {
             video_memory_page_table[i].p = 1;
         }
         else{

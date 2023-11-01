@@ -76,7 +76,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     int within_data_block_idx;
     for (curr_byte_idx = offset; curr_byte_idx < length + offset; curr_byte_idx++) {
         // reached end of file
-        if (curr_byte_idx >= curr_inode->length) {
+        if (curr_byte_idx - offset >= curr_inode->length) {
             return 0;
         }
 

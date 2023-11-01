@@ -22,3 +22,5 @@ int alignment_check();
 int machine_check();
 int simd_floating_point_exception();
 int user_defined();
+
+int exception_raised_flag;
