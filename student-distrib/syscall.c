@@ -342,7 +342,7 @@ int32_t vidmap (uint8_t** screen_start) {
     // check if screen start is valid 
     if (screen_start == NULL) return -1;
 
-    // if ((uint32_t) screen_start < USER_MEM_VIRTUAL_ADDR || (uint32_t) screen_start > (USER_MEM_VIRTUAL_ADDR + FOUR_MB)) return -1;
+    if ((uint32_t) screen_start < USER_MEM_VIRTUAL_ADDR || (uint32_t) screen_start > (USER_MEM_VIRTUAL_ADDR + FOUR_MB)) return -1;
 
     // set up page as 4kb pages
     // TODO: change permission level from 0 to 1. Do we do this for all page table entries, or just the one that we add?
@@ -353,7 +353,8 @@ int32_t vidmap (uint8_t** screen_start) {
 
     // TODO: MP3 doc about not changing privilege levels
     video_memory_page_table[i].p = 1; 
-    video_memory_page_table[i].us = 1; 
+    video_memory_page_table[i].us = 1;
+    video_memory_page_table[i].base_31_12 = i;
     flush_tlb();
 
     // *screen_start = (uint32_t *) ((&video_memory_page_table[i])) / FOUR_KB;

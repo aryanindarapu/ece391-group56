@@ -19,7 +19,7 @@ void init_paging () {
             case 0: // Video memory page table
                 page_dir[i].p = 1;
                 page_dir[i].rw = 1;
-                page_dir[i].us = 0; // its 0 level privelage
+                page_dir[i].us = 1; // its 0 level privelage
                 page_dir[i].pwt = 0;
                 page_dir[i].pcd = 0;
                 page_dir[i].a = 0;
