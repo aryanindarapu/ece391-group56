@@ -337,7 +337,44 @@ int32_t write (uint32_t fd, const void* buf, uint32_t nbytes) {
     return pcb->file_desc_arr[fd].ops_ptr.write(fd, buf, nbytes);
 }
 
-/* NO NEED TO IMPLEMENT YET (CHECKPOINT 3.4) */
+/*
+* getargs
+*   DESCRIPTION: Copies the arguments into a user-level buffer
+*   INPUTS: buf - the buffer to copy the arguments into
+*           nbytes - the number of bytes to copy
+*   OUTPUTS: none
+*   RETURN VALUE: 0 on success, -1 on failure
+*   SIDE EFFECTS: none
+*/
+int32_t getargs (uint8_t* buf, uint32_t nbytes) {
+    // Grab current pcb pointer
+    pcb_t * pcb = get_curr_pcb_ptr();
+    int i;
+
+    // If there are no arguments in command line, return -1
+    // Also need to check to make sure we have enough space on our buf for the command + NULL terminating character
+    // So, command line can't be longer than 127
+    if (strlen((const int8_t *) pcb->commands) == 0) return -1;
+    
+    // If there are more than 128 bytes for nbytes, we cap it off at the length of the command line
+    // if (nbytes > strlen((const int8_t *) pcb->commands)) nbytes = strlen((const int8_t *) pcb->commands);
+    // Loop through pcb commands and copy it to the buf
+    for (i = 0; i < nbytes; i++) {
+        if (i < strlen((const int8_t *) pcb->commands)) buf[i] = pcb->commands[i];
+        else buf[i] = '\0';
+    }
+
+    return 0;
+}
+
+/*
+* vidmap
+*   DESCRIPTION: Maps the text-mode video memory into user space at a pre-set virtual address
+*   INPUTS: screen_start - the address to map the video memory to
+*   OUTPUTS: none
+*   RETURN VALUE: 0 on success, -1 on failure
+*   SIDE EFFECTS: changes paging structure
+*/
 int32_t vidmap (uint8_t** screen_start) {
     // check if screen start is valid 
     if (screen_start == NULL) return -1;
@@ -362,32 +399,27 @@ int32_t vidmap (uint8_t** screen_start) {
     return 0;
 }
 
-int32_t getargs (uint8_t* buf, uint32_t nbytes) {
-    // Grab current pcb pointer
-    pcb_t * pcb = get_curr_pcb_ptr();
-    int i;
-
-    // If there are no arguments in command line, return -1
-    // Also need to check to make sure we have enough space on our buf for the command + NULL terminating character
-    // So, command line can't be longer than 127
-    if (strlen((const int8_t *) pcb->commands) == 0) return -1;
-    
-    // If there are more than 128 bytes for nbytes, we cap it off at the length of the command line
-    // if (nbytes > strlen((const int8_t *) pcb->commands)) nbytes = strlen((const int8_t *) pcb->commands);
-    // Loop through pcb commands and copy it to the buf
-    for (i = 0; i < nbytes; i++) {
-        if (i < strlen((const int8_t *) pcb->commands)) buf[i] = pcb->commands[i];
-        else buf[i] = '\0';
-    }
-
-    return 0;
-}
-
-/* EXTRA CREDIT SYSTEM CALLS */
+/*
+* set_handler
+*   DESCRIPTION: Sets the handler for the given signal
+*   INPUTS: signum - the signal to set the handler for
+*           handler_address - the address of the handler
+*   OUTPUTS: none
+*   RETURN VALUE: -1
+*   SIDE EFFECTS: none
+*/
 int32_t set_handler (uint32_t signum, void* handler_address) {
     return -1;
 }
 
+/*
+* sigreturn
+*   DESCRIPTION: Returns the signal to the handler
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: -1
+*   SIDE EFFECTS: none
+*/
 int32_t sigreturn (void) {
     return -1;
 }
