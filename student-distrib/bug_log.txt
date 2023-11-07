@@ -1,21 +1,10 @@
-****************************************** BUG LOG *******************************************
------------------
-TEMPLATE: 
------------------
-FILE/FUNCTION: 
-BUG: 
-SOLUTION:
-DIFFICULTY:
------------------
 **************************************** CHECKPOINT 4 ****************************************
 -----------------
-FILE/FUNCTION:
-BUG:
-DIFFICULTY: 
-SOLUTION:
+FILE/FUNCTION: read_dentry_by_name
+BUG: read_dentry_by_name was returning that the file was not found when the file name was 32 characters long
+DIFFICULTY: 20 minutes
+SOLUTION: We were checking the length of the file name, which was return the wrong value. Instead, we used only the strcmp function. 
 -----------------
-- read_dentry_by_name not correct when handling files with filename length 32
-- read data was slightly incorrect when offset was not 0
 **************************************** CHECKPOINT 3 ****************************************
 -----------------
 FILE/FUNCTION: syscall.c
