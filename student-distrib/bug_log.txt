@@ -7,6 +7,15 @@ BUG:
 SOLUTION:
 DIFFICULTY:
 -----------------
+**************************************** CHECKPOINT 4 ****************************************
+-----------------
+FILE/FUNCTION:
+BUG:
+DIFFICULTY: 
+SOLUTION:
+-----------------
+- read_dentry_by_name not correct when handling files with filename length 32
+- read data was slightly incorrect when offset was not 0
 **************************************** CHECKPOINT 3 ****************************************
 -----------------
 FILE/FUNCTION: syscall.c
@@ -127,13 +136,6 @@ DIFFICULTY: 2 hours
 -----------------
 
 **************************************** CHECKPOINT 5 ****************************************
------------------
-FILE/FUNCTION:
-BUG:
-DIFFICULTY: 
-SOLUTION:
------------------
-**************************************** CHECKPOINT 4 ****************************************
 -----------------
 FILE/FUNCTION:
 BUG:

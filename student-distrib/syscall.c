@@ -121,7 +121,6 @@ int32_t execute (const uint8_t* command) {
     int32_t output;
     
     /* enable interrupts*/
-    sti();
     // sets up DS, ESP, EFLAGS, CS, EIP onto stack for context switch
     asm volatile ("\
         andl $0x00FF, %%eax     ;\
@@ -163,7 +162,7 @@ int32_t halt (uint8_t status) {
         // recover context from halt(esp, eip, USER_CS, USER_DS);
         // 0x00FF - clears the bottom 8 bytes of the return value
         // 0x0200 - turns on bit of EFLAGS
-        sti();
+        // sti();
         asm volatile ("\
             andl $0x00FF, %%eax     ;\
             movw %%ax, %%ds         ;\
@@ -382,20 +381,12 @@ int32_t vidmap (uint8_t** screen_start) {
     if ((uint32_t) screen_start < USER_MEM_VIRTUAL_ADDR || (uint32_t) screen_start > (USER_MEM_VIRTUAL_ADDR + FOUR_MB)) return -1;
 
     // set up page as 4kb pages
-    // TODO: change permission level from 0 to 1. Do we do this for all page table entries, or just the one that we add?
-    int i;
-    for (i = 0; i < NUM_ENTRIES; i++) {
-        if (video_memory_page_table[i].p == 0) break;
-    }
-
-    // TODO: MP3 doc about not changing privilege levels
-    video_memory_page_table[i].p = 1; 
-    video_memory_page_table[i].us = 1;
-    video_memory_page_table[i].base_31_12 = i;
+    video_memory_page_table[USER_VIDEO_MEM_INDEX].p = 1; 
+    video_memory_page_table[USER_VIDEO_MEM_INDEX].us = 1;
+    video_memory_page_table[USER_VIDEO_MEM_INDEX].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
     flush_tlb();
 
-    // *screen_start = (uint32_t *) ((&video_memory_page_table[i])) / FOUR_KB;
-    *screen_start = (uint8_t *) (FOUR_KB * i);
+    *screen_start = (uint8_t *) (USER_VIDEO_MEM_ADDRESS); 
     return 0;
 }
 

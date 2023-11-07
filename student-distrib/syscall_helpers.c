@@ -15,8 +15,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
 
     // Scan through directory entries to find file name
     for (dir_index = 0; dir_index < boot_block_ptr->num_dirs; dir_index++) {
-        if (strlen((const int8_t *) fname) == strlen((const int8_t *) boot_block_ptr->dir_entries[dir_index].file_name) 
-            && strncmp((const int8_t *) fname, (const int8_t *) boot_block_ptr->dir_entries[dir_index].file_name, FILENAME_SIZE) == 0) {
+        if (strncmp((const int8_t *) fname, (const int8_t *) boot_block_ptr->dir_entries[dir_index].file_name, FILENAME_SIZE) == 0) {
             // File found in our boot block so we update our dentry
             strcpy(dentry->file_name, (const int8_t *) fname);
             // Now we update the dentry with the inode and type

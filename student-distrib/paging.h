@@ -11,6 +11,9 @@
 #define KERNEL_ADDRESS 0x400000
 #define VIDEO_ADDRESS  0xB8000
 
+#define USER_VIDEO_MEM_INDEX 1
+#define USER_VIDEO_MEM_ADDRESS FOUR_KB
+
 #ifndef ASM
 
 /* Initialize paging */

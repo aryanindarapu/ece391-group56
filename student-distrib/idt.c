@@ -53,7 +53,7 @@ void init_idt() {
             idt[i].size = 1; // size of gate - INT gate is a 32 bit gate
             idt[i].reserved1 = 1;
             idt[i].reserved2 = 1;
-            idt[i].reserved3 = 0;
+            idt[i].reserved3 = 1;
             idt[i].seg_selector = KERNEL_CS;
         } else if (i == 0x21 || i == 0x28) {
             idt[i].present = 1;
