@@ -9,7 +9,7 @@
 #include "keyboard.h"
 #include "../terminal.h"        
 
-uint8_t special_key_flags[NUM_SPECIAL_FLAGS] = { 0, 0, 0 };
+uint8_t special_key_flags[NUM_SPECIAL_FLAGS] = { 0, 0, 0, 0 };
 
 const unsigned char keyboard_map[128] =
     {
@@ -144,10 +144,12 @@ void keyboard_driver() {
             }
             return;
         case ALT_P:
-            // printf(" ALT_PRESSED ");
+            /* assert alt pressed flag */
+            special_key_flags[ALT_INDEX] = 1;
             return;
         case ALT_R:
-            // printf(" ALT_RELEASED ");
+            /* release alt flag */
+            special_key_flags[ALT_INDEX] = 0;
             return;
         case BACKSPACE:
             if(get_buffer_fill() == 0) return;
@@ -172,7 +174,6 @@ void keyboard_driver() {
             if(get_buffer_fill() == 127) return; //do check in terminal
             if (keycode > 0 && keycode < 58) {
                 // Check if CTRL is held down
-                
                 if (special_key_flags[CTRL_INDEX]) {
                     switch (keycode) {
                     case 38:
@@ -217,6 +218,13 @@ void keyboard_driver() {
                     // buffer_idx++;
                 }
 
+            }
+            else if(keycode > 58 && keycode < 70){
+                // quick test to detect alt + Function key
+                if (special_key_flags[ALT_INDEX]){
+                    putc(keyboard_map[2]);
+                    write_to_terminal(keyboard_map[2]);
+                }
             }
 
             // if(buffer_idx == 80)
