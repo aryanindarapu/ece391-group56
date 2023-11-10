@@ -7,6 +7,8 @@ static uint8_t saved_line_buffer[LINE_BUFFER_SIZE];
 static volatile int enter_flag_pressed = 0;
 static unsigned int save_buffer_idx = 0;
 
+// TODO: add a 2d array of 6 input buffers
+
 /* get_buffer_Fill
  * Inputs: none
  * Return Value: buffer_idx

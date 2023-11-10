@@ -144,6 +144,7 @@ void keyboard_driver() {
             }
             return;
         case ALT_P:
+            // TODO: add process switching when function key is pressed 
             // printf(" ALT_PRESSED ");
             return;
         case ALT_R:
