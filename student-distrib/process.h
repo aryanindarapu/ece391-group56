@@ -3,11 +3,12 @@
 
 #define MAX_NUM_PROGRAMS 6
 
-int32_t process_switch(int32_t process_num);
+int32_t process_switch();
 
 typedef struct pcb {
     int32_t pid; 
     int32_t parent_pid;
+    int32_t child_pid;
     uint32_t kernel_ebp;
     uint32_t kernel_esp;
     uint32_t user_esp;
@@ -19,3 +20,4 @@ typedef struct pcb {
 } pcb_t;
 
 uint32_t pcb_flags[MAX_NUM_PROGRAMS];
+pcb_t * terminal_indices[3];

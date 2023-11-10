@@ -3,6 +3,7 @@
 #include "types.h"
 #include "syscall.h"
 #include "syscall_helpers.h"
+#include "process.h"
 
 /* 
  * init_file_system
