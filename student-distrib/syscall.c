@@ -74,12 +74,12 @@ int32_t execute (const uint8_t* command) {
 
     /* Set up parent and child pointers accordingly */
     // TODO: change this when dynamically loading shells
-    if (new_pid_idx == 0 || new_pid_idx == 1 || new_pid_idx == 2) { // i.e. the PCB is for the initial shell
-        new_pcb->parent_pid = -1;
-    } else {
+    // if (new_pid_idx == 0 || new_pid_idx == 1 || new_pid_idx == 2) { // i.e. the PCB is for the initial shell
+    //     new_pcb->parent_pid = -1;
+    // } else {
         new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
         get_curr_pcb_ptr()->child_pid = new_pid_idx;
-    }
+    // }
 
     new_pcb->file_desc_arr[0].ops_ptr = stdin_ops_table;
     new_pcb->file_desc_arr[0].inode = -1;
@@ -164,7 +164,7 @@ int32_t halt (uint8_t status) {
 
     /* push user context if its base shell since we have no processes left */
     // TODO: change this when dynamically loading shells
-    if (pcb->pid == 0 || pcb->pid == 1 || pcb->pid == 2) {
+    if (pcb->pid == 0 ){//|| pcb->pid == 1 || pcb->pid == 2) {
         // recover context from halt(esp, eip, USER_CS, USER_DS);
         // 0x00FF - clears the bottom 8 bytes of the return value
         // 0x0200 - turns on bit of EFLAGS

@@ -166,6 +166,7 @@ void entry(unsigned long magic, unsigned long addr) {
     init_file_system();
     init_terminals_vidmaps();
     clear();
+    sti();
     // init_shells();
     execute((const uint8_t *) "shell");
     
@@ -173,7 +174,7 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */   
-    sti();
+    
 #ifdef RUN_TESTS
     /* Run tests */
     //launch_tests();

@@ -219,7 +219,7 @@ void keyboard_driver() {
                 }
 
             }
-            else if(keycode > 58 && keycode < 61){
+            else if(keycode > 58 && keycode < 62){
                 // quick test to detect alt + Function key
                 if (special_key_flags[ALT_INDEX]){
                     terminal_switch(keycode - 59);

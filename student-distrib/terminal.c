@@ -9,8 +9,10 @@ static uint8_t line_buffer[3][LINE_BUFFER_SIZE];
 static uint8_t saved_line_buffer[3][LINE_BUFFER_SIZE];
 static volatile int enter_flag_pressed[3] = {0,0,0};
 static unsigned int save_buffer_idx[3] = {0,0,0};
-char* vidmems[3][4000];
+char* vidmems[3][4096];
 unsigned char terminal_init_check[3] = {1, 0, 0};
+int save_screen_x[3];
+int save_screen_y[3];
 
 // TODO: add a 2d array of 6 input buffers
 
@@ -107,7 +109,7 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // printf("ACCESSED TERMINAL READ");
     sti();
     
-    while (enter_flag_pressed[terminal_idx] != 1);
+    while (enter_flag_pressed[terminal_idx] != 1){sti();};
     
     cli();
     
@@ -156,9 +158,16 @@ int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
 void terminal_switch(int t_idx)
 {
     if(t_idx > 2 || t_idx < 0) return;
-    memcpy((void *) (&vidmems[terminal_idx]), (void *) VIDEO, 4000);
+    memcpy((void *) (&vidmems[terminal_idx]), (void *) VIDEO, 4096);
+    save_screen_x[terminal_idx] = get_screen_x();
+    save_screen_y[terminal_idx] = get_screen_x();
+
     terminal_idx = t_idx;
-    memcpy((void *) VIDEO, (void *) (&vidmems[terminal_idx]), 4000);
+    
+    memcpy((void *) VIDEO, (void *) (&vidmems[terminal_idx]), 4096);
+    save_screen_x[terminal_idx] = get_screen_x();
+    save_screen_y[terminal_idx] = get_screen_x();
+    
     if(terminal_init_check[terminal_idx] == 0)
     {
         clear();

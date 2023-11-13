@@ -38,6 +38,11 @@ void backspace(void);
 /* moves the contents of the screen up one line */
 void move_screen_up(void);
 
+int get_screen_x();
+int get_screen_y();
+void set_screen_x();
+void set_screen_y();
+
 /* Port read functions */
 /* Inb reads a byte and returns its value as a zero-extended 32-bit
  * unsigned int */
