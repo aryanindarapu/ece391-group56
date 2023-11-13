@@ -108,6 +108,7 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // NOTE: this is a blocking call, so it can't be interrupted
     // printf("ACCESSED TERMINAL READ");
     sti();
+    
     while (enter_flag_pressed[terminal_idx] != 1){sti();};
     
     cli();
@@ -173,7 +174,8 @@ void terminal_switch(int t_idx)
         clear();
         terminal_init_check[terminal_idx] = 1;
         sti();
-        // execute((const uint8_t *) "shell");
+        send_eoi(1);
+        execute((const uint8_t *) "shell");
     }
     // printf("aaaa%d", terminal_idx);
     
