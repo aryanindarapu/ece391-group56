@@ -1,7 +1,11 @@
+#ifndef PROCESS_H
+#define PROCESS_H
+
 #include "types.h"
 #include "file_system_driver.h"
 
 #define MAX_NUM_PROGRAMS 6
+
 
 int32_t process_switch();
 
@@ -21,3 +25,5 @@ typedef struct pcb {
 
 uint32_t pcb_flags[MAX_NUM_PROGRAMS];
 pcb_t * terminal_indices[3];
+
+#endif

@@ -219,11 +219,13 @@ void keyboard_driver() {
                 }
 
             }
-            else if(keycode > 58 && keycode < 70){
+            else if(keycode > 58 && keycode < 61){
                 // quick test to detect alt + Function key
                 if (special_key_flags[ALT_INDEX]){
-                    putc(keyboard_map[2]);
-                    write_to_terminal(keyboard_map[2]);
+                    terminal_switch(keycode - 59);
+                    //printf("Switched to terminal ");
+                    //putc(keyboard_map[2] + keycode - 59);
+                    //write_to_terminal(keyboard_map[2] + keycode - 59);
                 }
             }
 

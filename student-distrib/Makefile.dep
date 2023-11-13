@@ -6,38 +6,49 @@ x86_desc.o: x86_desc.S x86_desc.h types.h
 exceptions.o: exceptions.c exceptions.h lib.h types.h syscall.h paging.h \
   file_system_driver.h devices/rtc.h devices/../types.h terminal.h
 file_system_driver.o: file_system_driver.c file_system_driver.h \
-  devices/rtc.h devices/../types.h terminal.h types.h lib.h syscall.h \
-  paging.h syscall_helpers.h
+  devices/rtc.h devices/../types.h terminal.h types.h lib.h paging.h \
+  syscall.h syscall_helpers.h process.h
 idt.o: idt.c idt.h x86_desc.h types.h devices/keyboard.h devices/i8259.h \
   devices/../types.h devices/../lib.h devices/../types.h \
   devices/../x86_desc.h exceptions.h lib.h asm_linkage.h devices/rtc.h \
-  paging.h syscall.h file_system_driver.h terminal.h
+  devices/pit.h paging.h syscall.h file_system_driver.h terminal.h
 kernel.o: kernel.c multiboot.h types.h x86_desc.h lib.h debug.h tests.h \
   idt.h devices/keyboard.h devices/i8259.h devices/../types.h \
   devices/../lib.h devices/../x86_desc.h paging.h file_system_driver.h \
-  devices/rtc.h terminal.h syscall.h devices/i8259.h
+  devices/rtc.h terminal.h syscall.h process.h devices/i8259.h
 lib.o: lib.c lib.h types.h
 paging.o: paging.c paging.h types.h lib.h
+process.o: process.c process.h types.h file_system_driver.h devices/rtc.h \
+  devices/../types.h terminal.h lib.h paging.h syscall.h \
+  syscall_helpers.h
 syscall.o: syscall.c syscall.h paging.h types.h lib.h \
   file_system_driver.h devices/rtc.h devices/../types.h terminal.h \
-  syscall_helpers.h x86_desc.h exceptions.h
+  syscall_helpers.h process.h x86_desc.h exceptions.h
 syscall_helpers.o: syscall_helpers.c syscall_helpers.h types.h \
   file_system_driver.h devices/rtc.h devices/../types.h terminal.h lib.h \
-  syscall.h paging.h
+  paging.h syscall.h process.h
 terminal.o: terminal.c terminal.h types.h lib.h file_system_driver.h \
-  devices/rtc.h devices/../types.h
+  devices/rtc.h devices/../types.h paging.h syscall.h
 tests.o: tests.c tests.h x86_desc.h types.h lib.h file_system_driver.h \
-  devices/rtc.h devices/../types.h terminal.h syscall.h paging.h
+  devices/rtc.h devices/../types.h terminal.h paging.h syscall.h
 i8259.o: devices/i8259.c devices/i8259.h devices/../types.h \
   devices/../lib.h devices/../types.h devices/../x86_desc.h
 keyboard.o: devices/keyboard.c devices/../lib.h devices/../types.h \
   devices/../x86_desc.h devices/keyboard.h devices/i8259.h \
   devices/../types.h devices/../terminal.h devices/../lib.h \
   devices/../file_system_driver.h devices/../devices/rtc.h \
-  devices/../devices/../types.h devices/../terminal.h
+  devices/../devices/../types.h devices/../terminal.h devices/../paging.h \
+  devices/../syscall.h
+pit.o: devices/pit.c devices/i8259.h devices/../types.h devices/../lib.h \
+  devices/../types.h devices/../x86_desc.h devices/rtc.h \
+  devices/../syscall_helpers.h devices/../file_system_driver.h \
+  devices/../devices/rtc.h devices/../devices/../types.h \
+  devices/../terminal.h devices/../lib.h devices/../paging.h \
+  devices/../syscall.h devices/../process.h devices/../process.h \
+  devices/pit.h
 rtc.o: devices/rtc.c devices/i8259.h devices/../types.h devices/../lib.h \
   devices/../types.h devices/../x86_desc.h devices/rtc.h \
   devices/../syscall_helpers.h devices/../file_system_driver.h \
   devices/../devices/rtc.h devices/../devices/../types.h \
-  devices/../terminal.h devices/../lib.h devices/../syscall.h \
-  devices/../paging.h
+  devices/../terminal.h devices/../lib.h devices/../paging.h \
+  devices/../syscall.h devices/../process.h

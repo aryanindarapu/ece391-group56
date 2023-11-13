@@ -4,8 +4,11 @@
 #include "types.h"
 #include "lib.h"
 #include "file_system_driver.h"
+#include "paging.h"
+#include "syscall.h"
 
 #define LINE_BUFFER_SIZE 128
+#define VIDEO       0xB8000
 
 /* kbd input to terminal to update buffer */
 extern void write_to_terminal(unsigned char ascii);
@@ -17,6 +20,10 @@ int get_buffer_fill();
 void terminal_backspace();
 /* fnc to handle enter press */
 void terminal_enter();
+/* fnc to swap terminals */
+void terminal_switch(int t_idx);
+/* init pages to hold vid data for 3 terms */
+void init_terminals_vidmaps();
 
 /* standard file operations for terminal */
 extern int32_t terminal_open(const uint8_t* filename);

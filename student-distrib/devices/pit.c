@@ -40,7 +40,8 @@ void init_pit() {
 }
 
 int pit_handler() {
-    process_switch();
+    return 0;
+    //process_switch();
 }
 
 

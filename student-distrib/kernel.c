@@ -11,6 +11,7 @@
 #include "paging.h"
 #include "file_system_driver.h"
 #include "syscall.h"
+#include "process.h"
 
 #include "devices/i8259.h"
 #include "devices/keyboard.h"
@@ -163,8 +164,11 @@ void entry(unsigned long magic, unsigned long addr) {
     init_rtc();
     init_paging();
     init_file_system();
-    
+    init_terminals_vidmaps();
     clear();
+    // init_shells();
+    execute((const uint8_t *) "shell");
+    
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
@@ -172,10 +176,10 @@ void entry(unsigned long magic, unsigned long addr) {
     sti();
 #ifdef RUN_TESTS
     /* Run tests */
-    launch_tests();
+    //launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
-    execute((const uint8_t *) "shell");
+    //execute((const uint8_t *) "shell");
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
 }

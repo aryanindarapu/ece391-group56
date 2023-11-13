@@ -1,6 +1,7 @@
 #include "types.h"
 #include "file_system_driver.h"
 #include "syscall.h"
+#include "process.h"
 
 #define PCB_BITMASK 0xFFFFE000
 

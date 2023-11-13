@@ -1,11 +1,16 @@
 #include "terminal.h"
 
+// Which terminal we are currently on
+static int terminal_idx = 0;
 
-static unsigned int buffer_idx = 0;
-static uint8_t line_buffer[LINE_BUFFER_SIZE];
-static uint8_t saved_line_buffer[LINE_BUFFER_SIZE];
-static volatile int enter_flag_pressed = 0;
-static unsigned int save_buffer_idx = 0;
+// Store buffer for each terminal (0 for first, 1 for second, etc.)
+static unsigned int buffer_idx[3] = {0,0,0};
+static uint8_t line_buffer[3][LINE_BUFFER_SIZE];
+static uint8_t saved_line_buffer[3][LINE_BUFFER_SIZE];
+static volatile int enter_flag_pressed[3] = {0,0,0};
+static unsigned int save_buffer_idx[3] = {0,0,0};
+char* vidmems[3][4000];
+unsigned char terminal_init_check[3] = {1, 0, 0};
 
 // TODO: add a 2d array of 6 input buffers
 
@@ -15,7 +20,7 @@ static unsigned int save_buffer_idx = 0;
  * Function: returns the next empty idx in the buffer (0 indexed) */
 int get_buffer_fill()
 {
-    return buffer_idx;
+    return buffer_idx[terminal_idx];
 }
 
 /* write_to_terminal
@@ -23,12 +28,12 @@ int get_buffer_fill()
  * Return Value: none
  * Function: addes the current char to the buffer */
 void write_to_terminal(unsigned char ascii) {
-    if(buffer_idx == 128)
+    if(buffer_idx[terminal_idx] == 128)
         return;
     else
     {
-        line_buffer[buffer_idx] = ascii;
-        buffer_idx++;
+        line_buffer[terminal_idx][buffer_idx[terminal_idx]] = ascii;
+        buffer_idx[terminal_idx]++;
     }
            
 }
@@ -38,18 +43,18 @@ void write_to_terminal(unsigned char ascii) {
  * Function: removes the last char in the buffer */
 void terminal_backspace()
 {
-    if(buffer_idx==0) return;
+    if(buffer_idx[terminal_idx]==0) return;
     
-    if(line_buffer[buffer_idx-1] == '\t')
+    if(line_buffer[terminal_idx][buffer_idx[terminal_idx]] == '\t')
     {
         backspace();
         backspace();
         backspace();
     }
 
-    line_buffer[buffer_idx-1] = 0;
+    line_buffer[terminal_idx][buffer_idx[terminal_idx]-1] = 0;
 
-    buffer_idx--;
+    buffer_idx[terminal_idx]--;
 }
 
 /* terminal clear
@@ -57,8 +62,9 @@ void terminal_backspace()
  * Return Value: none
  * Function: resets buffer_idx */
 void terminal_clear() {
-    buffer_idx = 0;
+    buffer_idx[terminal_idx] = 0;
 }
+
 
 /* terminal_enter
  * Inputs: none
@@ -68,11 +74,11 @@ void terminal_enter()
 {
     int i;
     for (i = 0; i < LINE_BUFFER_SIZE; i++){
-        saved_line_buffer[i] = line_buffer[i];
+        saved_line_buffer[terminal_idx][i] = line_buffer[i];
     }
-    enter_flag_pressed = 1;
-    save_buffer_idx = buffer_idx;
-    buffer_idx = 0;
+    enter_flag_pressed[terminal_idx] = 1;
+    save_buffer_idx[terminal_idx] = buffer_idx[terminal_idx];
+    buffer_idx[terminal_idx] = 0;
 }
 
 /* 
@@ -101,24 +107,24 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // printf("ACCESSED TERMINAL READ");
     sti();
     
-    while (enter_flag_pressed != 1);
+    while (enter_flag_pressed[terminal_idx] != 1);
     
     cli();
     
-    line_buffer[save_buffer_idx] = '\n';
-    save_buffer_idx++;
-    enter_flag_pressed = 0;
+    line_buffer[terminal_idx][save_buffer_idx[terminal_idx]] = '\n';
+    save_buffer_idx[terminal_idx]++;
+    enter_flag_pressed[terminal_idx] = 0;
     //save_buffer_idx = buffer_idx;
-    if (nbytes < save_buffer_idx) {
-        memcpy(buf, (const void *) line_buffer, nbytes);
+    if (nbytes < save_buffer_idx[terminal_idx]) {
+        memcpy(buf, (const void *) line_buffer[terminal_idx], nbytes);
         sti();
         return nbytes;
     }
     else
     {
-        memcpy(buf, (const void *) line_buffer, save_buffer_idx);
+        memcpy(buf, (const void *) line_buffer[terminal_idx], save_buffer_idx[terminal_idx]);
         sti();
-        return save_buffer_idx;
+        return save_buffer_idx[terminal_idx];
     }
     // should check for ENTER and BACKSPACE here
     sti();
@@ -147,3 +153,34 @@ int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
     return nbytes;
 }
 
+void terminal_switch(int t_idx)
+{
+    if(t_idx > 2 || t_idx < 0) return;
+    memcpy((void *) (&vidmems[terminal_idx]), (void *) VIDEO, 4000);
+    terminal_idx = t_idx;
+    memcpy((void *) VIDEO, (void *) (&vidmems[terminal_idx]), 4000);
+    if(terminal_init_check[terminal_idx] == 0)
+    {
+        clear();
+        terminal_init_check[terminal_idx] = 1;
+        sti();
+        // execute((const uint8_t *) "shell");
+    }
+    // printf("aaaa%d", terminal_idx);
+    
+}
+
+void init_terminals_vidmaps()
+{
+    // 2kb to 4kb is terminal vmem
+    video_memory_page_table[2].p = 1; 
+    video_memory_page_table[2].us = 0;
+    video_memory_page_table[2].base_31_12 = 2 ; //VIDEO_ADDRESS / FOUR_KB;
+    video_memory_page_table[3].p = 1; 
+    video_memory_page_table[3].us = 0;
+    video_memory_page_table[3].base_31_12 = 3 ; //VIDEO_ADDRESS / FOUR_KB;
+    video_memory_page_table[4].p = 1; 
+    video_memory_page_table[4].us = 0;
+    video_memory_page_table[4].base_31_12 = 4 ; //VIDEO_ADDRESS / FOUR_KB;
+    flush_tlb();
+}
