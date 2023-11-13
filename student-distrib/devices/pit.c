@@ -6,7 +6,7 @@
 #include "../process.h"
 #include "pit.h"
 
-
+int32_t schedule_index = 0;
 /*
  *  0x40    Channel 0 data port (read/write) for the PIT
  *
@@ -40,6 +40,11 @@ void init_pit() {
 }
 
 int pit_handler() {
+    send_eoi(0);
+    cli();
+    process_switch(schedule_index);
+    schedule_index = (schedule_index + 1) % 3;
+    sti();
     return 0;
     //process_switch();
 }
