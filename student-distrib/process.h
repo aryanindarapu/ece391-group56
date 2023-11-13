@@ -6,8 +6,8 @@
 
 #define MAX_NUM_PROGRAMS 6
 
-
-int32_t process_switch();
+int32_t process_switch(int32_t terminal_num);
+int32_t process_vidmap_change(int32_t terminal_from, int32_t terminal_to);
 
 typedef struct pcb {
     int32_t pid; 

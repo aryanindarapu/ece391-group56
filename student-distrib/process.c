@@ -1,25 +1,25 @@
 #include "process.h"
 #include "syscall.h"
 #include "syscall_helpers.h"
+#include "x86_desc.h"
 
 int32_t active_terminal_index; // TODO: this is changed by the keyboard driver for terminal switching
-int32_t schedule_index;
 
-void init_shells() {
-    int i;
-    for (i = 0; i < 3; i++) {
-        execute("shell");
-        terminal_indices[i] = get_pcb_ptr(i); // puts pointer of current pcb into terminal struct
-    }
+// void init_shells() {
+//     int i;
+//     for (i = 0; i < 3; i++) {
+//         execute("shell");
+//         terminal_indices[i] = get_pcb_ptr(i); // puts pointer of current pcb into terminal struct
+//     }
 
     
 
-    schedule_index = 0;
-}
+//     schedule_index = 0;
+// }
 
-int32_t process_switch() {
+int32_t process_switch(int32_t terminal_num) {
     // Get to end of linked list
-    pcb_t * curr_pcb = get_pcb_ptr(schedule_index);
+    pcb_t * curr_pcb = get_pcb_ptr(terminal_num);
 
     while (curr_pcb->child_pid != -1) {
         curr_pcb = get_pcb_ptr(curr_pcb->child_pid);
@@ -33,10 +33,46 @@ int32_t process_switch() {
     // } else {
     //     // write to non-display memory
     // }
+    tss.esp0 = (uint32_t) curr_pcb + EIGHT_KB - STACK_FENCE_SIZE;
+    tss.ss0 = KERNEL_DS;
+    
+    setup_user_page(((curr_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
+    flush_tlb();
 
-    // Change to use different vidmap page mapping
-    schedule_index++;
-    if (schedule_index >= 3) schedule_index = 0;
+    // TODO: set up TSS
+    // store kernel esp and ebp in the pcb
+    asm volatile (
+        "movl %%esp, %%eax   ;\
+         movl %%ebp, %%ebx   ;\
+        "
+        : "=a" (curr_pcb->kernel_esp), "=b" (curr_pcb->kernel_ebp)
+        :
+        : "memory"
+    );
 
+    int32_t output;
+    
+    /* enable interrupts*/
+    // sets up DS, ESP, EFLAGS, CS, EIP onto stack for context switch
+    asm volatile ("\
+        andl $0x00FF, %%eax     ;\
+        movw %%ax, %%ds         ;\
+        pushl %%eax             ;\
+        pushl %%ebx             ;\
+        pushfl                  ;\
+        pushl %%ecx             ;\
+        pushl %%edx             ;\
+        iret                    ;\
+        "
+        : "=a" (output)
+        : "a" (USER_DS), "b" (curr_pcb->user_esp), "c" (USER_CS), "d" (curr_pcb->user_eip) 
+        : "memory"
+    );
+
+    // NOTE: will it return back here? This context switch probably isn't exactly correct
     return 0;
+}
+
+int32_t process_vidmap_change(int32_t terminal_from, int32_t terminal_to) {
+    
 }
