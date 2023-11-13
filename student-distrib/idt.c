@@ -55,7 +55,7 @@ void init_idt() {
             idt[i].reserved2 = 1;
             idt[i].reserved3 = 1;
             idt[i].seg_selector = KERNEL_CS;
-        } else if (i == 0x20 || i == 0x21 || i == 0x28) {
+        } else if (/*i == 0x20 ||*/ i == 0x21 || i == 0x28) {
             idt[i].present = 1;
             idt[i].dpl = 0; // set privilege level 1
             idt[i].reserved0 = 0;
@@ -101,7 +101,7 @@ void init_idt() {
     SET_IDT_ENTRY(idt[0x13], simd_floating_point_exception);
     
     // PIT PIC interrupt
-    SET_IDT_ENTRY(idt[0x20], pit_handler_linkage);
+    // SET_IDT_ENTRY(idt[0x20], pit_handler_linkage);
 
     // Keyboard PIC interrupt
     SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage);

@@ -20,7 +20,7 @@ lib.o: lib.c lib.h types.h
 paging.o: paging.c paging.h types.h lib.h
 process.o: process.c process.h types.h file_system_driver.h devices/rtc.h \
   devices/../types.h terminal.h lib.h paging.h syscall.h \
-  syscall_helpers.h
+  syscall_helpers.h x86_desc.h
 syscall.o: syscall.c syscall.h paging.h types.h lib.h \
   file_system_driver.h devices/rtc.h devices/../types.h terminal.h \
   syscall_helpers.h process.h x86_desc.h exceptions.h
