@@ -26,20 +26,21 @@ void init_pit() {
     // Select channel 0 in the mode/command register (port 0x43)
     // This also sends out the interrupt signal to PIC when count reaches 0
     // Resetting the counter and sending the signal is handled for us
-    outb(0x00, PIT_COMMAND);
+    outb(0x36, PIT_COMMAND);
 
     // Need to set the rate for the pit (2^17 ~= 100ms between each IRQ)
-    int count = (65536 * 2) - 1;
+    int count = 30000;
 
     outb(count & 0xFF, PIT_CHANNEL0_DATA);
-    outb((count & 0xFF00) >> 8, PIT_CHANNEL0_DATA);
+    outb(count >> 8, PIT_CHANNEL0_DATA);
+
 
     enable_irq(0);
-
-    sti();
 }
 
 int pit_handler() {
+    send_eoi(0);
+    return 0;
     cli();
     process_switch(schedule_index);
     schedule_index = (schedule_index + 1) % 3;

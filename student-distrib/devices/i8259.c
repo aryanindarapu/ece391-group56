@@ -37,8 +37,8 @@ void i8259_init(void) {
 	
 	// Other devices are initialized in helper functions after 8259
     init_keyboard();
-    init_rtc();
     init_pit();
+    init_rtc();
 }
 
 

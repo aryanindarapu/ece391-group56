@@ -55,7 +55,7 @@ void init_idt() {
             idt[i].reserved2 = 1;
             idt[i].reserved3 = 1;
             idt[i].seg_selector = KERNEL_CS;
-        } else if (/*i == 0x20 ||*/ i == 0x21 || i == 0x28) {
+        } else if (i == 0x20 || i == 0x21 || i == 0x28) {
             idt[i].present = 1;
             idt[i].dpl = 0; // set privilege level 1
             idt[i].reserved0 = 0;

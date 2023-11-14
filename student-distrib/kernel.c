@@ -157,10 +157,10 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
-    i8259_init();
     init_paging();
     init_file_system();
     init_terminals_vidmaps();
+    i8259_init();
     clear();
     sti();
     // init_shells();
