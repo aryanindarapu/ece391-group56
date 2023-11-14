@@ -101,7 +101,7 @@ void init_idt() {
     SET_IDT_ENTRY(idt[0x13], simd_floating_point_exception);
     
     // PIT PIC interrupt
-    // SET_IDT_ENTRY(idt[0x20], pit_handler_linkage);
+    SET_IDT_ENTRY(idt[0x20], pit_handler_linkage);
 
     // Keyboard PIC interrupt
     SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage);

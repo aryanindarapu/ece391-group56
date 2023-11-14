@@ -40,11 +40,11 @@ void init_pit() {
 }
 
 int pit_handler() {
-    send_eoi(0);
     cli();
     process_switch(schedule_index);
     schedule_index = (schedule_index + 1) % 3;
     sti();
+    send_eoi(0);
     return 0;
     //process_switch();
 }

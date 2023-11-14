@@ -14,8 +14,6 @@
 #include "process.h"
 
 #include "devices/i8259.h"
-#include "devices/keyboard.h"
-#include "devices/rtc.h"
 
 
 #define RUN_TESTS
@@ -160,8 +158,6 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
     i8259_init();
-    init_keyboard();
-    init_rtc();
     init_paging();
     init_file_system();
     init_terminals_vidmaps();
