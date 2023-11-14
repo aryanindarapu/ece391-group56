@@ -3,6 +3,9 @@
  */
 
 #include "i8259.h"
+#include "keyboard.h"
+#include "rtc.h"
+#include "pit.h"
 #include "../lib.h"
 #include "../x86_desc.h"
 
@@ -33,6 +36,9 @@ void i8259_init(void) {
 	PIC_remap(ICW2_MASTER, ICW2_SLAVE);
 	
 	// Other devices are initialized in helper functions after 8259
+    init_keyboard();
+    init_pit();
+    init_rtc();
 }
 
 
