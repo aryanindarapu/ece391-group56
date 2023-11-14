@@ -1,7 +1,7 @@
 #include "terminal.h"
+#include "process.h"
 
-// Which terminal we are currently on
-static int terminal_idx = 0;
+
 
 // Store buffer for each terminal (0 for first, 1 for second, etc.)
 static unsigned int buffer_idx[3] = {0,0,0};
@@ -10,7 +10,6 @@ static uint8_t saved_line_buffer[3][LINE_BUFFER_SIZE];
 static volatile int enter_flag_pressed[3] = {0,0,0};
 static unsigned int save_buffer_idx[3] = {0,0,0};
 char* vidmems[3][4096];
-unsigned char terminal_init_check[3] = {1, 0, 0};
 int save_screen_x[3] = {7,7,7};
 int save_screen_y[3] = {1,1,1};
 
@@ -155,43 +154,57 @@ int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
     return nbytes;
 }
 
-void terminal_switch(int t_idx)
+void terminal_switch (int t_idx)
 {
     if(t_idx > 2 || t_idx < 0) return;
-    memcpy((void *) (&vidmems[terminal_idx]), (void *) VIDEO, 4096);
+
+    cli();
     save_screen_x[terminal_idx] = get_screen_x();
     save_screen_y[terminal_idx] = get_screen_y();
 
+    video_memory_page_table[1 + terminal_idx].base_31_12 = 1 + terminal_idx;
+    flush_tlb();
+    memcpy((void *) (FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4096);
     terminal_idx = t_idx;
     
-    memcpy((void *) VIDEO, (void *) (&vidmems[terminal_idx]), 4096);
+    set_vid_mem(terminal_idx);
+    memcpy((void *) VIDEO, (void *) (FOUR_KB * (terminal_idx + 1)), 4096);
+    
+    video_memory_page_table[1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
+    flush_tlb();
     set_screen_x(save_screen_x[terminal_idx]);
     set_screen_y(save_screen_y[terminal_idx]);
     update_cursor();
     
-    if(terminal_init_check[terminal_idx] == 0)
+    if (terminal_pids[terminal_idx] == -1)
     {
         clear();
-        terminal_init_check[terminal_idx] = 1;
+        new_terminal_flag = 1; // need to set up new terminal
         sti();
         send_eoi(1);
         execute((const uint8_t *) "shell");
     }
+    sti();
     // printf("aaaa%d", terminal_idx);
     
 }
 
+int get_terminal_idx() {
+    return terminal_idx;
+}
+
 void init_terminals_vidmaps()
 {
-    // 2kb to 4kb is terminal vmem
+    // 8kb to 20kb is terminal vmem
+    set_vid_mem(0);
+    video_memory_page_table[1].p = 1; 
+    video_memory_page_table[1].us = 1;
+    video_memory_page_table[1].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
     video_memory_page_table[2].p = 1; 
-    video_memory_page_table[2].us = 0;
+    video_memory_page_table[2].us = 1;
     video_memory_page_table[2].base_31_12 = 2 ; //VIDEO_ADDRESS / FOUR_KB;
     video_memory_page_table[3].p = 1; 
-    video_memory_page_table[3].us = 0;
+    video_memory_page_table[3].us = 1;
     video_memory_page_table[3].base_31_12 = 3 ; //VIDEO_ADDRESS / FOUR_KB;
-    video_memory_page_table[4].p = 1; 
-    video_memory_page_table[4].us = 0;
-    video_memory_page_table[4].base_31_12 = 4 ; //VIDEO_ADDRESS / FOUR_KB;
     flush_tlb();
 }

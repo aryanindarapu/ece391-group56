@@ -28,7 +28,7 @@ syscall_helpers.o: syscall_helpers.c syscall_helpers.h types.h \
   file_system_driver.h devices/rtc.h devices/../types.h terminal.h lib.h \
   paging.h syscall.h process.h
 terminal.o: terminal.c terminal.h types.h lib.h file_system_driver.h \
-  devices/rtc.h devices/../types.h paging.h syscall.h
+  devices/rtc.h devices/../types.h paging.h syscall.h process.h
 tests.o: tests.c tests.h x86_desc.h types.h lib.h file_system_driver.h \
   devices/rtc.h devices/../types.h terminal.h paging.h syscall.h
 i8259.o: devices/i8259.c devices/i8259.h devices/../types.h \

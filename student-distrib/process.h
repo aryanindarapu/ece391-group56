@@ -24,6 +24,5 @@ typedef struct pcb {
 } pcb_t;
 
 uint32_t pcb_flags[MAX_NUM_PROGRAMS];
-pcb_t * terminal_indices[3];
 
 #endif

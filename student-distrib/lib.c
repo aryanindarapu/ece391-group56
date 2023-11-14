@@ -11,7 +11,7 @@
 static int ATTRIB = 0xCF;
 static int screen_x;
 static int screen_y;
-static char* video_mem = (char *)VIDEO;
+static char* video_mem = (char *)(TERMINAL_VID_MEM);
 
 /* void clear(void);
  * Inputs: void
@@ -27,6 +27,11 @@ void clear(void) {
     screen_x = 0;
     screen_y = 0;
     update_cursor();
+}
+
+void set_vid_mem(int terminal_idx)
+{
+    video_mem = (char *)(TERMINAL_VID_MEM + FOUR_KB * terminal_idx);
 }
 
 int get_screen_x(){return screen_x;};

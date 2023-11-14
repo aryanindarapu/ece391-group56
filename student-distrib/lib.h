@@ -7,6 +7,9 @@
 
 #include "types.h"
 
+#define TERMINAL_VID_MEM 4096
+#define FOUR_KB          4096
+
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
 int32_t puts(int8_t *s);
@@ -42,6 +45,8 @@ int get_screen_x();
 int get_screen_y();
 void set_screen_x(int x);
 void set_screen_y(int y);
+
+void set_vid_mem(int terminal_idx);
 
 /* Port read functions */
 /* Inb reads a byte and returns its value as a zero-extended 32-bit

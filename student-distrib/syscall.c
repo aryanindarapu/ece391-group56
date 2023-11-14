@@ -6,6 +6,7 @@
 #include "x86_desc.h"
 #include "exceptions.h"
 #include "process.h"
+#include "terminal.h"
 
 /* 
  * execute
@@ -74,12 +75,21 @@ int32_t execute (const uint8_t* command) {
 
     /* Set up parent and child pointers accordingly */
     // TODO: change this when dynamically loading shells
-    // if (new_pid_idx == 0 || new_pid_idx == 1 || new_pid_idx == 2) { // i.e. the PCB is for the initial shell
+    // if (new_pid_idx == 0) { // i.e. the PCB is for the initial shell
     //     new_pcb->parent_pid = -1;
     // } else {
+    //     new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
+    //     get_curr_pcb_ptr()->child_pid = new_pid_idx;
+    // }
+
+    if (new_terminal_flag) {
+        new_pcb->parent_pid = -1;
+        terminal_pids[terminal_idx] = new_pid_idx;
+        new_terminal_flag = 0; // reset flag
+    } else {
         new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
         get_curr_pcb_ptr()->child_pid = new_pid_idx;
-    // }
+    }
 
     new_pcb->file_desc_arr[0].ops_ptr = stdin_ops_table;
     new_pcb->file_desc_arr[0].inode = -1;
@@ -390,12 +400,12 @@ int32_t vidmap (uint8_t** screen_start) {
     if ((uint32_t) screen_start < USER_MEM_VIRTUAL_ADDR || (uint32_t) screen_start > (USER_MEM_VIRTUAL_ADDR + FOUR_MB)) return -1;
 
     // set up page as 4kb pages
-    video_memory_page_table[USER_VIDEO_MEM_INDEX].p = 1; 
-    video_memory_page_table[USER_VIDEO_MEM_INDEX].us = 1;
-    video_memory_page_table[USER_VIDEO_MEM_INDEX].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
-    flush_tlb();
+    // video_memory_page_table[USER_VIDEO_MEM_INDEX].p = 1; 
+    // video_memory_page_table[USER_VIDEO_MEM_INDEX].us = 1;
+    // video_memory_page_table[USER_VIDEO_MEM_INDEX].base_31_12 = (1 + get_terminal_idx());
+    // flush_tlb();
 
-    *screen_start = (uint8_t *) (USER_VIDEO_MEM_ADDRESS); 
+    *screen_start = (uint8_t *) (FOUR_KB * (1 + get_terminal_idx()));  //(USER_VIDEO_MEM_ADDRESS); 
     return 0;
 }
 
