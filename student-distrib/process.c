@@ -28,11 +28,12 @@ int32_t process_switch(int32_t terminal_num) {
     //     // write to non-display memory
     // }
     
-    // setup_user_page(((curr_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
-    // flush_tlb();
+    setup_user_page(((curr_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
+    flush_tlb();
 
-    tss.esp0 = (uint32_t) curr_pcb + EIGHT_KB - STACK_FENCE_SIZE;
     tss.ss0 = KERNEL_DS;
+    tss.esp0 = (uint32_t) curr_pcb + EIGHT_KB - STACK_FENCE_SIZE;
+    
 
     // TODO: set up TSS
     // store kernel esp and ebp in the pcb

@@ -39,6 +39,11 @@ void init_pit() {
 }
 
 int pit_handler() {
+    /* grab esp eip, store in pcb, replace with next pcb eip, esp, use iret*/
+
+    // update pcb for current process's eip esp
+    // jump with process_switch()
+    // set up iret context for rest
     send_eoi(0);
     return 0;
     cli();
