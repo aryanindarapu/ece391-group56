@@ -32,6 +32,7 @@ void clear(void) {
 void set_vid_mem(int terminal_idx)
 {
     video_mem = (char *)(TERMINAL_VID_MEM + FOUR_KB * terminal_idx);
+    ATTRIB = 0xCF & (0xEF<<terminal_idx);
 }
 
 int get_screen_x(){return screen_x;};

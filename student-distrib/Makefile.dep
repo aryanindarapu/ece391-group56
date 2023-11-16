@@ -28,7 +28,9 @@ syscall_helpers.o: syscall_helpers.c syscall_helpers.h types.h \
   file_system_driver.h devices/rtc.h devices/../types.h terminal.h lib.h \
   paging.h syscall.h process.h
 terminal.o: terminal.c terminal.h types.h lib.h file_system_driver.h \
-  devices/rtc.h devices/../types.h paging.h syscall.h process.h
+  devices/rtc.h devices/../types.h paging.h syscall.h process.h \
+  devices/i8259.h devices/../types.h devices/../lib.h \
+  devices/../x86_desc.h devices/../types.h
 tests.o: tests.c tests.h x86_desc.h types.h lib.h file_system_driver.h \
   devices/rtc.h devices/../types.h terminal.h paging.h syscall.h
 i8259.o: devices/i8259.c devices/i8259.h devices/../types.h \
@@ -43,13 +45,11 @@ keyboard.o: devices/keyboard.c devices/../lib.h devices/../types.h \
 pit.o: devices/pit.c devices/i8259.h devices/../types.h devices/../lib.h \
   devices/../types.h devices/../x86_desc.h devices/rtc.h \
   devices/../syscall_helpers.h devices/../file_system_driver.h \
-  devices/../devices/rtc.h devices/../devices/../types.h \
-  devices/../terminal.h devices/../lib.h devices/../paging.h \
-  devices/../syscall.h devices/../process.h devices/../process.h \
-  devices/pit.h
-rtc.o: devices/rtc.c devices/i8259.h devices/../types.h devices/../lib.h \
-  devices/../types.h devices/../x86_desc.h devices/rtc.h \
+  devices/../devices/rtc.h devices/../terminal.h devices/../lib.h \
+  devices/../paging.h devices/../syscall.h devices/../process.h \
+  devices/../process.h devices/pit.h
+rtc.o: devices/rtc.c devices/rtc.h devices/../types.h devices/i8259.h \
+  devices/../lib.h devices/../types.h devices/../x86_desc.h \
   devices/../syscall_helpers.h devices/../file_system_driver.h \
-  devices/../devices/rtc.h devices/../devices/../types.h \
-  devices/../terminal.h devices/../lib.h devices/../paging.h \
-  devices/../syscall.h devices/../process.h
+  devices/../devices/rtc.h devices/../terminal.h devices/../lib.h \
+  devices/../paging.h devices/../syscall.h devices/../process.h

@@ -1,7 +1,6 @@
 #include "terminal.h"
 #include "process.h"
-
-
+#include "./devices/i8259.h"
 
 // Store buffer for each terminal (0 for first, 1 for second, etc.)
 static unsigned int buffer_idx[3] = {0,0,0};
@@ -9,7 +8,11 @@ static uint8_t line_buffer[3][LINE_BUFFER_SIZE];
 static uint8_t saved_line_buffer[3][LINE_BUFFER_SIZE];
 static volatile int enter_flag_pressed[3] = {0,0,0};
 static unsigned int save_buffer_idx[3] = {0,0,0};
-char* vidmems[3][4096];
+int terminal_idx = 0;
+int new_terminal_flag = 1;
+int32_t terminal_pids[3] = {0, -1, -1};
+
+// char vidmems[3][4096];
 int save_screen_x[3] = {7,7,7};
 int save_screen_y[3] = {1,1,1};
 
@@ -184,13 +187,15 @@ void terminal_switch (int t_idx)
         send_eoi(1);
         execute((const uint8_t *) "shell");
     }
+    else
+    {
+        sti();
+        send_eoi(1);
+        process_switch(terminal_idx);
+    }
     sti();
     // printf("aaaa%d", terminal_idx);
     
-}
-
-int get_terminal_idx() {
-    return terminal_idx;
 }
 
 void init_terminals_vidmaps()
@@ -202,9 +207,18 @@ void init_terminals_vidmaps()
     video_memory_page_table[1].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
     video_memory_page_table[2].p = 1; 
     video_memory_page_table[2].us = 1;
-    video_memory_page_table[2].base_31_12 = 2 ; //VIDEO_ADDRESS / FOUR_KB;
+    video_memory_page_table[2].base_31_12 = 2; //VIDEO_ADDRESS / FOUR_KB;
     video_memory_page_table[3].p = 1; 
     video_memory_page_table[3].us = 1;
     video_memory_page_table[3].base_31_12 = 3 ; //VIDEO_ADDRESS / FOUR_KB;
     flush_tlb();
+}
+
+int get_terminal_arr(int index) {
+    if (index < 0 || index > 2) return -1;
+    return terminal_pids[index];
+}
+
+void set_terminal_arr(int index, int val) {
+    terminal_pids[index] = val;
 }

@@ -1,3 +1,6 @@
+#ifndef _KEYBOARD_H
+#define _KEYBOARD_H
+
 #include "i8259.h"
 
 
@@ -32,3 +35,5 @@ void init_keyboard();
 void keyboard_handler();
 // handles reading and interaction with temrinal
 void keyboard_driver();
+
+#endif

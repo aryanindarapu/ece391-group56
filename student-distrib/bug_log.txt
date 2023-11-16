@@ -1,3 +1,5 @@
+- fish starts flashing when switching between terminals
+
 **************************************** CHECKPOINT 4 ****************************************
 -----------------
 FILE/FUNCTION: read_dentry_by_name

@@ -11,11 +11,6 @@
 #define LINE_BUFFER_SIZE 128
 #define VIDEO       0xB8000
 
-// Which terminal we are currently on
-static int terminal_idx = 0;
-int32_t terminal_pids[3] = {0, -1, -1};
-int32_t new_terminal_flag = 0;
-
 /* kbd input to terminal to update buffer */
 extern void write_to_terminal(unsigned char ascii);
 /* clears terminal */
@@ -30,8 +25,9 @@ void terminal_enter();
 void terminal_switch(int t_idx);
 /* init pages to hold vid data for 3 terms */
 void init_terminals_vidmaps();
-/**/
-int get_terminal_idx();
+
+int get_terminal_arr(int index);
+void set_terminal_arr(int index, int val);
 
 /* standard file operations for terminal */
 extern int32_t terminal_open(const uint8_t* filename);

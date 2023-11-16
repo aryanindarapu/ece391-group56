@@ -1,3 +1,6 @@
+#ifndef _SYSCALL_HELPERS_H
+#define _SYSCALL_HELPERS_H
+
 #include "types.h"
 #include "file_system_driver.h"
 #include "syscall.h"
@@ -14,3 +17,4 @@ pcb_t * get_curr_pcb_ptr (void);
 pcb_t * get_pcb_ptr(int32_t pid);
 
 void setup_user_page(uint32_t table_addr);
+#endif

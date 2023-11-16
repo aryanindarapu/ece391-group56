@@ -8,10 +8,10 @@ IMPORTANT: What is important is that if register C is not read after an IRQ 8, t
 
 */
 
+#include "rtc.h"
 #include "i8259.h"
 #include "../lib.h"
 #include "../x86_desc.h"
-#include "rtc.h"
 #include "../syscall_helpers.h"
 
 

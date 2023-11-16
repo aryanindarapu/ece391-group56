@@ -1,3 +1,6 @@
+#ifndef _RTC_H
+#define _RTC_H
+
 #include "../types.h"
 
 #define RTC_PORT_COMMAND    0x70
@@ -18,3 +21,6 @@ void init_rtc();
 
 // Handles the RTC when it is called in an interrupt
 void rtc_handler();
+
+#endif
+

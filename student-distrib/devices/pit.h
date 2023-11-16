@@ -1,3 +1,6 @@
+#ifndef _PIT_H
+#define _PIT_H
+
 #include "../types.h"
 
 #define PIT_CHANNEL0_DATA   0x40
@@ -10,3 +13,5 @@ int pit_handler();
 
 // Intializes the pit on the PIC
 void init_pit();
+
+#endif

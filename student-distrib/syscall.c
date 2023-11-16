@@ -8,6 +8,9 @@
 #include "process.h"
 #include "terminal.h"
 
+extern int terminal_idx;
+extern int new_terminal_flag;
+
 /* 
  * execute
  *   DESCRIPTION: Executes a program with the given arguments. 
@@ -82,9 +85,9 @@ int32_t execute (const uint8_t* command) {
     //     get_curr_pcb_ptr()->child_pid = new_pid_idx;
     // }
 
-    if (new_terminal_flag) {
+    if (new_pid_idx == 0 || new_terminal_flag) {
         new_pcb->parent_pid = -1;
-        terminal_pids[terminal_idx] = new_pid_idx;
+        set_terminal_arr(terminal_idx, new_pid_idx);
         new_terminal_flag = 0; // reset flag
     } else {
         new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
@@ -174,6 +177,7 @@ int32_t halt (uint8_t status) {
 
     /* push user context if its base shell since we have no processes left */
     // TODO: change this when dynamically loading shells
+    // Check if the pid is in the current active terminals array
     if (pcb->pid == 0 ){//|| pcb->pid == 1 || pcb->pid == 2) {
         // recover context from halt(esp, eip, USER_CS, USER_DS);
         // 0x00FF - clears the bottom 8 bytes of the return value
@@ -199,8 +203,13 @@ int32_t halt (uint8_t status) {
     pcb_t * parent_pcb = get_pcb_ptr(pcb->parent_pid);
     parent_pcb->child_pid = -1; // removes the child process
 
-    // release FD array for this pcb
+    // clear old commands
     int i;
+    for (i = 0; i < LINE_BUFFER_SIZE; i++) {
+        pcb->commands[i] = '\0';
+    }
+
+    // release FD array for this pcb
     for (i = 0; i < MAX_FILE_DESC; i++) {
         if (pcb->file_desc_arr[i].flags) {
             pcb->file_desc_arr->ops_ptr.close(i);
@@ -210,6 +219,7 @@ int32_t halt (uint8_t status) {
     }
 
     /* remove current pcb from present flags */
+    pcb->parent_pid = -1;
     pcb_flags[pcb->pid] = 0;
     
     /* Set TSS again */
@@ -404,8 +414,8 @@ int32_t vidmap (uint8_t** screen_start) {
     // video_memory_page_table[USER_VIDEO_MEM_INDEX].us = 1;
     // video_memory_page_table[USER_VIDEO_MEM_INDEX].base_31_12 = (1 + get_terminal_idx());
     // flush_tlb();
-
-    *screen_start = (uint8_t *) (FOUR_KB * (1 + get_terminal_idx()));  //(USER_VIDEO_MEM_ADDRESS); 
+    
+    *screen_start = (uint8_t *) (FOUR_KB * (1 + terminal_idx));  //(USER_VIDEO_MEM_ADDRESS); 
     return 0;
 }
 

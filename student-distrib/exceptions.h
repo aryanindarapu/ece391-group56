@@ -1,3 +1,6 @@
+#ifndef _EXCEPTIONS_H
+#define _EXCEPTIONS_H
+
 #include "lib.h"
 
 /* Handlers for exceptions from 0x00 to 0x13 */
@@ -24,3 +27,4 @@ int simd_floating_point_exception();
 int user_defined();
 
 int exception_raised_flag;
+#endif
