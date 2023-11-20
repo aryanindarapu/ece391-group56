@@ -47,7 +47,7 @@ pit.o: devices/pit.c devices/i8259.h devices/../types.h devices/../lib.h \
   devices/../syscall_helpers.h devices/../file_system_driver.h \
   devices/../devices/rtc.h devices/../terminal.h devices/../lib.h \
   devices/../paging.h devices/../syscall.h devices/../process.h \
-  devices/../process.h devices/pit.h
+  devices/../process.h devices/pit.h devices/../terminal.h
 rtc.o: devices/rtc.c devices/rtc.h devices/../types.h devices/i8259.h \
   devices/../lib.h devices/../types.h devices/../x86_desc.h \
   devices/../syscall_helpers.h devices/../file_system_driver.h \

@@ -9,6 +9,7 @@ static uint8_t saved_line_buffer[3][LINE_BUFFER_SIZE];
 static volatile int enter_flag_pressed[3] = {0,0,0};
 static unsigned int save_buffer_idx[3] = {0,0,0};
 int terminal_idx = 0;
+int first_shell_started = 0;
 int new_terminal_flag = 1;
 int32_t terminal_pids[3] = {0, -1, -1};
 
@@ -32,6 +33,7 @@ int get_buffer_fill()
  * Return Value: none
  * Function: addes the current char to the buffer */
 void write_to_terminal(unsigned char ascii) {
+    
     if(buffer_idx[terminal_idx] == 128)
         return;
     else
@@ -68,6 +70,12 @@ void terminal_backspace()
 void terminal_clear() {
     buffer_idx[terminal_idx] = 0;
 }
+
+// TODO: comment
+int is_started()
+{   
+    return first_shell_started;
+};
 
 
 /* terminal_enter
@@ -110,7 +118,7 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // NOTE: this is a blocking call, so it can't be interrupted
     // printf("ACCESSED TERMINAL READ");
     sti();
-    
+    first_shell_started = 1;
     while (enter_flag_pressed[terminal_idx] != 1){sti();};
     
     cli();
@@ -191,7 +199,7 @@ void terminal_switch (int t_idx)
     {
         sti();
         send_eoi(1);
-        process_switch(terminal_idx);
+        // process_switch(terminal_idx);
     }
     sti();
     // printf("aaaa%d", terminal_idx);

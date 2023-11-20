@@ -3,6 +3,8 @@
 name:                       ;\
     pushal                  ;\
     pushfl                  ;\
+    movl 36(%esp), %eax     ;\
+    movl 48(%esp), %ebx     ;\
     call func               ;\
     popfl                   ;\
     popal                   ;\

@@ -9,7 +9,7 @@
 #define PIT_COMMAND         0x43
 
 // Sends an interupt to the PIC to let PIC know we're doing a process switch
-int pit_handler();
+int pit_handler();//int eip, int esp);
 
 // Intializes the pit on the PIC
 void init_pit();
