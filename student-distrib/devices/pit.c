@@ -40,20 +40,21 @@ void init_pit() {
     enable_irq(0);
 }
 
-int pit_handler(){//int eip, int esp) {
-    uint32_t a;
-    uint32_t b;
-    asm volatile ("\
-        "
-        : "=a" (a), "=b" (b)
-        :
-        : "memory"
-    );
+int pit_handler(void * esp_ptr){//int eip, int esp) {
+    // uint32_t a;
+    // uint32_t b;
+    // asm volatile ("\
+    //     "
+    //     : "=a" (a), "=b" (b)
+    //     :
+    //     : "memory"
+    // );
     // printf("%d %d \n", a , b);
     send_eoi(0);
-    if(0==0)//is_started()==0)
+    if(is_started()==0)
     {
         return 0;
+        //asm volatile ("iret");
     } 
 
     // asm volatile ("\
@@ -69,15 +70,15 @@ int pit_handler(){//int eip, int esp) {
     
     /* grab esp eip, store in pcb, replace with next pcb eip, esp, use iret*/
     pcb_t * curr_pcb = get_child_pcb(schedule_index);
-    
-    curr_pcb->user_eip = a;
-    curr_pcb->user_esp = b;
+    // EIP, CS, FL, ESP, SS
+    curr_pcb->user_eip = (uint32_t)(*((int*)esp_ptr+36));
+    curr_pcb->user_esp = (uint32_t)(*((int*)esp_ptr+48));
     
     do
     {
         schedule_index ++;
         schedule_index %= 3;
-    } while(get_terminal_arr(schedule_index)!=-1);
+    } while(get_terminal_arr(schedule_index)==-1);
         
     pcb_t * next_pcb = get_child_pcb(get_terminal_arr(schedule_index));
     
@@ -85,19 +86,16 @@ int pit_handler(){//int eip, int esp) {
     tss.esp0 = (uint32_t) next_pcb + EIGHT_KB - STACK_FENCE_SIZE; // offset of kernel stack segment
     
     asm volatile ("\
-        andl $0x00FF, %%eax     ;\
-        movw %%ax, %%ds         ;\
-        pushl %%eax             ;\
-        pushl %%ebx             ;\
-        pushfl                  ;\
-        pushl %%ecx             ;\
-        pushl %%edx             ;\
-        iret                    ;\
+        addl $36, %%eax         ;\
+        movl %%ecx, (%%eax)     ;\
+        addl $12, %%eax         ;\
+        movl %%ebx, (%%eax)     ;\
         "
         : 
-        : "a" (USER_DS), "b" (next_pcb->user_esp), "c" (USER_CS), "d" (next_pcb->user_eip) 
+        : "a" (esp_ptr), "b" (next_pcb->user_esp), "c" (next_pcb->user_eip) 
         : "memory"
     );
+    return 0;
     // asm volatile ("\
     //     "
     //     : "=a" (curr_pcb->user_eip), "=b" (curr_pcb->user_esp)
