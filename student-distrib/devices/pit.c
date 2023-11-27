@@ -40,82 +40,51 @@ void init_pit() {
     enable_irq(0);
 }
 
-int pit_handler(void * esp_ptr){//int eip, int esp) {
-    // uint32_t a;
-    // uint32_t b;
-    // asm volatile ("\
-    //     "
-    //     : "=a" (a), "=b" (b)
-    //     :
-    //     : "memory"
-    // );
-    // printf("%d %d \n", a , b);
+int pit_handler () {
     send_eoi(0);
-    if(is_started()==0)
+    return 0;
+    if (is_started() == 0)
     {
+        send_eoi(0);
         return 0;
         //asm volatile ("iret");
-    } 
+    }
 
-    // asm volatile ("\
-    //     addl $3, %%esp          ;\
-    //     popfl                   ;\
-    //     popal                   ;\
-    //     iret                    ;\
-    //     "
-    //     : 
-    //     :
-    //     : "memory"
-    // );
-    
-    /* grab esp eip, store in pcb, replace with next pcb eip, esp, use iret*/
-    pcb_t * curr_pcb = get_child_pcb(schedule_index);
-    // EIP, CS, FL, ESP, SS
-    curr_pcb->user_eip = (uint32_t)(*((int*)esp_ptr+36));
-    curr_pcb->user_esp = (uint32_t)(*((int*)esp_ptr+48));
-    
-    do
-    {
-        schedule_index ++;
-        schedule_index %= 3;
-    } while(get_terminal_arr(schedule_index)==-1);
-        
-    pcb_t * next_pcb = get_child_pcb(get_terminal_arr(schedule_index));
-    
-    tss.ss0 = (uint16_t) KERNEL_DS;
-    tss.esp0 = (uint32_t) next_pcb + EIGHT_KB - STACK_FENCE_SIZE; // offset of kernel stack segment
-    
-    asm volatile ("\
-        addl $36, %%eax         ;\
-        movl %%ecx, (%%eax)     ;\
-        addl $12, %%eax         ;\
-        movl %%ebx, (%%eax)     ;\
+    asm volatile (
+        "movl %%esp, %0   ;\
+         movl %%ebp, %1   ;\
         "
-        : 
-        : "a" (esp_ptr), "b" (next_pcb->user_esp), "c" (next_pcb->user_eip) 
+        : "=r" (get_curr_pcb_ptr()->kernel_esp), "=r" (get_curr_pcb_ptr()->kernel_ebp)
+        :
         : "memory"
     );
-    return 0;
-    // asm volatile ("\
-    //     "
-    //     : "=a" (curr_pcb->user_eip), "=b" (curr_pcb->user_esp)
-    //     :
-    //     : "memory"
-    // );
-
+    //chose which terminal to write too
+    do {
+        schedule_index++;
+        schedule_index %= 3;
+    } while (get_terminal_arr(schedule_index) == -1);
+    set_vid_mem(schedule_index, get_terminal_idx());
     
+    pcb_t * next_pcb = get_child_pcb(get_terminal_arr(schedule_index));
+    tss.ss0 = (uint16_t) KERNEL_DS;
+    tss.esp0 = (uint32_t) next_pcb->kernel_esp + EIGHT_KB - STACK_FENCE_SIZE;
+    flush_tlb();
 
+    // int output;
     // asm volatile ("\
-    //     movl %%eax, 8(%%esp)     ;\
-    //     movl %%ebx, 20(%%esp)   ;\
-    //     movl $8, %%esp          ;\
-    //     iret                    ;\
+    //     andl $0x00FF, %%eax     ;\
+    //     movw %%ax, %%ds         ;\
+    //     pushl %%eax             ;\
+    //     pushl %%ebx             ;\
+    //     pushfl                  ;\
+    //     pushl %%ecx             ;\
+    //     pushl %%edx             ;\
     //     "
-    //     :
-    //     : "a" (next_pcb->user_eip), "b" (next_pcb->user_esp)
+    //     : "=a" (output)
+    //     : "a" (USER_DS), "b" (next_pcb->user_esp), "c" (USER_CS), "d" (next_pcb->user_eip) 
     //     : "memory"
     // );
-
+    send_eoi(0);
     return 0;
     // update pcb for current process's eip esp
     // jump with process_switch()

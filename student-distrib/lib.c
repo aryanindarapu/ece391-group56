@@ -29,10 +29,14 @@ void clear(void) {
     update_cursor();
 }
 
-void set_vid_mem(int terminal_idx)
+void set_vid_mem(int terminal_idx, int active_terminal)
 {
-    video_mem = (char *)(TERMINAL_VID_MEM + FOUR_KB * terminal_idx);
     ATTRIB = 0xCF & (0xEF<<terminal_idx);
+    if(terminal_idx == active_terminal)
+        video_mem = VIDEO;
+    else
+        video_mem = (char *)(VIDEO + FOUR_KB * (terminal_idx+1));
+    
 }
 
 int get_screen_x(){return screen_x;};

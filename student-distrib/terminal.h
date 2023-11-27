@@ -29,6 +29,7 @@ void init_terminals_vidmaps();
 int get_terminal_arr(int index);
 void set_terminal_arr(int index, int val);
 int is_started();
+int get_terminal_idx();
 
 /* standard file operations for terminal */
 extern int32_t terminal_open(const uint8_t* filename);

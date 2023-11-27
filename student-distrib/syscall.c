@@ -178,7 +178,7 @@ int32_t halt (uint8_t status) {
     /* push user context if its base shell since we have no processes left */
     // TODO: change this when dynamically loading shells
     // Check if the pid is in the current active terminals array
-    if (pcb->pid == 0 ){//|| pcb->pid == 1 || pcb->pid == 2) {
+    if (pcb->pid == 0) {//|| pcb->pid == 1 || pcb->pid == 2) {
         // recover context from halt(esp, eip, USER_CS, USER_DS);
         // 0x00FF - clears the bottom 8 bytes of the return value
         // 0x0200 - turns on bit of EFLAGS
@@ -412,10 +412,10 @@ int32_t vidmap (uint8_t** screen_start) {
     // set up page as 4kb pages
     // video_memory_page_table[USER_VIDEO_MEM_INDEX].p = 1; 
     // video_memory_page_table[USER_VIDEO_MEM_INDEX].us = 1;
-    // video_memory_page_table[USER_VIDEO_MEM_INDEX].base_31_12 = (1 + get_terminal_idx());
+    // video_memory_page_table[USER_VIDEO_MEM_INDEX].base_31_12 = ; // (1 + get_terminal_idx());
     // flush_tlb();
-    
-    *screen_start = (uint8_t *) (FOUR_KB * (1 + terminal_idx));  //(USER_VIDEO_MEM_ADDRESS); 
+    //(uint8_t *) (VIDEO + FOUR_KB * (1 + terminal_idx));  //
+    *screen_start = (USER_VIDEO_MEM_ADDRESS); 
     return 0;
 }
 
