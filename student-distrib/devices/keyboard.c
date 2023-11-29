@@ -119,6 +119,7 @@ void keyboard_driver() {
     // cli();
     //printf("keyboard int occured\n");
     //unsigned char status;
+    // give to active terminal the keycoamdndadaADadadasdadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     unsigned char keycode = inb(KEYBOARD_PORT);  
     // Control key code: 29
     // Set special 

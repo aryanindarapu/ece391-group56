@@ -6,6 +6,7 @@
 #define _LIB_H
 
 #include "types.h"
+#include "terminal.h"
 
 #define TERMINAL_VID_MEM 4096
 #define FOUR_KB          4096

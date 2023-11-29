@@ -32,13 +32,13 @@ void clear(void) {
 void set_vid_mem(int terminal_idx, int active_terminal)
 {
     ATTRIB = 0xCF & (0xAF<<terminal_idx);
-
+    
     // video_mem = (char *)(VIDEO + FOUR_KB * (terminal_idx+1));
-    video_mem = (char *)(VIDEO + FOUR_KB * (terminal_idx+1));
-    // if(terminal_idx == active_terminal)
-    //     video_mem = (char *)(VIDEO + FOUR_KB * (active_terminal+1));
-    // else
-    //     video_mem = (char *)(VIDEO + FOUR_KB * (terminal_idx+1));
+    // video_mem = (char *)(VIDEO + FOUR_KB * (terminal_idx+1));
+    if(terminal_idx == active_terminal)
+        video_mem = VIDEO;
+    else
+        video_mem = (char *)(VIDEO + FOUR_KB * (terminal_idx+1));
     
 }
 

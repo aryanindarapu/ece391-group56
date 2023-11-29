@@ -16,6 +16,8 @@ typedef struct pcb {
     uint32_t user_eip;
     uint8_t commands[LINE_BUFFER_SIZE];
     file_desc_t file_desc_arr[MAX_FILE_DESC];
+    // uint8_t **user_screen_start;
+    // uint8_t screen_flag_set;
     // uint8_t old_commands[LINE_BUFFER_SIZE];
 } pcb_t;
 

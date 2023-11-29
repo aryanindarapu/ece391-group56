@@ -182,20 +182,34 @@ void terminal_switch (int t_idx)
     video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
     flush_tlb();
     memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4096);
+    
     terminal_idx = t_idx;
     
     memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4096);
-    
     video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
-    
-    set_vid_mem(terminal_idx, terminal_idx);
     flush_tlb();
+    
+    //screen save stuff
+    // video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
+    // flush_tlb();
+    // if(get_child_pcb(terminal_idx)->screen_flag_set == 1) 
+    //     *(get_child_pcb(terminal_idx)->user_screen_start) = VIDEO + FOUR_KB * (terminal_idx + 1);
+    // memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4096);
+    // terminal_idx = t_idx;
+    
+    // // video_memory_page_table[VIDEO_ADDRESS / FOUR_KB].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
+    // memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4096);
+    // video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
+    // flush_tlb();
+    
+    // set_vid_mem(terminal_idx, terminal_idx);
     set_screen_x(save_screen_x[terminal_idx]);
     set_screen_y(save_screen_y[terminal_idx]);
     update_cursor();
     
     if (terminal_pids[terminal_idx] == -1)
     {
+        putc("A");
         clear();
         new_terminal_flag = 1; // need to set up new terminal
         sti();
@@ -204,6 +218,8 @@ void terminal_switch (int t_idx)
     }
     else
     {
+        // if(get_child_pcb(terminal_idx)->screen_flag_set == 1) 
+        //     *(get_child_pcb(terminal_idx)->user_screen_start) = VIDEO;
         sti();
         send_eoi(1);
         // process_switch(terminal_idx);
@@ -216,10 +232,11 @@ void terminal_switch (int t_idx)
 void init_terminals_vidmaps()
 {
     // 8kb to 20kb is terminal vmem
-    set_vid_mem(0, 0);
+    // set_vid_mem(0, 0);
+    // video_memory_page_table[    (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = 1 + (VIDEO_ADDRESS / FOUR_KB);
     video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].p = 1; 
     video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].us = 1;
-    video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = VIDEO_ADDRESS/FOUR_KB;// 1 + (VIDEO_ADDRESS / FOUR_KB);
+    video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = VIDEO/FOUR_KB; //1 + (VIDEO_ADDRESS / FOUR_KB);
     video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].p = 1; 
     video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].us = 1;
     video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = 2 + (VIDEO_ADDRESS / FOUR_KB);

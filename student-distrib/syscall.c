@@ -104,6 +104,8 @@ int32_t execute (const uint8_t* command) {
     new_pcb->file_desc_arr[1].flags = 1;
     new_pcb->file_desc_arr[1].file_pos = 0;
 
+    // new_pcb->screen_flag_set = 0;
+
     /* Set up 4MB page for user program */
     setup_user_page(((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB);
 
@@ -415,6 +417,8 @@ int32_t vidmap (uint8_t** screen_start) {
     // video_memory_page_table[USER_VIDEO_MEM_INDEX].base_31_12 = ; // (1 + get_terminal_idx());
     // flush_tlb();
     //(uint8_t *) (VIDEO + FOUR_KB * (1 + terminal_idx));  //
+    // get_curr_pcb_ptr()->user_screen_start = screen_start;
+    // get_curr_pcb_ptr()->screen_flag_set = 1;
     *screen_start = (uint8_t *) (VIDEO + FOUR_KB * (1 + terminal_idx)); 
     return 0;
 }
