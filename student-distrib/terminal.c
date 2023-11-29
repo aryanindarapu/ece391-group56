@@ -8,7 +8,7 @@ static uint8_t line_buffer[3][LINE_BUFFER_SIZE];
 static uint8_t saved_line_buffer[3][LINE_BUFFER_SIZE];
 static volatile int enter_flag_pressed[3] = {0,0,0};
 static unsigned int save_buffer_idx[3] = {0,0,0};
-int terminal_idx = 0;
+int terminal_idx = 0; //active one
 int first_shell_started = 0;
 int new_terminal_flag = 1;
 int32_t terminal_pids[3] = {0, -1, -1};
@@ -19,6 +19,7 @@ int save_screen_x[3] = {7,7,7};
 int save_screen_y[3] = {1,1,1};
 
 // TODO: add a 2d array of 6 input buffers
+
 int get_terminal_idx()
 {
     return terminal_idx;
@@ -178,16 +179,17 @@ void terminal_switch (int t_idx)
     save_screen_x[terminal_idx] = get_screen_x();
     save_screen_y[terminal_idx] = get_screen_y();
 
-    // video_memory_page_table[1 + terminal_idx].base_31_12 = 1 + terminal_idx;
-    // flush_tlb();
+    video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
+    flush_tlb();
     memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4096);
     terminal_idx = t_idx;
     
-    set_vid_mem(terminal_idx, terminal_idx);
     memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4096);
     
-    // video_memory_page_table[1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
-    // flush_tlb();
+    video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
+    
+    set_vid_mem(terminal_idx, terminal_idx);
+    flush_tlb();
     set_screen_x(save_screen_x[terminal_idx]);
     set_screen_y(save_screen_y[terminal_idx]);
     update_cursor();
@@ -214,10 +216,10 @@ void terminal_switch (int t_idx)
 void init_terminals_vidmaps()
 {
     // 8kb to 20kb is terminal vmem
-    set_vid_mem(0);
+    set_vid_mem(0, 0);
     video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].p = 1; 
     video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].us = 1;
-    video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = 1 + (VIDEO_ADDRESS / FOUR_KB);
+    video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = VIDEO_ADDRESS/FOUR_KB;// 1 + (VIDEO_ADDRESS / FOUR_KB);
     video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].p = 1; 
     video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].us = 1;
     video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = 2 + (VIDEO_ADDRESS / FOUR_KB);

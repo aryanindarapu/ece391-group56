@@ -415,7 +415,7 @@ int32_t vidmap (uint8_t** screen_start) {
     // video_memory_page_table[USER_VIDEO_MEM_INDEX].base_31_12 = ; // (1 + get_terminal_idx());
     // flush_tlb();
     //(uint8_t *) (VIDEO + FOUR_KB * (1 + terminal_idx));  //
-    *screen_start = (USER_VIDEO_MEM_ADDRESS); 
+    *screen_start = (uint8_t *) (VIDEO + FOUR_KB * (1 + terminal_idx)); 
     return 0;
 }
 
