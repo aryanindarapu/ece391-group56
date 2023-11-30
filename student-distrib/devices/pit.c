@@ -56,6 +56,20 @@ int pit_handler () {
         return 0;
         //asm volatile ("iret");
     }
+    // send_eoi(0);
+    // return 0;
+
+
+    //chose which terminal to write too
+    do {
+        schedule_index++;
+        schedule_index %= 3;
+    } while (get_terminal_arr(schedule_index) == -1);
+    
+    pcb_t * next_pcb = get_child_pcb(schedule_index);
+    tss.ss0 = (uint16_t) KERNEL_DS;
+    tss.esp0 = (uint32_t) next_pcb + EIGHT_KB - STACK_FENCE_SIZE;
+    set_vid_mem(schedule_index, get_terminal_idx());
 
     asm volatile (
         "movl %%esp, %0   ;\
@@ -80,6 +94,17 @@ int pit_handler () {
     sti();
     send_eoi(0);
     return 0;
+    
+    // asm volatile (
+    //     "movl %0, %%esp   ;\
+    //      movl %1, %%ebp   ;\
+    //     "
+    //     :
+    //     : "r" (next_pcb->kernel_esp), "r" (next_pcb->kernel_ebp)
+    //     : "memory"
+    // );
+    // setup_user_page(((next_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
+
     // int output;
     // asm volatile ("\
     //     andl $0x00FF, %%eax     ;\

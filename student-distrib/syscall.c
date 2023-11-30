@@ -20,6 +20,7 @@ extern int new_terminal_flag;
  *   SIDE EFFECTS: sets up user page, changes tss, and initializes a new pcb
  */
 int32_t execute (const uint8_t* command) {
+    cli();
     if (command == NULL) return -1;
     int i;
     
@@ -141,6 +142,7 @@ int32_t execute (const uint8_t* command) {
 
     int32_t output;
     /* enable interrupts*/
+    sti();
     // sets up DS, ESP, EFLAGS, CS, EIP onto stack for context switch
     asm volatile ("\
         andl $0x00FF, %%eax     ;\

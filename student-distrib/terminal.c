@@ -235,7 +235,6 @@ void terminal_switch (int t_idx)
         // set_screen_y(save_screen_y[terminal_idx]);
         // update_cursor();
         new_terminal_flag = 1; // need to set up new terminal
-        sti();
         send_eoi(1);
         execute((const uint8_t *) "shell");
     }
