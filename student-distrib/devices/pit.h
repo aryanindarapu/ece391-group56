@@ -13,5 +13,6 @@ int pit_handler();//int eip, int esp);
 
 // Intializes the pit on the PIC
 void init_pit();
+int get_schedule_idx();
 
 #endif

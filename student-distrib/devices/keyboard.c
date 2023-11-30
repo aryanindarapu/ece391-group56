@@ -116,7 +116,9 @@ void keyboard_handler() {
  * Return Value: none
  * Function: reads in from keyboard port and decodes keycode. Sends necessary data to terminal to update the buffer */
 void keyboard_driver() {
-    // cli();
+    cli();
+    int term = get_terminal_idx();
+    sti();
     //printf("keyboard int occured\n");
     //unsigned char status;
     // give to active terminal the keycoamdndadaADadadasdadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -154,21 +156,26 @@ void keyboard_driver() {
             return;
         case BACKSPACE:
             if(get_buffer_fill() == 0) return;
-            backspace();
+            // backspace();
             terminal_backspace();
             //printf("%d",get_buffer_fill());
             return;
         case ENTER: //enter
             //if(get_buffer_fill() == 128) return;
-            printf("\n");//printf("\n[Terminal]$ ");
+            putc_terminal('\n', term);
+            //printf("\n");//printf("\n[Terminal]$ ");
             terminal_enter();
             return;
         case TAB:
             if(get_buffer_fill() == 127) return;
-            putc(' '); // put 4 spaces for tab
-            putc(' ');
-            putc(' ');
-            putc(' ');
+            putc_terminal(' ', term);
+            putc_terminal(' ', term);
+            putc_terminal(' ', term);
+            putc_terminal(' ', term);
+            // putc_kbd(' ', get_terminal_idx()); // put 4 spaces for tab
+            // putc_kbd(' ', get_terminal_idx());
+            // putc_kbd(' ', get_terminal_idx());
+            // putc_kbd(' ', get_terminal_idx());
             write_to_terminal(keyboard_map[keycode]);
             return;
         default:
@@ -178,7 +185,9 @@ void keyboard_driver() {
                 if (special_key_flags[CTRL_INDEX]) {
                     switch (keycode) {
                     case 38:
-                        clear();
+                        // lib stuff
+                        clear_terminal(term);
+                        // buffer stuff
                         terminal_clear();
                         break;
                     default:
@@ -189,7 +198,7 @@ void keyboard_driver() {
                     char char_key = keyboard_map[keycode];
                     if (char_key > 96 && char_key < 123 && special_key_flags[SHIFT_INDEX] == 0)
                     {
-                        putc(shift_keyboard_map[keycode]);
+                        putc_terminal(shift_keyboard_map[keycode], term);
                         write_to_terminal(shift_keyboard_map[keycode]);
                         //line_buffer[buffer_idx] = shift_keyboard_map[keycode];
                         //buffer_idx++;
@@ -197,7 +206,7 @@ void keyboard_driver() {
                     
                     else
                     {
-                        putc(char_key);
+                        putc_terminal(char_key, term);
                         write_to_terminal(char_key);
                         // line_buffer[buffer_idx] = char_key;
                         // buffer_idx++;
@@ -206,14 +215,14 @@ void keyboard_driver() {
                     
                     
                 } else if (special_key_flags[SHIFT_INDEX]) {
-                    putc(shift_keyboard_map[keycode]);
+                    putc_terminal(shift_keyboard_map[keycode], term);
                     write_to_terminal(shift_keyboard_map[keycode]);
                     // line_buffer[buffer_idx] = shift_keyboard_map[keycode];
                     // buffer_idx++;
                 }
                 else
                 {
-                    putc(keyboard_map[keycode]);
+                    putc_terminal(keyboard_map[keycode], term);
                     write_to_terminal(keyboard_map[keycode]);
                     // line_buffer[buffer_idx] = keyboard_map[keycode];
                     // buffer_idx++;
@@ -225,7 +234,7 @@ void keyboard_driver() {
                 if (special_key_flags[ALT_INDEX]){
                     terminal_switch(keycode - 59);
                     //printf("Switched to terminal ");
-                    //putc(keyboard_map[2] + keycode - 59);
+                    //putc_kbd(keyboard_map[2] + keycode - 59);
                     //write_to_terminal(keyboard_map[2] + keycode - 59);
                 }
             }

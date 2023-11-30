@@ -85,14 +85,6 @@ int32_t execute (const uint8_t* command) {
     //     get_curr_pcb_ptr()->child_pid = new_pid_idx;
     // }
 
-    if (new_pid_idx == 0 || new_terminal_flag) {
-        new_pcb->parent_pid = -1;
-        set_terminal_arr(terminal_idx, new_pid_idx);
-        new_terminal_flag = 0; // reset flag
-    } else {
-        new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
-        get_curr_pcb_ptr()->child_pid = new_pid_idx;
-    }
 
     new_pcb->file_desc_arr[0].ops_ptr = stdin_ops_table;
     new_pcb->file_desc_arr[0].inode = -1;
@@ -137,9 +129,17 @@ int32_t execute (const uint8_t* command) {
         :
         : "memory"
     );
+    
+    if (new_pid_idx == 0 || new_terminal_flag) {
+        new_pcb->parent_pid = -1;
+        set_terminal_arr(terminal_idx, new_pid_idx);
+        new_terminal_flag = 0; // reset flag
+    } else {
+        new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
+        get_curr_pcb_ptr()->child_pid = new_pid_idx;
+    }
 
     int32_t output;
-    
     /* enable interrupts*/
     // sets up DS, ESP, EFLAGS, CS, EIP onto stack for context switch
     asm volatile ("\

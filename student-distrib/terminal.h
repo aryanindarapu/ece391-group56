@@ -31,6 +31,12 @@ void set_terminal_arr(int index, int val);
 int is_started();
 int get_terminal_idx();
 
+int get_saved_screen_x(int term);
+int get_saved_screen_y(int term);
+void set_saved_screen_x(int term, int x);
+void set_saved_screen_y(int term, int y);
+
+
 /* standard file operations for terminal */
 extern int32_t terminal_open(const uint8_t* filename);
 extern int32_t terminal_close(int32_t fd);

@@ -15,8 +15,8 @@ int32_t terminal_pids[3] = {0, -1, -1};
 // TODO: add rtc switching as well
 
 // char vidmems[3][4096];
-int save_screen_x[3] = {7,7,7};
-int save_screen_y[3] = {1,1,1};
+int save_screen_x[3] = {7,0,0};
+int save_screen_y[3] = {1,0,0};
 
 // TODO: add a 2d array of 6 input buffers
 
@@ -57,16 +57,18 @@ void terminal_backspace()
 {
     if(buffer_idx[terminal_idx]==0) return;
     
-    if(line_buffer[terminal_idx][buffer_idx[terminal_idx]] == '\t')
+    cli();
+    int term = terminal_idx;
+    backspace(term);
+    if(line_buffer[term][buffer_idx[term]] == '\t')
     {
-        backspace();
-        backspace();
-        backspace();
+        backspace(term);
+        backspace(term);
+        backspace(term);
     }
-
-    line_buffer[terminal_idx][buffer_idx[terminal_idx]-1] = 0;
-
-    buffer_idx[terminal_idx]--;
+    line_buffer[term][buffer_idx[term]-1] = 0;
+    buffer_idx[term]--;
+    sti();
 }
 
 /* terminal clear
@@ -156,19 +158,39 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
 int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
     int i;
     cli();
+    int term = terminal_idx;
     for (i = 0; i < nbytes; i++) {
         if(((char*)buf)[i] == '\t')
         {
-            putc(' ');
-            putc(' ');
-            putc(' ');
-            putc(' ');
+            putc_terminal(' ', term);
+            putc_terminal(' ', term);
+            putc_terminal(' ', term);
+            putc_terminal(' ', term);
         }
         else
-            putc(((char*)buf)[i]);
+            putc_terminal(((char*)buf)[i], term);
     }
     sti();
     return nbytes;
+}
+int get_saved_screen_x(int term)
+{
+    return save_screen_x[term];
+}
+
+int get_saved_screen_y(int term)
+{
+    return save_screen_y[term];
+}
+
+void set_saved_screen_x(int term, int x)
+{
+    save_screen_x[term] = x;
+}
+
+void set_saved_screen_y(int term, int y)
+{
+    save_screen_y[term] = y;
 }
 
 void terminal_switch (int t_idx)
@@ -176,8 +198,8 @@ void terminal_switch (int t_idx)
     cli();
     if(t_idx > 2 || t_idx < 0) return;
 
-    save_screen_x[terminal_idx] = get_screen_x();
-    save_screen_y[terminal_idx] = get_screen_y();
+    // save_screen_x[terminal_idx] = get_screen_x();
+    // save_screen_y[terminal_idx] = get_screen_y();
 
     video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
     flush_tlb();
@@ -203,14 +225,15 @@ void terminal_switch (int t_idx)
     // flush_tlb();
     
     // set_vid_mem(terminal_idx, terminal_idx);
-    set_screen_x(save_screen_x[terminal_idx]);
-    set_screen_y(save_screen_y[terminal_idx]);
-    update_cursor();
     
+    set_vid_mem(terminal_idx, terminal_idx);
+
     if (terminal_pids[terminal_idx] == -1)
     {
-        putc("A");
-        clear();
+        clear_terminal(terminal_idx);
+        // set_screen_x(save_screen_x[terminal_idx]);
+        // set_screen_y(save_screen_y[terminal_idx]);
+        // update_cursor();
         new_terminal_flag = 1; // need to set up new terminal
         sti();
         send_eoi(1);
@@ -220,6 +243,9 @@ void terminal_switch (int t_idx)
     {
         // if(get_child_pcb(terminal_idx)->screen_flag_set == 1) 
         //     *(get_child_pcb(terminal_idx)->user_screen_start) = VIDEO;
+        // set_screen_x(save_screen_x[terminal_idx]);
+        // set_screen_y(save_screen_y[terminal_idx]);
+        // update_cursor();
         sti();
         send_eoi(1);
         // process_switch(terminal_idx);

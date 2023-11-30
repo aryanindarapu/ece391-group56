@@ -162,7 +162,7 @@ void entry(unsigned long magic, unsigned long addr) {
     init_terminals_vidmaps();
     i8259_init();
     set_vid_mem(0,0);
-    clear();
+    clear_terminal(0);
     sti();
     // init_shells();
     execute((const uint8_t *) "shell");

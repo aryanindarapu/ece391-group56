@@ -40,11 +40,18 @@ void init_pit() {
     enable_irq(0);
 }
 
+int get_schedule_idx()
+{
+    return schedule_index;
+}
+
 int pit_handler () {
     // send_eoi(0);
     // return 0;
+    cli();
     if (is_started() == 0)
     {
+        sti();
         send_eoi(0);
         return 0;
         //asm volatile ("iret");
@@ -63,14 +70,16 @@ int pit_handler () {
         schedule_index++;
         schedule_index %= 3;
     } while (get_terminal_arr(schedule_index) == -1);
-    
+    // set_vid_mem(schedule_index, schedule_index);//get_terminal_idx());
     pcb_t * next_pcb = get_child_pcb(get_terminal_arr(schedule_index));
     tss.ss0 = (uint16_t) KERNEL_DS;
     tss.esp0 = (uint32_t) next_pcb->kernel_esp + EIGHT_KB - STACK_FENCE_SIZE;
-    set_vid_mem(schedule_index, get_terminal_idx());
     // set_vid_mem(schedule_index, get_terminal_idx());
+    setup_user_page(((next_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
     flush_tlb();
-
+    sti();
+    send_eoi(0);
+    return 0;
     // int output;
     // asm volatile ("\
     //     andl $0x00FF, %%eax     ;\
@@ -85,8 +94,7 @@ int pit_handler () {
     //     : "a" (USER_DS), "b" (next_pcb->user_esp), "c" (USER_CS), "d" (next_pcb->user_eip) 
     //     : "memory"
     // );
-    send_eoi(0);
-    return 0;
+    
     // update pcb for current process's eip esp
     // jump with process_switch()
     // set up iret context for rest
