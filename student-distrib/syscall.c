@@ -126,7 +126,7 @@ int32_t execute (const uint8_t* command) {
         "movl %%esp, %%eax   ;\
          movl %%ebp, %%ebx   ;\
         "
-        : "=a" (new_pcb->kernel_esp), "=b" (new_pcb->kernel_ebp)
+        : "=a" (new_pcb->base_esp), "=b" (new_pcb->base_ebp)
         :
         : "memory"
     );
@@ -160,12 +160,12 @@ int32_t execute (const uint8_t* command) {
     );
 
     asm volatile("ret_from_halt: ");
-
     if (exception_raised_flag) {
         exception_raised_flag = 0;
         return EXCEPTION_OCCURRED_VAL; 
     }
 
+    sti();
     return output;
 }
 
@@ -241,11 +241,10 @@ int32_t halt (uint8_t status) {
         movl %%ebx, %%ebp      ;\
         movl %%ecx, %%esp      ;\
         movl %%edx, %%eax      ;\
-        sti                    ;\
         jmp ret_from_halt      ;\
         "
         : 
-        : "b" (pcb->kernel_ebp), "c" (pcb->kernel_esp), "d" (status)
+        : "b" (pcb->base_ebp), "c" (pcb->base_esp), "d" (status)
     );
 
     // if we get control back then we return fail(we shouldn't ever get control back)

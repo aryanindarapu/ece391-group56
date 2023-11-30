@@ -12,6 +12,8 @@ typedef struct pcb {
     int32_t child_pid;
     uint32_t kernel_ebp;
     uint32_t kernel_esp;
+    uint32_t base_ebp;
+    uint32_t base_esp;
     uint32_t user_esp;
     uint32_t user_eip;
     uint8_t commands[LINE_BUFFER_SIZE];
