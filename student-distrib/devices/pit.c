@@ -75,22 +75,24 @@ int pit_handler () {
     // set_vid_mem(schedule_index, schedule_index);//get_terminal_idx());
     pcb_t * next_pcb = get_child_pcb(get_terminal_arr(schedule_index));
     tss.ss0 = (uint16_t) KERNEL_DS;
-    tss.esp0 = (uint32_t) next_pcb->kernel_esp + EIGHT_KB - STACK_FENCE_SIZE;
+    tss.esp0 = (uint32_t) next_pcb + EIGHT_KB - STACK_FENCE_SIZE;
     // set_vid_mem(schedule_index, get_terminal_idx());
+
     setup_user_page(((next_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
-    flush_tlb();
     sti();
+    
+    // moved this down here so page is set up first
+    asm volatile (
+        "movl %%eax, %%esp   ;\
+         movl %%ebx, %%ebp   ;\
+        "
+        :
+        : "a" (next_pcb->kernel_esp), "b" (next_pcb->kernel_ebp)
+        : "memory"
+    );
     send_eoi(0);
     return 0;
     
-    // asm volatile (
-    //     "movl %0, %%esp   ;\
-    //      movl %1, %%ebp   ;\
-    //     "
-    //     :
-    //     : "r" (next_pcb->kernel_esp), "r" (next_pcb->kernel_ebp)
-    //     : "memory"
-    // );
     // setup_user_page(((next_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
 
     // int output;

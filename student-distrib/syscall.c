@@ -178,11 +178,11 @@ int32_t execute (const uint8_t* command) {
 int32_t halt (uint8_t status) {
     // When closing, do I need to check if current PCB has any child PCBs?
     pcb_t * pcb = get_curr_pcb_ptr();
-
+    cli();
     /* push user context if its base shell since we have no processes left */
     // TODO: change this when dynamically loading shells
     // Check if the pid is in the current active terminals array
-    if (pcb->pid == 0) {//|| pcb->pid == 1 || pcb->pid == 2) {
+    if (pcb->pid == 0) {//|| pcb->pid == 1 || pcb->pid == 2)
         // recover context from halt(esp, eip, USER_CS, USER_DS);
         // 0x00FF - clears the bottom 8 bytes of the return value
         // 0x0200 - turns on bit of EFLAGS
@@ -205,7 +205,6 @@ int32_t halt (uint8_t status) {
 
     /* get pcb from cur pcbs parent PID*/
     pcb_t * parent_pcb = get_pcb_ptr(pcb->parent_pid);
-    parent_pcb->child_pid = -1; // removes the child process
 
     // clear old commands
     int i;
@@ -221,18 +220,21 @@ int32_t halt (uint8_t status) {
 
         pcb->file_desc_arr[i].flags = 0;
     }
+    
+    parent_pcb->child_pid = -1; // removes the child process
 
     /* remove current pcb from present flags */
+    pcb->pid = -1;
     pcb->parent_pid = -1;
     pcb_flags[pcb->pid] = 0;
     
     /* Set TSS again */
     tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
-    tss.esp0 = (uint32_t) EIGHT_MB - (parent_pcb->pid) * EIGHT_KB - STACK_FENCE_SIZE; 
+    tss.esp0 = (uint32_t) parent_pcb + EIGHT_KB - STACK_FENCE_SIZE;; 
     
     /* Restore parent paging and flush tlb to update paging structure */
     setup_user_page(((parent_pcb->pid  * FOUR_MB) + EIGHT_MB) / FOUR_KB);
-
+    sti();
     /* Save process context (ebp, esp) then return to execute the next process */
     asm volatile ("\
         pushl %%ebp            ;\
