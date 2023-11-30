@@ -206,6 +206,7 @@ int32_t halt (uint8_t status) {
     /* get pcb from cur pcbs parent PID*/
     pcb_t * parent_pcb = get_pcb_ptr(pcb->parent_pid);
 
+    parent_pcb->child_pid = -1; // removes the child process
     // clear old commands
     int i;
     for (i = 0; i < LINE_BUFFER_SIZE; i++) {
@@ -221,12 +222,11 @@ int32_t halt (uint8_t status) {
         pcb->file_desc_arr[i].flags = 0;
     }
 
-    parent_pcb->child_pid = -1; // removes the child process
 
     /* remove current pcb from present flags */
+    pcb_flags[pcb->pid] = 0;
     pcb->pid = -1;
     pcb->parent_pid = -1;
-    pcb_flags[pcb->pid] = 0;
     
     /* Set TSS again */
     tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment

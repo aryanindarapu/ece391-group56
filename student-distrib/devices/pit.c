@@ -79,7 +79,6 @@ int pit_handler () {
     // set_vid_mem(schedule_index, get_terminal_idx());
 
     setup_user_page(((next_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
-    sti();
     
     // moved this down here so page is set up first
     asm volatile (
@@ -91,6 +90,7 @@ int pit_handler () {
         : "memory"
     );
     send_eoi(0);
+    sti();
     return 0;
     
     // setup_user_page(((next_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
