@@ -137,6 +137,8 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
 
+    asm volatile("ret_from_halt: ");
+
     if (exception_raised_flag) {
         exception_raised_flag = 0;
         return EXCEPTION_OCCURRED_VAL; 
@@ -202,13 +204,10 @@ int32_t halt (uint8_t status) {
 
     /* Save process context (ebp, esp) then return to execute the next process */
     asm volatile ("\
-        pushl %%ebp            ;\
-        movl %%esp, %%ebp      ;\
         movl %%ebx, %%ebp      ;\
         movl %%ecx, %%esp      ;\
         movl %%edx, %%eax      ;\
-        leave                  ;\
-        ret                    ;\
+        jmp ret_from_halt      ;\
         "
         : 
         : "b" (pcb->kernel_ebp), "c" (pcb->kernel_esp), "d" (status)
