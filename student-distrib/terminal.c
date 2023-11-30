@@ -158,6 +158,7 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
 int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
     int i;
     cli();
+    // int term = terminal_idx;
     int term = get_schedule_idx();
     for (i = 0; i < nbytes; i++) {
         if(((char*)buf)[i] == '\t')
@@ -235,6 +236,7 @@ void terminal_switch (int t_idx)
         // set_screen_y(save_screen_y[terminal_idx]);
         // update_cursor();
         new_terminal_flag = 1; // need to set up new terminal
+        set_schedule_idx(terminal_idx);
         send_eoi(1);
         execute((const uint8_t *) "shell");
     }

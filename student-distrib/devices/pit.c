@@ -45,6 +45,11 @@ int get_schedule_idx()
     return schedule_index;
 }
 
+void set_schedule_idx(int index)
+{
+    schedule_index = index;
+}
+
 int pit_handler () {
     // send_eoi(0);
     // return 0;
