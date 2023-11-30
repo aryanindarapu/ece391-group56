@@ -177,8 +177,8 @@ int32_t execute (const uint8_t* command) {
  */
 int32_t halt (uint8_t status) {
     // When closing, do I need to check if current PCB has any child PCBs?
-    pcb_t * pcb = get_curr_pcb_ptr();
     cli();
+    pcb_t * pcb = get_curr_pcb_ptr();
     /* push user context if its base shell since we have no processes left */
     // TODO: change this when dynamically loading shells
     // Check if the pid is in the current active terminals array
@@ -220,7 +220,7 @@ int32_t halt (uint8_t status) {
 
         pcb->file_desc_arr[i].flags = 0;
     }
-    
+
     parent_pcb->child_pid = -1; // removes the child process
 
     /* remove current pcb from present flags */
@@ -234,7 +234,6 @@ int32_t halt (uint8_t status) {
     
     /* Restore parent paging and flush tlb to update paging structure */
     setup_user_page(((parent_pcb->pid  * FOUR_MB) + EIGHT_MB) / FOUR_KB);
-    sti();
     /* Save process context (ebp, esp) then return to execute the next process */
     asm volatile ("\
         pushl %%ebp            ;\
@@ -242,6 +241,7 @@ int32_t halt (uint8_t status) {
         movl %%ebx, %%ebp      ;\
         movl %%ecx, %%esp      ;\
         movl %%edx, %%eax      ;\
+        sti                    ;\
         leave                  ;\
         ret                    ;\
         "
