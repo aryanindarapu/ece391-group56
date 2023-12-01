@@ -300,7 +300,7 @@ format_char_switch:
                 break;
 
             default:
-                putc(*buf);
+                putc_terminal(*buf, get_terminal_idx());
                 break;
         }
         buf++;

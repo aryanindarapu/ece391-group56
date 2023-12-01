@@ -229,31 +229,13 @@ void terminal_switch (int t_idx)
     
     set_vid_mem(terminal_idx, terminal_idx);
 
-    if (terminal_pids[terminal_idx] == -1)
-    {
+    if (terminal_pids[terminal_idx] == -1) {
         clear_terminal(terminal_idx);
-        // set_screen_x(save_screen_x[terminal_idx]);
-        // set_screen_y(save_screen_y[terminal_idx]);
-        // update_cursor();
         new_terminal_flag = 1; // need to set up new terminal
-        set_schedule_idx(terminal_idx);
-        send_eoi(1);
-        execute((const uint8_t *) "shell");
     }
-    else
-    {
-        // if(get_child_pcb(terminal_idx)->screen_flag_set == 1) 
-        //     *(get_child_pcb(terminal_idx)->user_screen_start) = VIDEO;
-        // set_screen_x(save_screen_x[terminal_idx]);
-        // set_screen_y(save_screen_y[terminal_idx]);
-        // update_cursor();
-        sti();
-        send_eoi(1);
-        // process_switch(terminal_idx);
-    }
+
+    send_eoi(1);
     sti();
-    // printf("aaaa%d", terminal_idx);
-    
 }
 
 void init_terminals_vidmaps()

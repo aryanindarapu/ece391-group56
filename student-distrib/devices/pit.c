@@ -8,6 +8,8 @@
 #include "../terminal.h"
 
 int32_t schedule_index = 0;
+extern int new_terminal_flag;
+
 
 /*
  *  0x40    Channel 0 data port (read/write) for the PIT
@@ -61,8 +63,13 @@ int pit_handler () {
         return 0;
         //asm volatile ("iret");
     }
-    // send_eoi(0);
-    // return 0;
+
+    if (new_terminal_flag) {
+        send_eoi(0);
+        schedule_index = get_terminal_idx();
+        execute((const uint8_t *) "shell");
+        return 0;
+    }
 
     asm volatile (
         "movl %%esp, %0   ;\

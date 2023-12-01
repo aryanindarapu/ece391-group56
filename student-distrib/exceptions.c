@@ -14,8 +14,8 @@
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int divide_error() {
-    printf("Divide error occurred\n");
-    exception_raised_flag = 1;
+    // printf("Divide error occurred\n");
+    exception_raised_flag = 0;
     halt((uint8_t) 256);
     return 256;
 }
@@ -29,7 +29,7 @@ int divide_error() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int debug() {
-    printf("Debug interrupt occurred\n");
+    // printf("Debug interrupt occurred\n");
     exception_raised_flag = 1;
     halt((uint8_t) 256);
     return 256;
@@ -44,7 +44,7 @@ int debug() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int nmi_interrupt() {
-    printf("NMI interrupt occured\n");
+    // printf("NMI interrupt occured\n");
     exception_raised_flag = 1;
     halt((uint8_t) 256);
     return 256;
@@ -59,8 +59,8 @@ int nmi_interrupt() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int breakpoint() {
-    printf("Breakpoint interrupt occurred\n");
-    exception_raised_flag = 1;
+    // printf("Breakpoint interrupt occurred\n");
+    exception_raised_flag = 2;
     halt((uint8_t) 256);
     return 256;
 }
@@ -74,8 +74,8 @@ int breakpoint() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int overflow() {
-    printf("Overflow error occurred\n"); 
-    exception_raised_flag = 1;
+    // printf("Overflow error occurred\n"); 
+    exception_raised_flag = 3;
     halt((uint8_t) 256);
     return 256;
 }
@@ -89,8 +89,8 @@ int overflow() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int bound_range_exceeded() {
-    printf("Bound range error occurred\n");
-    exception_raised_flag = 1;
+    // printf("Bound range error occurred\n");
+    exception_raised_flag = 4;
     halt((uint8_t) 256);
     return 256;
 }
@@ -104,8 +104,8 @@ int bound_range_exceeded() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int invalid_opcode() {
-    printf("Invalid opcode error occurred\n");
-    exception_raised_flag = 1;
+    // printf("Invalid opcode error occurred\n");
+    exception_raised_flag = 5;
     halt((uint8_t) 256);
     
     return 256;
@@ -120,8 +120,8 @@ int invalid_opcode() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int device_not_available() {
-    printf("Device not available\n");
-    exception_raised_flag = 1;
+    // printf("Device not available\n");
+    exception_raised_flag = 6;
     halt((uint8_t) 256);
     return 256;
 }
@@ -135,8 +135,8 @@ int device_not_available() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int double_fault() {
-    printf("Double fault error occurred\n");
-    exception_raised_flag = 1;
+    // printf("Double fault error occurred\n");
+    exception_raised_flag = 7;
     halt((uint8_t) 256);
     return 256;
 }
@@ -150,8 +150,8 @@ int double_fault() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int coprocessor_segment_overrun() {
-    printf("Coprocessor segment overrun error occurred\n");
-    exception_raised_flag = 1;
+    // printf("Coprocessor segment overrun error occurred\n");
+    exception_raised_flag = 8;
     halt((uint8_t) 256);
     return 256;
 }
@@ -165,8 +165,8 @@ int coprocessor_segment_overrun() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int invalid_tss() {
-    printf("Invalid tts error occurred\n");
-    exception_raised_flag = 1;
+    // printf("Invalid tts error occurred\n");
+    exception_raised_flag = 9;
     halt((uint8_t) 256);  
     return 256;
 }
@@ -180,8 +180,8 @@ int invalid_tss() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int segment_not_present() {
-    printf("***segment not present***\n");
-    exception_raised_flag = 1;
+    // printf("***segment not present***\n");
+    exception_raised_flag = 10;
     halt((uint8_t) 256);
     return 256;
 }
@@ -195,8 +195,8 @@ int segment_not_present() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int stack_segment_fault() {
-    printf("***stack segment fault***\n");
-    exception_raised_flag = 1;
+    // printf("***stack segment fault***\n");
+    exception_raised_flag = 11;
     halt((uint8_t) 256);
     return 256;
 }
@@ -210,8 +210,8 @@ int stack_segment_fault() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int general_protection() {
-    printf("General protection fault\n");
-    exception_raised_flag = 1;
+    // printf("General protection fault\n");
+    exception_raised_flag = 12;
     halt((uint8_t) 256);
     return 256;
 }
@@ -225,8 +225,8 @@ int general_protection() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int page_fault() {
-    printf("Page fault occurred\n");
-    exception_raised_flag = 1;
+    // printf("Page fault occurred\n");
+    exception_raised_flag = 13;
     halt((uint8_t) 256);
     return 256;
 }
@@ -240,8 +240,8 @@ int page_fault() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int reserved() {
-    printf("Reserved interrupt occurred\n");
-    exception_raised_flag = 1;
+    // printf("Reserved interrupt occurred\n");
+    exception_raised_flag = 14;
     halt((uint8_t) 256);
     return 256;
 }
@@ -255,8 +255,8 @@ int reserved() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int x87_fpu_floating_point_error() {
-    printf("x87 fpu floating point error occurred\n");
-    exception_raised_flag = 1;
+    // printf("x87 fpu floating point error occurred\n");
+    exception_raised_flag = 15;
     halt((uint8_t) 256);
     return 256;
 }
@@ -270,8 +270,8 @@ int x87_fpu_floating_point_error() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int alignment_check() {
-    printf("Alignment check interrupt occurred\n");
-    exception_raised_flag = 1;
+    // printf("Alignment check interrupt occurred\n");
+    exception_raised_flag = 16;
     halt((uint8_t) 256);
     return 256;
 }
@@ -285,8 +285,8 @@ int alignment_check() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int machine_check() {
-    printf("Machine alignment interrupt occurred\n");
-    exception_raised_flag = 1;
+    // printf("Machine alignment interrupt occurred\n");
+    exception_raised_flag = 17;
     halt((uint8_t) 256);
     return 256;
 }
@@ -300,8 +300,8 @@ int machine_check() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int simd_floating_point_exception() {
-    printf("Simd floating point exception occurred\n");
-    exception_raised_flag = 1;
+    // printf("Simd floating point exception occurred\n");
+    exception_raised_flag = 18;
     halt((uint8_t) 256);
     return 256;
 }
@@ -315,8 +315,8 @@ int simd_floating_point_exception() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int user_defined() {
-    printf("User defined interrupt occurred\n");
-    exception_raised_flag = 1;
+    // printf("User defined interrupt occurred\n");
+    exception_raised_flag = 19;
     halt((uint8_t) 256);
     return 256;
 }
