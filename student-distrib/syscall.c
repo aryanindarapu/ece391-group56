@@ -439,7 +439,7 @@ int32_t vidmap (uint8_t** screen_start) {
     //(uint8_t *) (VIDEO + FOUR_KB * (1 + terminal_idx));  //
     // get_curr_pcb_ptr()->user_screen_start = screen_start;
     // get_curr_pcb_ptr()->screen_flag_set = 1;
-    *screen_start = (uint8_t *) (VIDEO + FOUR_KB * (1 + terminal_idx)); 
+    *screen_start = (uint8_t *) (VIDEO + FOUR_KB * (1 + get_schedule_idx())); 
     return 0;
 }
 

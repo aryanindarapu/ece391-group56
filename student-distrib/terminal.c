@@ -196,7 +196,7 @@ void set_saved_screen_y(int term, int y)
 
 void terminal_switch (int t_idx)
 {
-    cli();
+    // cli();
     if(t_idx > 2 || t_idx < 0) return;
 
     // save_screen_x[terminal_idx] = get_screen_x();
@@ -204,11 +204,11 @@ void terminal_switch (int t_idx)
 
     video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
     flush_tlb();
-    memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4096);
+    memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4000);
     
     terminal_idx = t_idx;
     
-    memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4096);
+    memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000);
     video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
     flush_tlb();
     
@@ -234,8 +234,8 @@ void terminal_switch (int t_idx)
         new_terminal_flag = 1; // need to set up new terminal
     }
 
-    send_eoi(1);
-    sti();
+    // send_eoi(1);
+    // sti();
 }
 
 void init_terminals_vidmaps()

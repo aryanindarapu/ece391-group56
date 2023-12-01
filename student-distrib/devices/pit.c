@@ -55,10 +55,10 @@ void set_schedule_idx(int index)
 int pit_handler () {
     // send_eoi(0);
     // return 0;
-    cli();
+    // cli();
     if (is_started() == 0)
     {
-        sti();
+        // sti();s
         send_eoi(0);
         return 0;
         //asm volatile ("iret");
@@ -85,7 +85,7 @@ int pit_handler () {
         schedule_index %= 3;
     } while (get_terminal_arr(schedule_index) == -1);
     // set_vid_mem(schedule_index, schedule_index);//get_terminal_idx());
-    pcb_t * next_pcb = get_child_pcb(get_terminal_arr(schedule_index));
+    pcb_t * next_pcb = get_child_pcb(schedule_index);
     tss.ss0 = (uint16_t) KERNEL_DS;
     tss.esp0 = (uint32_t) next_pcb + EIGHT_KB - STACK_FENCE_SIZE;
     // set_vid_mem(schedule_index, get_terminal_idx());
@@ -102,7 +102,7 @@ int pit_handler () {
         : "memory"
     );
     send_eoi(0);
-    sti();
+    // sti();
     return 0;
     
     // setup_user_page(((next_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
