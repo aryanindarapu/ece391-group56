@@ -7,6 +7,7 @@
 #include "exceptions.h"
 #include "process.h"
 #include "terminal.h"
+#include "devices/i8259.h"
 
 extern int terminal_idx;
 extern int new_terminal_flag;
@@ -71,7 +72,7 @@ int32_t execute (const uint8_t* command) {
 
     // Set commands
     int offset = i;
-    for (; i < LINE_BUFFER_SIZE; i++) {
+    for (; i < strlen(command); i++) {
         new_pcb->commands[i - offset] = command[i];
     }
 
@@ -138,6 +139,7 @@ int32_t execute (const uint8_t* command) {
         new_pcb->parent_pid = -1;
         set_terminal_arr(terminal_idx, new_pid_idx);
         new_terminal_flag = 0; // reset flag
+        send_eoi(0);
     } else {
         new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
         get_curr_pcb_ptr()->child_pid = new_pid_idx;

@@ -56,16 +56,16 @@ int pit_handler () {
     // send_eoi(0);
     // return 0;
     // cli();
-    if (is_started() == 0)
-    {
-        // sti();s
-        send_eoi(0);
-        return 0;
-        //asm volatile ("iret");
-    }
+    // if (is_started() == 0)
+    // {
+    //     // sti();s
+    //     send_eoi(0);
+    //     return 0;
+    //     //asm volatile ("iret");
+    // }
 
     if (new_terminal_flag) {
-        send_eoi(0);
+        // send_eoi(0);
         schedule_index = get_terminal_idx();
         execute((const uint8_t *) "shell");
         return 0;

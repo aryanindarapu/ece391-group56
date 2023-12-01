@@ -12,6 +12,7 @@
 #include "file_system_driver.h"
 #include "syscall.h"
 #include "process.h"
+#include "terminal.h"
 
 #include "devices/i8259.h"
 
@@ -21,6 +22,9 @@
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags, bit)   ((flags) & (1 << (bit)))
+
+extern int new_terminal_flag;
+
 
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
@@ -163,9 +167,10 @@ void entry(unsigned long magic, unsigned long addr) {
     i8259_init();
     set_vid_mem(0,0);
     clear_terminal(0);
+    new_terminal_flag = 1;
     sti();
     // init_shells();
-    execute((const uint8_t *) "shell");
+    // execute((const uint8_t *) "shell");
     
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your

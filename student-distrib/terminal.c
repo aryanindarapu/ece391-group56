@@ -76,6 +76,10 @@ void terminal_backspace()
  * Return Value: none
  * Function: resets buffer_idx */
 void terminal_clear() {
+    int i;
+    for (i = 0; i < LINE_BUFFER_SIZE; i++) {
+        line_buffer[terminal_idx][i] = '\0';
+    }
     buffer_idx[terminal_idx] = 0;
 }
 
@@ -196,7 +200,7 @@ void set_saved_screen_y(int term, int y)
 
 void terminal_switch (int t_idx)
 {
-    // cli();
+    cli();
     if(t_idx > 2 || t_idx < 0) return;
     if(terminal_pids[t_idx] == -1 && !is_pcb_available()) return;
     // save_screen_x[terminal_idx] = get_screen_x();

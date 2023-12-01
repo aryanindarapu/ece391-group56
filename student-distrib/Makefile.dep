@@ -30,7 +30,8 @@ process.o: process.c process.h types.h file_system_driver.h devices/rtc.h \
   syscall_helpers.h x86_desc.h
 syscall.o: syscall.c syscall.h paging.h types.h lib.h terminal.h \
   file_system_driver.h devices/rtc.h devices/../types.h devices/pit.h \
-  syscall_helpers.h process.h x86_desc.h exceptions.h
+  syscall_helpers.h process.h x86_desc.h exceptions.h devices/i8259.h \
+  devices/../lib.h devices/../x86_desc.h
 syscall_helpers.o: syscall_helpers.c syscall_helpers.h types.h \
   file_system_driver.h devices/rtc.h devices/../types.h terminal.h lib.h \
   devices/pit.h paging.h syscall.h process.h
