@@ -238,7 +238,6 @@ void terminal_switch (int t_idx)
         new_terminal_flag = 1; // need to set up new terminal
         set_schedule_idx(terminal_idx);
         send_eoi(1);
-        sti();
         execute((const uint8_t *) "shell");
     }
     else

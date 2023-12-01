@@ -10,19 +10,6 @@ name:                       ;\
     popal                   ;\
     iret                    ;\
 
-#define INTR_LINK_PIT(pname,pfunc)   \
-.GLOBL pname                 ;\
-pname:                       ;\
-    pushal                  ;\
-    pushfl                  ;\
-    pushl %esp              ;\
-    call pfunc               ;\
-    popl %esp               ;\
-    popfl                   ;\
-    popal                   ;\
-    iret                    ;\
-
-
 
 /* link device handlers */
 INTR_LINK(keyboard_handler_linkage, keyboard_handler)

@@ -20,7 +20,6 @@ extern int new_terminal_flag;
  *   SIDE EFFECTS: sets up user page, changes tss, and initializes a new pcb
  */
 int32_t execute (const uint8_t* command) {
-    cli();
     if (command == NULL) return -1;
     int i;
     
@@ -165,12 +164,20 @@ int32_t execute (const uint8_t* command) {
         pushl %%edx             ;\
         iret                    ;\
         "
-        : "=a" (output)
+        :
         : "a" (USER_DS), "b" (user_esp), "c" (USER_CS), "d" (user_eip) 
         : "memory"
     );
 
-    asm volatile("ret_from_halt: ");
+    asm volatile ("\
+        ret_from_halt:     ;\
+        movl %%eax, %0     ;\
+        "
+        : "=r" (output)
+        : 
+        : "memory"
+    );
+
     if (exception_raised_flag) {
         exception_raised_flag = 0;
         return EXCEPTION_OCCURRED_VAL; 
@@ -195,7 +202,7 @@ int32_t halt (uint8_t status) {
     /* push user context if its base shell since we have no processes left */
     // TODO: change this when dynamically loading shells
     // Check if the pid is in the current active terminals array
-    if (pcb->pid == 0) {//|| pcb->pid == 1 || pcb->pid == 2)
+    if (pcb->pid == get_terminal_arr(0) || pcb->pid == get_terminal_arr(1) || pcb->pid == get_terminal_arr(2)) {
         // recover context from halt(esp, eip, USER_CS, USER_DS);
         // 0x00FF - clears the bottom 8 bytes of the return value
         // 0x0200 - turns on bit of EFLAGS
