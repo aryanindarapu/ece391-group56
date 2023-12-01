@@ -106,7 +106,7 @@ void init_keyboard() {
  *   SIDE EFFECTS: prints any keyboard input to the screen
  */ 
 void keyboard_handler() {
-    while (new_terminal_flag) {}
+    // while (new_terminal_flag) {}
     // Read input from keyboard
     keyboard_driver();
     
