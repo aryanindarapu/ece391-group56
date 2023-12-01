@@ -116,9 +116,7 @@ void keyboard_handler() {
  * Return Value: none
  * Function: reads in from keyboard port and decodes keycode. Sends necessary data to terminal to update the buffer */
 void keyboard_driver() {
-    cli();
     int term = get_terminal_idx();
-    sti();
     //printf("keyboard int occured\n");
     //unsigned char status;
     // give to active terminal the keycoamdndadaADadadasdadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

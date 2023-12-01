@@ -125,26 +125,28 @@ int32_t terminal_close(int32_t fd) {
 int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // NOTE: this is a blocking call, so it can't be interrupted
     // printf("ACCESSED TERMINAL READ");
+    sti();
     first_shell_started = 1;
     int term = terminal_idx;
-    sti();
-    while (enter_flag_pressed[terminal_idx] != 1){};
+    while (get_schedule_idx() != terminal_idx || enter_flag_pressed[terminal_idx] != 1){};
     
-    while (term !=get_schedule_idx()){};
+    // while (term !=get_schedule_idx()){};
     
-    line_buffer[term][save_buffer_idx[term]] = '\n';
-    save_buffer_idx[term]++;
-    enter_flag_pressed[term] = 0;
+    cli();
+    line_buffer[terminal_idx][save_buffer_idx[terminal_idx]] = '\n';
+    save_buffer_idx[terminal_idx]++;
+    enter_flag_pressed[terminal_idx] = 0;
     //save_buffer_idx = buffer_idx;
-    if (nbytes < save_buffer_idx[term]) {
-        memcpy(buf, (const void *) line_buffer[term], nbytes);
+    if (nbytes < save_buffer_idx[terminal_idx]) {
+        memcpy(buf, (const void *) line_buffer[terminal_idx], nbytes);
         return nbytes;
     }
     else
     {
-        memcpy(buf, (const void *) line_buffer[term], save_buffer_idx[term]);
-        return save_buffer_idx[term];
+        memcpy(buf, (const void *) line_buffer[terminal_idx], save_buffer_idx[terminal_idx]);
+        return save_buffer_idx[terminal_idx];
     }
+    sti();
     // should check for ENTER and BACKSPACE here
     return -1;
 }
