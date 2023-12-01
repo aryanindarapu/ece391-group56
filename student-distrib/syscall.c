@@ -120,7 +120,9 @@ int32_t execute (const uint8_t* command) {
     /* push the user eip and esp to the cur pcb so we can restore context */
     new_pcb->user_esp = user_esp;
     new_pcb->user_eip = user_eip;
-    
+    // new_pcb->kernel_esp = new_pcb + EIGHT_KB - STACK_FENCE_SIZE;
+    // new_pcb->kernel_ebp = new_pcb + EIGHT_KB - STACK_FENCE_SIZE;
+
     // store kernel esp and ebp in the pcb
     asm volatile (
         "movl %%esp, %%eax   ;\
@@ -143,6 +145,15 @@ int32_t execute (const uint8_t* command) {
     int32_t output;
     /* enable interrupts*/
     sti();
+    // stack swap
+    // asm volatile (
+    //     "movl %%eax, %%esp   ;\
+    //      movl %%ebx, %%ebp   ;\
+    //     "
+    //     :
+    //     : "a" (new_pcb->kernel_esp), "b" (new_pcb->kernel_ebp)
+    //     : "memory"
+    // );
     // sets up DS, ESP, EFLAGS, CS, EIP onto stack for context switch
     asm volatile ("\
         andl $0x00FF, %%eax     ;\

@@ -427,8 +427,8 @@ void putc_terminal(uint8_t c, int term)
     } else if (c == '\0') {
         return;
     } else {
-        *(uint8_t *)(video_mem + ((NUM_COLS * terminal_screen_y[term] + terminal_screen_x[term]) << 1)) = c;
-        *(uint8_t *)(video_mem + ((NUM_COLS * terminal_screen_y[term] + terminal_screen_x[term]) << 1) + 1) = temp_att;
+        *(uint8_t *)(temp_vmem + ((NUM_COLS * terminal_screen_y[term] + terminal_screen_x[term]) << 1)) = c;
+        *(uint8_t *)(temp_vmem + ((NUM_COLS * terminal_screen_y[term] + terminal_screen_x[term]) << 1) + 1) = temp_att;
         terminal_screen_x[term]++;
         terminal_screen_y[term] = (terminal_screen_y[term] + (terminal_screen_x[term] / NUM_COLS)); // % NUM_ROWS;
         terminal_screen_x[term] %= NUM_COLS;
@@ -436,7 +436,7 @@ void putc_terminal(uint8_t c, int term)
 
     if(terminal_screen_y[term] == NUM_ROWS)
     {
-        move_screen_up();
+        move_screen_up_terminal(term);
         terminal_screen_y[term]=NUM_ROWS-1;
     }
 

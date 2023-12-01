@@ -127,9 +127,10 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // printf("ACCESSED TERMINAL READ");
     sti();
     first_shell_started = 1;
+    int term = terminal_idx;
     while (enter_flag_pressed[terminal_idx] != 1){sti();};
     
-    cli();
+    while (term !=get_schedule_idx()){};
     
     line_buffer[terminal_idx][save_buffer_idx[terminal_idx]] = '\n';
     save_buffer_idx[terminal_idx]++;
@@ -137,17 +138,14 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     //save_buffer_idx = buffer_idx;
     if (nbytes < save_buffer_idx[terminal_idx]) {
         memcpy(buf, (const void *) line_buffer[terminal_idx], nbytes);
-        sti();
         return nbytes;
     }
     else
     {
         memcpy(buf, (const void *) line_buffer[terminal_idx], save_buffer_idx[terminal_idx]);
-        sti();
         return save_buffer_idx[terminal_idx];
     }
     // should check for ENTER and BACKSPACE here
-    sti();
     return -1;
 }
 
@@ -238,6 +236,7 @@ void terminal_switch (int t_idx)
         new_terminal_flag = 1; // need to set up new terminal
         set_schedule_idx(terminal_idx);
         send_eoi(1);
+        sti();
         execute((const uint8_t *) "shell");
     }
     else
