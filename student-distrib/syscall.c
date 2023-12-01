@@ -20,6 +20,7 @@ extern int new_terminal_flag;
  *   SIDE EFFECTS: sets up user page, changes tss, and initializes a new pcb
  */
 int32_t execute (const uint8_t* command) {
+    cli();
     if (command == NULL) return -1;
     int i;
     

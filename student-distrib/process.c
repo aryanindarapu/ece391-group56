@@ -83,3 +83,16 @@ pcb_t * get_child_pcb(int32_t terminal_num)
 
     return curr_pcb;
 }
+
+int is_pcb_available()
+{
+    int i;
+    for(i =0; i<MAX_NUM_PROGRAMS; i++)
+    {
+        if(pcb_flags[i] == 0)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}

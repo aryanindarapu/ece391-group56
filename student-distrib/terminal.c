@@ -198,7 +198,7 @@ void terminal_switch (int t_idx)
 {
     // cli();
     if(t_idx > 2 || t_idx < 0) return;
-
+    if(terminal_pids[t_idx] == -1 && !is_pcb_available()) return;
     // save_screen_x[terminal_idx] = get_screen_x();
     // save_screen_y[terminal_idx] = get_screen_y();
 

@@ -28,6 +28,6 @@ uint32_t pcb_flags[MAX_NUM_PROGRAMS];
 int32_t process_switch(int32_t terminal_num);
 int32_t process_vidmap_change(int32_t terminal_from, int32_t terminal_to);
 pcb_t * get_child_pcb(int32_t terminal_num);
-
+int is_pcb_available(); // 1 yes 0 no
 
 #endif
