@@ -107,7 +107,6 @@ int pit_handler () {
         //     : "memory"
         // );
         execute((const uint8_t *) "shell");
-        return 0;
     }
 
     asm volatile (
