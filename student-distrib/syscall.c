@@ -133,6 +133,15 @@ int32_t execute (const uint8_t* command) {
         :
         : "memory"
     );
+
+    asm volatile (
+        "movl %%esp, %%eax   ;\
+         movl %%ebp, %%ebx   ;\
+        "
+        : "=a" (new_pcb->kernel_esp), "=b" (new_pcb->kernel_ebp)
+        :
+        : "memory"
+    );
     
     if (new_pid_idx == 0 || new_terminal_flag) {
         new_pcb->parent_pid = -1;

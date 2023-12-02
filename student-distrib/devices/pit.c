@@ -67,48 +67,48 @@ int pit_handler () {
     // }
 
 
-    int num = 4; // NOTE: must be 4, 7, 10, 13, etc.
+    // int num = 4; // NOTE: must be 4, 7, 10, 13, etc.
 
-    if (init_schedule_index == 0 || init_schedule_index == num || init_schedule_index == num * 2) {
-        schedule_index = (init_schedule_index / num) - 1;
-        terminal_switch(init_schedule_index / num);
-        temp_terminal_flag = 0;
-        // asm volatile (
-        //     "movl %%esp, %0   ;\
-        //     movl %%ebp, %1   ;\
-        //     "
-        //     : "=r" (get_pcb_ptr(init_schedule_index)->kernel_esp), "=r" (get_pcb_ptr(init_schedule_index)->kernel_ebp)
-        //     :
-        //     : "memory"
-        // );
-
-        init_schedule_index += 1;
-        execute((const uint8_t *) "shell");
-        return 0;
-    } else if (init_schedule_index == (num * 2) + 1) {
-        terminal_switch(0);
-        init_schedule_index++;
-    } else if (init_schedule_index < num * 2) {
-        init_schedule_index += 1;
-    }
-
-    // if (new_terminal_flag) {
-    //     // send_eoi(0);
-
-    //     schedule_index = get_terminal_idx();
+    // if (init_schedule_index == 0 || init_schedule_index == num || init_schedule_index == num * 2) {
+    //     schedule_index = (init_schedule_index / num) - 1;
+    //     terminal_switch(init_schedule_index / num);
     //     temp_terminal_flag = 0;
-
     //     // asm volatile (
     //     //     "movl %%esp, %0   ;\
     //     //     movl %%ebp, %1   ;\
     //     //     "
-    //     //     : "=r" (get_pcb_ptr(get_terminal_arr(schedule_index))->kernel_esp), "=r" (get_pcb_ptr(get_terminal_arr(schedule_index))->kernel_ebp)
+    //     //     : "=r" (get_pcb_ptr(init_schedule_index)->kernel_esp), "=r" (get_pcb_ptr(init_schedule_index)->kernel_ebp)
     //     //     :
     //     //     : "memory"
     //     // );
+
+    //     init_schedule_index += 1;
     //     execute((const uint8_t *) "shell");
     //     return 0;
+    // } else if (init_schedule_index == (num * 2) + 1) {
+    //     terminal_switch(0);
+    //     init_schedule_index++;
+    // } else if (init_schedule_index < num * 2) {
+    //     init_schedule_index += 1;
     // }
+
+    if (new_terminal_flag) {
+        // send_eoi(0);
+
+        schedule_index = get_terminal_idx();
+        temp_terminal_flag = 0;
+
+        // asm volatile (
+        //     "movl %%esp, %0   ;\
+        //     movl %%ebp, %1   ;\
+        //     "
+        //     : "=r" (get_pcb_ptr(get_terminal_arr(schedule_index))->kernel_esp), "=r" (get_pcb_ptr(get_terminal_arr(schedule_index))->kernel_ebp)
+        //     :
+        //     : "memory"
+        // );
+        execute((const uint8_t *) "shell");
+        return 0;
+    }
 
     asm volatile (
         "movl %%esp, %0   ;\
