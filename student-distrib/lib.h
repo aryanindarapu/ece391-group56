@@ -53,7 +53,7 @@ int get_screen_y();
 void set_screen_x(int x);
 void set_screen_y(int y);
 
-void set_vid_mem(int terminal_idx, int active_terminal);
+void set_vid_mem(int t);
 
 /* Port read functions */
 /* Inb reads a byte and returns its value as a zero-extended 32-bit

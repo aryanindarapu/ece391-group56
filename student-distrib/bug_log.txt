@@ -1,4 +1,5 @@
 - fish starts flashing when switching between terminals
+- kernel esp and ebp are 0 when we initialize shell
 
 **************************************** CHECKPOINT 4 ****************************************
 -----------------

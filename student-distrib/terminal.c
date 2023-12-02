@@ -10,8 +10,8 @@ static volatile int enter_flag_pressed[3] = {0,0,0};
 static unsigned int save_buffer_idx[3] = {0,0,0};
 int terminal_idx = 0; //active one
 int first_shell_started = 0;
-int new_terminal_flag = 1;
-int32_t terminal_pids[3] = {0, -1, -1};
+int new_terminal_flag = 0;
+int32_t terminal_pids[3] = {-1, -1, -1};
 // TODO: add rtc switching as well
 
 // char vidmems[3][4096];
@@ -201,13 +201,12 @@ void set_saved_screen_y(int term, int y)
 void terminal_switch (int t_idx)
 {
     cli();
-    if(t_idx > 2 || t_idx < 0) return;
+    if(t_idx > 2 || t_idx < 0 || new_terminal_flag == 1) return;
     if(terminal_pids[t_idx] == -1 && !is_pcb_available()) return;
     // save_screen_x[terminal_idx] = get_screen_x();
     // save_screen_y[terminal_idx] = get_screen_y();
 
     video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
-    flush_tlb();
     memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4000);
     
     terminal_idx = t_idx;
@@ -231,7 +230,7 @@ void terminal_switch (int t_idx)
     
     // set_vid_mem(terminal_idx, terminal_idx);
     
-    set_vid_mem(terminal_idx, terminal_idx);
+    set_vid_mem(terminal_idx);
 
     if (terminal_pids[terminal_idx] == -1) {
         clear_terminal(terminal_idx);

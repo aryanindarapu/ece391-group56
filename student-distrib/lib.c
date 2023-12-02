@@ -52,7 +52,7 @@ void clear_terminal(int term) {
 
 
 
-void set_vid_mem(int terminal_idx, int active_terminal)
+void set_vid_mem(int t)
 {
     // int prev_x = get_saved_screen_x(terminal_idx);
     // int prev_y = get_saved_screen_y(terminal_idx);
@@ -62,7 +62,7 @@ void set_vid_mem(int terminal_idx, int active_terminal)
     // screen_x = get_saved_screen_x(terminal_idx);
     // screen_y = get_saved_screen_y(terminal_idx);
     // curr_terminal_vmem = terminal_idx;
-    if(terminal_idx == get_terminal_idx()) update_cursor_terminal(terminal_screen_x[terminal_idx], terminal_screen_y[terminal_idx]);
+    if(t == get_terminal_idx()) update_cursor_terminal(terminal_screen_x[t], terminal_screen_y[t]);
 
     // set_saved_screen_x(prev_terminal_idx, get_saved_screen_x(prev_terminal_idx));
     // set_saved_screen_y(prev_terminal_idx, get_saved_screen_y(prev_terminal_idx));

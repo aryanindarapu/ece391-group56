@@ -8,8 +8,8 @@
 #include "../terminal.h"
 
 int32_t schedule_index = 0;
+int32_t init_schedule_index = 0;
 extern int new_terminal_flag;
-
 
 /*
  *  0x40    Channel 0 data port (read/write) for the PIT
@@ -53,9 +53,10 @@ void set_schedule_idx(int index)
 }
 
 int pit_handler () {
+
     // send_eoi(0);
     // return 0;
-    // cli();
+    cli();
     // if (is_started() == 0)
     // {
     //     // sti();s
@@ -63,13 +64,44 @@ int pit_handler () {
     //     return 0;
     //     //asm volatile ("iret");
     // }
+    int num = 8;
 
-    if (new_terminal_flag) {
-        // send_eoi(0);
-        schedule_index = get_terminal_idx();
+    if (init_schedule_index == 0 || init_schedule_index == num * 1 || init_schedule_index == num * 2) {
+        schedule_index = init_schedule_index / num;
+        terminal_switch(init_schedule_index / num);
+        // asm volatile (
+        //     "movl %%esp, %0   ;\
+        //     movl %%ebp, %1   ;\
+        //     "
+        //     : "=r" (get_pcb_ptr(init_schedule_index)->kernel_esp), "=r" (get_pcb_ptr(init_schedule_index)->kernel_ebp)
+        //     :
+        //     : "memory"
+        // );
+
+        init_schedule_index += 1;
         execute((const uint8_t *) "shell");
-        return 0;
+    } else if (init_schedule_index == num * 3) {
+        terminal_switch(0);
+        init_schedule_index++;
+    } else if (init_schedule_index < num * 3) {
+        init_schedule_index += 1;
     }
+
+    // if (new_terminal_flag) {
+    //     // send_eoi(0);
+
+    //     schedule_index = get_terminal_idx();
+    //     // asm volatile (
+    //     //     "movl %%esp, %0   ;\
+    //     //     movl %%ebp, %1   ;\
+    //     //     "
+    //     //     : "=r" (get_pcb_ptr(get_terminal_arr(schedule_index))->kernel_esp), "=r" (get_pcb_ptr(get_terminal_arr(schedule_index))->kernel_ebp)
+    //     //     :
+    //     //     : "memory"
+    //     // );
+    //     execute((const uint8_t *) "shell");
+    //     return 0;
+    // }
 
     asm volatile (
         "movl %%esp, %0   ;\
@@ -102,7 +134,7 @@ int pit_handler () {
         : "memory"
     );
     send_eoi(0);
-    // sti();
+    sti();
     return 0;
     
     // setup_user_page(((next_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);

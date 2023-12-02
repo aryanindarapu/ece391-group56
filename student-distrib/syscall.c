@@ -121,8 +121,8 @@ int32_t execute (const uint8_t* command) {
     /* push the user eip and esp to the cur pcb so we can restore context */
     new_pcb->user_esp = user_esp;
     new_pcb->user_eip = user_eip;
-    // new_pcb->kernel_esp = new_pcb + EIGHT_KB - STACK_FENCE_SIZE;
-    // new_pcb->kernel_ebp = new_pcb + EIGHT_KB - STACK_FENCE_SIZE;
+    // new_pcb->kernel_esp = (uint32_t) new_pcb + EIGHT_KB - STACK_FENCE_SIZE;
+    // new_pcb->kernel_ebp = (uint32_t) new_pcb + EIGHT_KB - STACK_FENCE_SIZE;
 
     // store kernel esp and ebp in the pcb
     asm volatile (
@@ -146,7 +146,7 @@ int32_t execute (const uint8_t* command) {
 
     int32_t output;
     /* enable interrupts*/
-    sti();
+    // sti();
     // stack swap
     // asm volatile (
     //     "movl %%eax, %%esp   ;\

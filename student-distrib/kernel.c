@@ -165,9 +165,9 @@ void entry(unsigned long magic, unsigned long addr) {
     init_file_system();
     init_terminals_vidmaps();
     i8259_init();
-    set_vid_mem(0,0);
-    clear_terminal(0);
-    new_terminal_flag = 1;
+    // set_vid_mem(0);
+    // clear_terminal(0);
+    // new_terminal_flag = 1;
     sti();
     // init_shells();
     // execute((const uint8_t *) "shell");
