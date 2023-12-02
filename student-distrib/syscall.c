@@ -146,7 +146,7 @@ int32_t execute (const uint8_t* command) {
 
     int32_t output;
     /* enable interrupts*/
-    // sti();
+    sti();
     // stack swap
     // asm volatile (
     //     "movl %%eax, %%esp   ;\

@@ -11,6 +11,7 @@ static unsigned int save_buffer_idx[3] = {0,0,0};
 int terminal_idx = 0; //active one
 int first_shell_started = 0;
 int new_terminal_flag = 0;
+int temp_terminal_flag = 0;
 int32_t terminal_pids[3] = {-1, -1, -1};
 // TODO: add rtc switching as well
 
@@ -200,6 +201,7 @@ void set_saved_screen_y(int term, int y)
 
 void terminal_switch (int t_idx)
 {
+    // if (!temp_terminal_flag) return;
     cli();
     if(t_idx > 2 || t_idx < 0 || new_terminal_flag == 1) return;
     if(terminal_pids[t_idx] == -1 && !is_pcb_available()) return;

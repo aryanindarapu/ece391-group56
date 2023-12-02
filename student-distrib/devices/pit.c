@@ -10,6 +10,7 @@
 int32_t schedule_index = 0;
 int32_t init_schedule_index = 0;
 extern int new_terminal_flag;
+extern int temp_terminal_flag;
 
 /*
  *  0x40    Channel 0 data port (read/write) for the PIT
@@ -64,11 +65,14 @@ int pit_handler () {
     //     return 0;
     //     //asm volatile ("iret");
     // }
-    int num = 8;
 
-    if (init_schedule_index == 0 || init_schedule_index == num * 1 || init_schedule_index == num * 2) {
-        schedule_index = init_schedule_index / num;
+
+    int num = 4; // NOTE: must be 4, 7, 10, 13, etc.
+
+    if (init_schedule_index == 0 || init_schedule_index == num || init_schedule_index == num * 2) {
+        schedule_index = (init_schedule_index / num) - 1;
         terminal_switch(init_schedule_index / num);
+        temp_terminal_flag = 0;
         // asm volatile (
         //     "movl %%esp, %0   ;\
         //     movl %%ebp, %1   ;\
@@ -80,10 +84,11 @@ int pit_handler () {
 
         init_schedule_index += 1;
         execute((const uint8_t *) "shell");
-    } else if (init_schedule_index == num * 3) {
+        return 0;
+    } else if (init_schedule_index == (num * 2) + 1) {
         terminal_switch(0);
         init_schedule_index++;
-    } else if (init_schedule_index < num * 3) {
+    } else if (init_schedule_index < num * 2) {
         init_schedule_index += 1;
     }
 
@@ -91,6 +96,8 @@ int pit_handler () {
     //     // send_eoi(0);
 
     //     schedule_index = get_terminal_idx();
+    //     temp_terminal_flag = 0;
+
     //     // asm volatile (
     //     //     "movl %%esp, %0   ;\
     //     //     movl %%ebp, %1   ;\
@@ -133,6 +140,7 @@ int pit_handler () {
         : "a" (next_pcb->kernel_esp), "b" (next_pcb->kernel_ebp)
         : "memory"
     );
+    temp_terminal_flag = 1;
     send_eoi(0);
     sti();
     return 0;
