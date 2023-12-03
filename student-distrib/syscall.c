@@ -5,7 +5,6 @@
 #include "lib.h"
 #include "x86_desc.h"
 #include "exceptions.h"
-#include "process.h"
 #include "terminal.h"
 #include "devices/i8259.h"
 
@@ -72,7 +71,7 @@ int32_t execute (const uint8_t* command) {
 
     // Set commands
     int offset = i;
-    for (; i < strlen(command); i++) {
+    for (; i < strlen((const int8_t *) command); i++) {
         new_pcb->commands[i - offset] = command[i];
     }
 
@@ -89,8 +88,6 @@ int32_t execute (const uint8_t* command) {
     new_pcb->file_desc_arr[1].inode = -1;
     new_pcb->file_desc_arr[1].flags = 1;
     new_pcb->file_desc_arr[1].file_pos = 0;
-
-    // new_pcb->screen_flag_set = 0;
 
     /* Set up 4MB page for user program */
     setup_user_page(((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB);

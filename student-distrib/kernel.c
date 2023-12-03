@@ -11,7 +11,6 @@
 #include "paging.h"
 #include "file_system_driver.h"
 #include "syscall.h"
-#include "process.h"
 #include "terminal.h"
 
 #include "devices/i8259.h"
@@ -177,7 +176,7 @@ void entry(unsigned long magic, unsigned long addr) {
     
 #ifdef RUN_TESTS
     /* Run tests */
-    //launch_tests();
+    // launch_tests();
 #endif
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");

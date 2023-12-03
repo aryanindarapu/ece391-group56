@@ -3,14 +3,12 @@
 #include "../x86_desc.h"
 #include "rtc.h"
 #include "../syscall_helpers.h"
-#include "../process.h"
 #include "pit.h"
 #include "../terminal.h"
 
 int32_t schedule_index = 0;
 int32_t init_schedule_index = 0;
 extern int new_terminal_flag;
-extern int temp_terminal_flag;
 int terminals_initialized = 0;
 int init_wait_count = 50;
 int pit_wait_count = 0;
@@ -27,16 +25,6 @@ int is_terminals_initialized()
 {
     return terminals_initialized;
 }
-/*
- *  0x40    Channel 0 data port (read/write) for the PIT
- *
- *  MAY NEED TO CHANGE COMMAND REGISTER (0x43) TO SELECT CHANNEL 0
- *  
- *  https://www.cs.princeton.edu/courses/archive/fall18/cos318/precepts/3-preemptive.pdf#:~:text=Preemptive%20Scheduling%20Tasks%20are%20preempted%20via%20timer%20interrupt,Save%20the%20current%20task%20%28context%20switch%29%20before%20preempting
- *
- *
- *
- */
 
 /*
  *   init_pit
@@ -102,13 +90,12 @@ void set_schedule_idx(int index)
  *   RETURN VALUE: none
  *   SIDE EFFECTS: Changes vid mapping to current scheduled terminal as well as saving stack and base pointers for old process
  */  
-int pit_handler () {
-
+void pit_handler () {
     // If terminals are not initialized, there is additional work we need to do
-    if(!terminals_initialized)
+    if (!terminals_initialized)
     {
         // Check to see if we still need to execute the additional terminals
-        if(init_schedule_index < 3)// && pit_wait_count == init_wait_count)
+        if (init_schedule_index < 3)
         {
             // Set new terminal flag and increment the schedule index to setup new terminal
             new_terminal_flag = 1;
@@ -128,7 +115,7 @@ int pit_handler () {
             execute((const uint8_t *) "shell");
         }
         // Finished setting up all terminals
-        else if(init_schedule_index == 3)
+        else if (init_schedule_index == 3)
         {
             // Switch back to first process and let program know we are done with setup
             terminal_switch(0);
@@ -136,7 +123,11 @@ int pit_handler () {
             schedule_index = 2;
         }
     }
-    
+
+    // Increment scheduling index to next terminal
+    schedule_index++;
+    schedule_index %= 3;
+
     // Save stack and base pointer for iret context in current pcb struct
     asm volatile (
         "movl %%esp, %0   ;\
@@ -146,10 +137,6 @@ int pit_handler () {
         :
         : "memory"
     );
-
-    // Increment scheduling index to next terminal
-    schedule_index++;
-    schedule_index %= 3;
 
     // Grab the next child pcb for the next scheduled item
     pcb_t * next_pcb = get_child_pcb(schedule_index);
@@ -170,10 +157,7 @@ int pit_handler () {
         : "a" (next_pcb->kernel_esp), "b" (next_pcb->kernel_ebp)
         : "memory"
     );
-    
-    send_eoi(0);
-    return 0;
-
+    send_eoi(0);    
 }
 
 

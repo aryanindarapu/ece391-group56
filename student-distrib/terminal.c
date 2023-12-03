@@ -1,21 +1,16 @@
 #include "terminal.h"
-#include "process.h"
 #include "./devices/i8259.h"
 
 // Store buffer for each terminal (0 for first, 1 for second, etc.)
 static unsigned int buffer_idx[3] = {0,0,0};
 static uint8_t line_buffer[3][LINE_BUFFER_SIZE];
-static uint8_t saved_line_buffer[3][LINE_BUFFER_SIZE];
 static volatile int enter_flag_pressed[3] = {0,0,0};
 static unsigned int save_buffer_idx[3] = {0,0,0};
 int terminal_idx = 0; //active one
 int first_shell_started = 0; //flag for first shell
 int new_terminal_flag = 0; //flag for starting a new shell
-int temp_terminal_flag = 0; //idk useless
 int32_t terminal_pids[3] = {-1, -1, -1}; //pid array for terminal shells
-// TODO: add rtc switching as well
 
-// char vidmems[3][4096];
 int save_screen_x[3] = {7,0,0};
 int save_screen_y[3] = {1,0,0};
 
@@ -101,10 +96,6 @@ int is_started()
  * Function: saves buffer idx for terminal_read and resets it, sets flag to allow read */
 void terminal_enter()
 {
-    int i;
-    for (i = 0; i < LINE_BUFFER_SIZE; i++){
-        saved_line_buffer[terminal_idx][i] = line_buffer[i];
-    }
     enter_flag_pressed[terminal_idx] = 1;
     save_buffer_idx[terminal_idx] = buffer_idx[terminal_idx];
     buffer_idx[terminal_idx] = 0;
@@ -234,26 +225,10 @@ void terminal_switch (int t_idx)
     flush_tlb();
     memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4000); // copy current to storage
     
-        terminal_idx = t_idx;
-        flush_tlb();
-    
-        memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000);
-        video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
-        flush_tlb();
-    }
-    else {
-        terminal_idx = t_idx;
-        flush_tlb();
-    
-        memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000);
-        video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
-        flush_tlb();
-    }
+    terminal_idx = t_idx;
 
-    // TODO: Potential areas of page faulting
-    
-    memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000); // copy storage to current
-    video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB; // link page
+    memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000);
+    video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
     flush_tlb();
     
     set_vid_mem(terminal_idx); // update cursor this function is stupid
@@ -268,7 +243,7 @@ void init_terminals_vidmaps()
     // 8kb to 20kb is terminal vmem
     video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].p = 1; 
     video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].us = 1;
-    video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = VIDEO/FOUR_KB; 
+    video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = VIDEO / FOUR_KB; 
     video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].p = 1; 
     video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].us = 1;
     video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = 2 + (VIDEO_ADDRESS / FOUR_KB);

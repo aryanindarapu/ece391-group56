@@ -10,7 +10,6 @@
 #include "../terminal.h"   
 
 extern int new_terminal_flag;
-extern int temp_terminal_flag;
 
 uint8_t special_key_flags[NUM_SPECIAL_FLAGS] = { 0, 0, 0, 0 };
 
@@ -107,11 +106,9 @@ void init_keyboard() {
  *   SIDE EFFECTS: prints any keyboard input to the screen
  */ 
 void keyboard_handler() {
-    // while (new_terminal_flag) {}
     // Read input from keyboard
     keyboard_driver();
     
-    // while (!temp_terminal_flag) {};
     // Signal that interrupt is done
     send_eoi(1);
 }
