@@ -146,7 +146,7 @@ int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
 int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
     cli();
     int freq = *(const int *)buf; //load freq
-    freq *= 8;
+    // freq *= 8;
     if (freq < 2 || freq > 1024) return -1; // param check
     if (freq && (! (freq & (freq-1)))) { //check power of 2
         wait_count[get_schedule_idx()] = RTC_MAX_FREQ/freq; //update settings

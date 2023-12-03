@@ -25,12 +25,16 @@ void terminal_enter();
 void terminal_switch(int t_idx);
 /* init pages to hold vid data for 3 terms */
 void init_terminals_vidmaps();
-
+/* returns the pid of the input terminal index */
 int get_terminal_arr(int index);
+/* sets the pid of the input terminal index */
 void set_terminal_arr(int index, int val);
+/* returns whether or not any shell has started*/
 int is_started();
+/* returns active terminal */
 int get_terminal_idx();
 
+/* get/set cursor pos for each terminal */
 int get_saved_screen_x(int term);
 int get_saved_screen_y(int term);
 void set_saved_screen_x(int term, int x);

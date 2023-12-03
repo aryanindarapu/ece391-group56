@@ -14,14 +14,14 @@
 
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
-void putc_terminal(uint8_t c, int term);
+
 void putc_kbd(uint8_t c, int term);
 int32_t puts(int8_t *s);
 int8_t *itoa(uint32_t value, int8_t* buf, int32_t radix);
 int8_t *strrev(int8_t* s);
 uint32_t strlen(const int8_t* s);
 void clear(void);
-void clear_terminal(int term);
+
 void update_attrib();
 
 void* memset(void* s, int32_t c, uint32_t n);
@@ -41,19 +41,30 @@ int32_t safe_strncpy(int8_t* dest, const int8_t* src, int32_t n);
 void test_interrupts(void);
 /* updates the _ cursor to the current screen pos */
 void update_cursor(void);
-void update_cursor_terminal(int x, int y);
-/* performs backspace logic on the current screen */
-void backspace(int term);
+
+
 /* moves the contents of the screen up one line */
 void move_screen_up(void);
 void move_screen_up_terminal(int term);
 
+
+
+void set_vid_mem(int t);
+
+/* MULTI TERMINAL LIB FUNCTIONS */
+/* update cursor pos */
+void update_cursor_terminal(int x, int y);
+/* performs backspace logic on the current screen */
+void backspace(int term);
+/* getter and setters for cursor pos */
 int get_screen_x();
 int get_screen_y();
 void set_screen_x(int x);
 void set_screen_y(int y);
-
-void set_vid_mem(int t);
+/* putc for scheduling */
+void putc_terminal(uint8_t c, int term);
+/* clear for scheduling */
+void clear_terminal(int term);
 
 /* Port read functions */
 /* Inb reads a byte and returns its value as a zero-extended 32-bit

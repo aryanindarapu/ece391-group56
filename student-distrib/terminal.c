@@ -9,18 +9,20 @@ static uint8_t saved_line_buffer[3][LINE_BUFFER_SIZE];
 static volatile int enter_flag_pressed[3] = {0,0,0};
 static unsigned int save_buffer_idx[3] = {0,0,0};
 int terminal_idx = 0; //active one
-int first_shell_started = 0;
-int new_terminal_flag = 0;
-int temp_terminal_flag = 0;
-int32_t terminal_pids[3] = {-1, -1, -1};
+int first_shell_started = 0; //flag for first shell
+int new_terminal_flag = 0; //flag for starting a new shell
+int temp_terminal_flag = 0; //idk useless
+int32_t terminal_pids[3] = {-1, -1, -1}; //pid array for terminal shells
 // TODO: add rtc switching as well
 
 // char vidmems[3][4096];
 int save_screen_x[3] = {7,0,0};
 int save_screen_y[3] = {1,0,0};
 
-// TODO: add a 2d array of 6 input buffers
-
+/* get_terminal_idx()
+ * Inputs: none
+ * Return Value: active terminal
+ * Function: returns active terminal*/
 int get_terminal_idx()
 {
     return terminal_idx;
@@ -45,7 +47,7 @@ void write_to_terminal(unsigned char ascii) {
         return;
     else
     {
-        line_buffer[terminal_idx][buffer_idx[terminal_idx]] = ascii;
+        line_buffer[terminal_idx][buffer_idx[terminal_idx]] = ascii; //add to line buff
         buffer_idx[terminal_idx]++;
     }
            
@@ -60,7 +62,7 @@ void terminal_backspace()
     
     int term = terminal_idx;
     backspace(term);
-    if(line_buffer[term][buffer_idx[term]] == '\t')
+    if(line_buffer[term][buffer_idx[term]] == '\t') // add extra for tab
     {
         backspace(term);
         backspace(term);
@@ -83,7 +85,10 @@ void terminal_clear() {
     buffer_idx[terminal_idx] = 0;
 }
 
-// TODO: comment
+/* is_started
+ * Inputs: none
+ * Return Value: first_shell_started
+ * Function: returns if first shell is starting */
 int is_started()
 {   
     return first_shell_started;
@@ -127,21 +132,16 @@ int32_t terminal_close(int32_t fd) {
  * Return Value: number of bytes read, -1 for fail
  * Function: waits until enter is pressed then writes all bytes in buffer(including new ling) to input buf */
 int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
-    // NOTE: this is a blocking call, so it can't be interrupted
-    // printf("ACCESSED TERMINAL READ");
     first_shell_started = 1;
     int term = terminal_idx;
-    // sti();
-    while (get_schedule_idx() != terminal_idx || enter_flag_pressed[terminal_idx] != 1){};
+    while (get_schedule_idx() != terminal_idx || enter_flag_pressed[terminal_idx] != 1){}; //wait for enter
     
-    // while (term !=get_schedule_idx()){};
-    
-    // cli();
-    line_buffer[term][save_buffer_idx[term]] = '\n';
+    line_buffer[term][save_buffer_idx[term]] = '\n'; 
     save_buffer_idx[term]++;
     enter_flag_pressed[term] = 0;
-    //save_buffer_idx = buffer_idx;
-    if (nbytes < save_buffer_idx[term]) {
+    
+    //memcpy to buf
+    if (nbytes < save_buffer_idx[term]) { 
         memcpy(buf, (const void *) line_buffer[term], nbytes);
         return nbytes;
     }
@@ -150,8 +150,7 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
         memcpy(buf, (const void *) line_buffer[term], save_buffer_idx[term]);
         return save_buffer_idx[term];
     }
-    // sti();
-    // should check for ENTER and BACKSPACE here
+    
     return -1;
 }
 
@@ -162,7 +161,7 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
 int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
     int i;
     int term;
-    if(!is_terminals_initialized())
+    if(!is_terminals_initialized()) //check for startup, before normal scheduling
     {
         term = terminal_idx;
     }
@@ -172,7 +171,7 @@ int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
     }
     
     for (i = 0; i < nbytes; i++) {
-        if(((char*)buf)[i] == '\t')
+        if(((char*)buf)[i] == '\t') // add extra for tab
         {
             putc_terminal(' ', term);
             putc_terminal(' ', term);
@@ -185,77 +184,75 @@ int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
     return nbytes;
     
 }
+
+/* get_saved_screen_x
+ * Inputs: term
+ * Return Value: screen x
+ * Function: returns screen x for input terminal */
 int get_saved_screen_x(int term)
 {
     return save_screen_x[term];
 }
 
+/* get_saved_screen_y
+ * Inputs: term
+ * Return Value: screen y
+ * Function: returns screen y for input terminal */
 int get_saved_screen_y(int term)
 {
     return save_screen_y[term];
 }
 
+/* set_saved_screen_x
+ * Inputs: term, x
+ * Return Value: NA
+ * Function: sets screen x for input terminal */
 void set_saved_screen_x(int term, int x)
 {
     save_screen_x[term] = x;
 }
 
+/* set_saved_screen_y
+ * Inputs: term, y
+ * Return Value: NA
+ * Function: sets screen y for input terminal */
 void set_saved_screen_y(int term, int y)
 {
     save_screen_y[term] = y;
 }
 
+/* terminal_switch
+ * Inputs: t_idx
+ * Return Value: none
+ * Function: copies and swaps video mem for next process*/
 void terminal_switch (int t_idx)
 {
-    // if (!temp_terminal_flag) return;
     if(t_idx > 2 || t_idx < 0 || new_terminal_flag == 1) return;
-    // if(terminal_pids[t_idx] == -1 && !is_pcb_available()) return;
-    // save_screen_x[terminal_idx] = get_screen_x();
-    // save_screen_y[terminal_idx] = get_screen_y();
 
-    video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
-    memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4000);
+
+    video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx; // unlink page
+    flush_tlb();
+    memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4000); // copy current to storage
     
     terminal_idx = t_idx;
     
-    memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000);
-    video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
+    memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000); // copy storage to current
+    video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB; // link page
     flush_tlb();
     
-    //screen save stuff
-    // video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
-    // flush_tlb();
-    // if(get_child_pcb(terminal_idx)->screen_flag_set == 1) 
-    //     *(get_child_pcb(terminal_idx)->user_screen_start) = VIDEO + FOUR_KB * (terminal_idx + 1);
-    // memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4096);
-    // terminal_idx = t_idx;
-    
-    // // video_memory_page_table[VIDEO_ADDRESS / FOUR_KB].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
-    // memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4096);
-    // video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
-    // flush_tlb();
-    
-    // set_vid_mem(terminal_idx, terminal_idx);
-    
-    set_vid_mem(terminal_idx);
-
-    // if (terminal_pids[terminal_idx] == -1) {
-    //     clear_terminal(terminal_idx);
-    //     new_terminal_flag = 1; // need to set up new terminal
-    // }
-
-    // send_eoi(1);
-    // sti();
+    set_vid_mem(terminal_idx); // update cursor this function is stupid
 }
 
+/* init_terminals_vidmaps
+ * Inputs: NA
+ * Return Value: none
+ * Function: sets up user vidmap pages*/
 void init_terminals_vidmaps()
 {
     // 8kb to 20kb is terminal vmem
-    // set_vid_mem(0, 0);
-    // video_memory_page_table[    (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = 1 + (VIDEO_ADDRESS / FOUR_KB);
     video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].p = 1; 
     video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].us = 1;
-    video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = VIDEO/FOUR_KB; //1 + (VIDEO_ADDRESS / FOUR_KB);
+    video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = VIDEO/FOUR_KB; 
     video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].p = 1; 
     video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].us = 1;
     video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = 2 + (VIDEO_ADDRESS / FOUR_KB);
@@ -265,11 +262,19 @@ void init_terminals_vidmaps()
     flush_tlb();
 }
 
+/* get_terminal_arr
+ * Inputs: idx
+ * Return Value: pid
+ * Function: returns terminal pid*/
 int get_terminal_arr(int index) {
     if (index < 0 || index > 2) return -1;
     return terminal_pids[index];
 }
 
+/* set_terminal_arr
+ * Inputs: idx, pid val
+ * Return Value: none
+ * Function: sets terminal pid*/
 void set_terminal_arr(int index, int val) {
     terminal_pids[index] = val;
 }

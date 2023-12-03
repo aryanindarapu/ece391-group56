@@ -84,6 +84,7 @@ pcb_t * get_child_pcb(int32_t terminal_num)
     return curr_pcb;
 }
 
+// TODO: FINISH THIS ARY, I LOVE YOU <3
 int is_pcb_available()
 {
     int i;

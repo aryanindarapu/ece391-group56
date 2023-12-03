@@ -24,7 +24,7 @@
 
 extern void system_call_handler();
 
-/* DONT NEED TO IMPLEMENT YET */
+/* file operation functions */
 int32_t halt (uint8_t status);
 int32_t execute (const uint8_t* command);
 
@@ -33,7 +33,6 @@ int32_t close (uint32_t fd);
 int32_t read (uint32_t fd, void* buf, uint32_t nbytes);
 int32_t write (uint32_t fd, const void* buf, uint32_t nbytes);
 
-/* DONT NEED TO IMPLEMENT YET */
 int32_t getargs (uint8_t* buf, uint32_t nbytes);
 int32_t vidmap (uint8_t** screen_start);
 

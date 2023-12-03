@@ -168,12 +168,7 @@ void entry(unsigned long magic, unsigned long addr) {
     clear_terminal(1);
     clear_terminal(2);
     i8259_init();
-    // set_vid_mem(0);
-    // clear_terminal(0);
-    // new_terminal_flag = 1;
     sti();
-    // init_shells();
-    // execute((const uint8_t *) "shell");
     
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
@@ -184,8 +179,6 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Run tests */
     //launch_tests();
 #endif
-    /* Execute the first program ("shell") ... */
-    //execute((const uint8_t *) "shell");
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
 }

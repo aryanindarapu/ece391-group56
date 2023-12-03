@@ -1,6 +1,44 @@
-- fish starts flashing when switching between terminals
-- kernel esp and ebp are 0 when we initialize shell
+BUG LOG
 
+**************************************** CHECKPOINT 5 ****************************************
+-----------------
+FILE/FUNCTION: pit_handler
+BUG: crash on first three shells
+DIFFICULTY: epic, 50-eceber hours
+SOLUTION: Two main problems were with saving ebp and esp before switching tasks. The first we did not save on normal switches, causing crashing randomly. 
+The other problem was that we did not save the ebp and esp before executing, so it was wrong for the first three shells.
+-----------------
+FILE/FUNCTION: terminal_switch
+BUG: fish flashing when switching terminal
+DIFFICULTY: 2 hrs
+SOLUTION: our terminal switch was not correctly switching video memory in the table, causing it to flicker randomly, cuz it was overwriting
+-----------------
+FILE/FUNCTION: pit_handler
+BUG: esp, ebp are stuck on 0
+DIFFICULTY: 1 hrs
+SOLUTION: we were using the wrong variable
+-----------------
+FILE/FUNCTION: lib.c, putc
+BUG: everything is printing everywhere
+DIFFICULTY: 6 hrs
+SOLUTION: our putc function was not writing to the correct video_mem, causing overlap between programs and general problems, to solve it we rewrote the lib fncs to 
+write to a specific terminal
+-----------------
+FILE/FUNCTION: 
+BUG:
+DIFFICULTY: 
+SOLUTION:
+-----------------
+FILE/FUNCTION:
+BUG:
+DIFFICULTY: 
+SOLUTION:
+-----------------
+FILE/FUNCTION:
+BUG:
+DIFFICULTY: 
+SOLUTION:
+-----------------
 **************************************** CHECKPOINT 4 ****************************************
 -----------------
 FILE/FUNCTION: read_dentry_by_name
@@ -127,10 +165,3 @@ SOLUTION: We forgot to actually initialize the idt itself in the kernel.c file, 
 DIFFICULTY: 2 hours
 -----------------
 
-**************************************** CHECKPOINT 5 ****************************************
------------------
-FILE/FUNCTION:
-BUG:
-DIFFICULTY: 
-SOLUTION:
------------------

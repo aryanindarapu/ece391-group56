@@ -34,6 +34,10 @@ void clear(void) {
     update_cursor();
 }
 
+/* void clear_terminal
+ * Inputs: term
+ * Return Value: none
+ * Function: clears vidmem to given terminal */
 void clear_terminal(int term) {
     int32_t i;
     int temp_att = 0xCF & (0xAF<<term);
@@ -51,34 +55,13 @@ void clear_terminal(int term) {
 }
 
 
-
+/* void set_vid_mem
+ * Inputs: t
+ * Return Value: na
+ * Function: updates cursor for terminal */
 void set_vid_mem(int t)
 {
-    // int prev_x = get_saved_screen_x(terminal_idx);
-    // int prev_y = get_saved_screen_y(terminal_idx);
-    
-    // ATTRIB = 0xCF & (0xAF<<terminal_idx);
-    // video_mem = (char *)(VIDEO + FOUR_KB * (terminal_idx+1));
-    // screen_x = get_saved_screen_x(terminal_idx);
-    // screen_y = get_saved_screen_y(terminal_idx);
-    // curr_terminal_vmem = terminal_idx;
-    if(t == get_terminal_idx()) update_cursor_terminal(terminal_screen_x[t], terminal_screen_y[t]);
-
-    // set_saved_screen_x(prev_terminal_idx, get_saved_screen_x(prev_terminal_idx));
-    // set_saved_screen_y(prev_terminal_idx, get_saved_screen_y(prev_terminal_idx));
-    // prev_terminal_idx = terminal_idx;
-    // ATTRIB = 0xCF & (0xAF<<terminal_idx);
-    // video_mem = (char *)(VIDEO + FOUR_KB * (terminal_idx+1));
-    // screen_x = get_saved_screen_x(terminal_idx);
-    // screen_y = get_saved_screen_y(terminal_idx);
-    // update_cursor();
-
-    // video_mem = (char *)(VIDEO + FOUR_KB * (terminal_idx+1));
-    // if(terminal_idx == active_terminal)
-    //     video_mem = VIDEO;
-    // else
-    //     video_mem = (char *)(VIDEO + FOUR_KB * (terminal_idx+1));
-    
+    if(t == get_terminal_idx()) update_cursor_terminal(terminal_screen_x[t], terminal_screen_y[t]);    
 }
 
 int get_screen_x(){return screen_x;};
@@ -100,9 +83,7 @@ void update_attrib() {
  * Function: deletes the previous character if any and updates screen pos */
 void backspace(int term)
 {
-    // int temp_att = 0xCF & (0xAF<<term);
-    // char* temp_vmem = (char *)(VIDEO + FOUR_KB * (term+1));
-
+    
     if(terminal_screen_x[term] == 0)
     {
         if(terminal_screen_y[term] == 0) return;
@@ -110,8 +91,7 @@ void backspace(int term)
         terminal_screen_y[term]--;
     }
     terminal_screen_x[term] --;
-    // set_saved_screen_x(term, terminal_screen_x[term]);
-    // set_saved_screen_y(term, terminal_screen_y[term]);
+    
     putc_terminal(' ', term);
     if(terminal_screen_x[term] == 0)
     {
@@ -119,66 +99,9 @@ void backspace(int term)
         terminal_screen_y[term]--;
     }
     terminal_screen_x[term] --;
-    // set_saved_screen_x(term, terminal_screen_x[term]);
-    // set_saved_screen_y(term, terminal_screen_y[term]);
-
+   
     if(get_terminal_idx() == term) 
         update_cursor_terminal(terminal_screen_x[term], terminal_screen_y[term]);
-
-    // if((get_terminal_idx() == get_schedule_idx()))
-    // {
-    //     if(screen_x == 0)
-    //     {
-    //         if(screen_y == 0) return;
-    //         screen_x = NUM_COLS;
-    //         screen_y--;
-    //     }
-    //     screen_x --;
-    //     putc_kbd(' ');
-    //     if(screen_x == 0)
-    //     {
-    //         screen_x = NUM_COLS;
-    //         screen_y--;
-    //     }
-    //     screen_x --;
-    //     update_cursor();
-    //     return;
-    // }
-    // int temp_att = ATTRIB;
-    // char* temp_vmem = video_mem;
-    // int save_screen_x = screen_x;
-    // int save_screen_y = screen_y;
-    // int sched_idx = get_terminal_idx();
-    // screen_x = get_saved_screen_x(sched_idx);
-    // screen_y = get_saved_screen_y(sched_idx);
-
-    // ATTRIB = 0xCF & (0xAF<<sched_idx);
-    // video_mem = (char *)(VIDEO + FOUR_KB * (sched_idx+1));
-
-    // if(screen_x == 0)
-    // {
-    //     if(screen_y == 0) return;
-    //     screen_x = NUM_COLS;
-    //     screen_y--;
-    // }
-    // screen_x --;
-    // putc_kbd(' ');
-    // if(screen_x == 0)
-    // {
-    //     screen_x = NUM_COLS;
-    //     screen_y--;
-    // }
-    // screen_x --;
-    // update_cursor();
-    
-    // set_saved_screen_x(sched_idx, screen_x);
-    // set_saved_screen_y(sched_idx, screen_y);
-    // screen_x = save_screen_x;
-    // screen_y = save_screen_y;
-    // ATTRIB = temp_att;
-    // video_mem = temp_vmem;
-
-    
 
 };
 
@@ -335,6 +258,10 @@ void move_screen_up(void) {
     sti();
 }
 
+/* void move_screen_up(term);
+ * Inputs: term
+ * Return Value: none
+ * Function: moves the screen up by one line for multi term*/
 void move_screen_up_terminal(int term)
 {
     int32_t i;
@@ -370,51 +297,13 @@ void putc(uint8_t c) {
         screen_y=NUM_ROWS-1;
     }
 
-    if(curr_terminal_vmem == get_terminal_idx()) update_cursor();
-    // if((get_terminal_idx() == get_schedule_idx()))
-    // {
-    //     putc_kbd(c);
-    //     return;
-    // }
-    // int temp_att = ATTRIB;
-    // char* temp_vmem = video_mem;
-    // int save_screen_x = screen_x;
-    // int save_screen_y = screen_y;
-    // screen_x = get_saved_screen_x();
-    // screen_y = get_saved_screen_y();
-
-    // ATTRIB = 0xCF & (0xAF<<get_terminal_idx());
-    // video_mem = (char *)(VIDEO + FOUR_KB * (get_terminal_idx()+1));
-
-    // if (c == '\n' || c == '\r') {
-    //     screen_y++;
-    //     screen_x = 0;
-    // } else if (c == '\0') {
-    //     return;
-    // } else {
-    //     *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
-    //     *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
-    //     screen_x++;
-    //     screen_y = (screen_y + (screen_x / NUM_COLS)); // % NUM_ROWS;
-    //     screen_x %= NUM_COLS;
-    // }
-
-    // if(screen_y == NUM_ROWS)
-    // {
-    //     move_screen_up();
-    //     screen_y=NUM_ROWS-1;
-    // }
-    // update_cursor();
-
-    // set_saved_screen_x(screen_x);
-    // set_saved_screen_y(screen_y);
-    // screen_x = save_screen_x;
-    // screen_y = save_screen_y;
-    // ATTRIB = temp_att;
-    // video_mem = temp_vmem;
-    
+    if(curr_terminal_vmem == get_terminal_idx()) update_cursor();    
 }
 
+/* void putc(uint8_t c, term);
+ * Inputs: uint_8* c = character to print, term to print to
+ * Return Value: void
+ *  Function: Output a character to the given term */
 void putc_terminal(uint8_t c, int term)
 {
     int temp_att = 0xCF & (0xAF<<term);
@@ -441,14 +330,11 @@ void putc_terminal(uint8_t c, int term)
         terminal_screen_y[term]=NUM_ROWS-1;
     }
 
-    
-    // set_saved_screen_x(term, terminal_screen_x[term]);
-    // set_saved_screen_y(term, terminal_screen_y[term]);
-
     if(get_terminal_idx() == term) 
         update_cursor_terminal(terminal_screen_x[term], terminal_screen_y[term]);
 }
 
+/* useless */
 void putc_kbd(uint8_t c, int term) {
     int tterm = term;
     int temp_att = 0xCF & (0xAF<<tterm);
@@ -483,39 +369,6 @@ void putc_kbd(uint8_t c, int term) {
         screen_y = temp_screen_y;
         update_cursor();
     }
-    // int sched_idx = get_terminal_idx();
-    // screen_x = get_saved_screen_x(sched_idx);
-    // screen_y = get_saved_screen_y(sched_idx);
-
-    // ATTRIB = 0xCF & (0xAF<<sched_idx);
-    // video_mem = (char *)(VIDEO + FOUR_KB * (sched_idx+1));
-
-    // if (c == '\n' || c == '\r') {
-    //     screen_y++;
-    //     screen_x = 0;
-    // } else if (c == '\0') {
-    //     return;
-    // } else {
-    //     *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
-    //     *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
-    //     screen_x++;
-    //     screen_y = (screen_y + (screen_x / NUM_COLS)); // % NUM_ROWS;
-    //     screen_x %= NUM_COLS;
-    // }
-
-    // if(screen_y == NUM_ROWS)
-    // {
-    //     move_screen_up();
-    //     screen_y=NUM_ROWS-1;
-    // }
-    // update_cursor();
-
-    // set_saved_screen_x(sched_idx, screen_x);
-    // set_saved_screen_y(sched_idx, screen_y);
-    // screen_x = save_screen_x;
-    // screen_y = save_screen_y;
-    // ATTRIB = temp_att;
-    // video_mem = temp_vmem;
 }
 
 /* update_cursor
@@ -531,6 +384,10 @@ void update_cursor() {
 	outb((uint8_t) ((pos >> 8) & 0xFF), 0x3D5);
 }
 
+/* update_cursor
+ * Inputs: x,y
+ * Return Value: None
+ * Function: updates the pos of the cursor to screen x and y */
 void update_cursor_terminal(int x, int y)
 {
     uint16_t pos = y * NUM_COLS + x;

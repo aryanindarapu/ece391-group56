@@ -79,16 +79,7 @@ int32_t execute (const uint8_t* command) {
     new_pcb->pid = new_pid_idx;
     new_pcb->child_pid = -1;  
 
-    /* Set up parent and child pointers accordingly */
-    // TODO: change this when dynamically loading shells
-    // if (new_pid_idx == 0) { // i.e. the PCB is for the initial shell
-    //     new_pcb->parent_pid = -1;
-    // } else {
-    //     new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
-    //     get_curr_pcb_ptr()->child_pid = new_pid_idx;
-    // }
-
-
+    // setup ops table
     new_pcb->file_desc_arr[0].ops_ptr = stdin_ops_table;
     new_pcb->file_desc_arr[0].inode = -1;
     new_pcb->file_desc_arr[0].flags = 1;
@@ -122,9 +113,7 @@ int32_t execute (const uint8_t* command) {
     /* push the user eip and esp to the cur pcb so we can restore context */
     new_pcb->user_esp = user_esp;
     new_pcb->user_eip = user_eip;
-    // new_pcb->kernel_esp = (uint32_t) new_pcb + EIGHT_KB - STACK_FENCE_SIZE;
-    // new_pcb->kernel_ebp = (uint32_t) new_pcb + EIGHT_KB - STACK_FENCE_SIZE;
-
+    
     // store kernel esp and ebp in the pcb
     asm volatile (
         "movl %%esp, %%eax   ;\
@@ -135,12 +124,12 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
     
+    // check for first three shell inits
     if (new_terminal_flag) {
-        new_pcb->parent_pid = -1;
+        new_pcb->parent_pid = -1; //set as base process
         new_terminal_flag = 0; // reset flag
         set_terminal_arr(new_pid_idx, new_pid_idx);
         terminal_switch(new_pid_idx);
-        clear_terminal(new_pid_idx);
         send_eoi(0);
     } else {
         new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
@@ -148,19 +137,8 @@ int32_t execute (const uint8_t* command) {
     }
 
     int32_t output;
-    /* enable interrupts*/
-    // sti();
-    // stack swap
-    // asm volatile (
-    //     "movl %%eax, %%esp   ;\
-    //      movl %%ebx, %%ebp   ;\
-    //     "
-    //     :
-    //     : "a" (new_pcb->kernel_esp), "b" (new_pcb->kernel_ebp)
-    //     : "memory"
-    // );
-    // sets up DS, ESP, EFLAGS, CS, EIP onto stack for context switch
-    
+
+    //update kernel esp ebp in pcb 
     asm volatile (
         "movl %%esp, %0   ;\
          movl %%ebp, %1   ;\
@@ -170,6 +148,7 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
 
+    // set up iret context and jump process
     asm volatile ("\
         andl $0x00FF, %%eax     ;\
         movw %%ax, %%ds         ;\
@@ -188,6 +167,7 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
 
+    // get back here from halt
     asm volatile ("\
         ret_from_halt:     ;\
         movl %%eax, %0     ;\
@@ -202,7 +182,6 @@ int32_t execute (const uint8_t* command) {
         return EXCEPTION_OCCURRED_VAL; 
     }
 
-    // sti();
     return output;
 }
 
@@ -453,14 +432,7 @@ int32_t vidmap (uint8_t** screen_start) {
 
     if ((uint32_t) screen_start < USER_MEM_VIRTUAL_ADDR || (uint32_t) screen_start > (USER_MEM_VIRTUAL_ADDR + FOUR_MB)) return -1;
 
-    // set up page as 4kb pages
-    // video_memory_page_table[USER_VIDEO_MEM_INDEX].p = 1; 
-    // video_memory_page_table[USER_VIDEO_MEM_INDEX].us = 1;
-    // video_memory_page_table[USER_VIDEO_MEM_INDEX].base_31_12 = ; // (1 + get_terminal_idx());
-    // flush_tlb();
-    //(uint8_t *) (VIDEO + FOUR_KB * (1 + terminal_idx));  //
-    // get_curr_pcb_ptr()->user_screen_start = screen_start;
-    // get_curr_pcb_ptr()->screen_flag_set = 1;
+    // set screenstart to the process's terminal
     *screen_start = (uint8_t *) (VIDEO + FOUR_KB * (1 + get_schedule_idx())); 
     return 0;
 }

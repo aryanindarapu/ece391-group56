@@ -13,8 +13,14 @@ int pit_handler();//int eip, int esp);
 
 // Intializes the pit on the PIC
 void init_pit();
+
+// Grabs the scheduled index
 int get_schedule_idx();
+
+// Sets the scheduling index
 void set_schedule_idx(int index);
+
+// Check to see if our terminals are done being set up
 int is_terminals_initialized();
 
 #endif

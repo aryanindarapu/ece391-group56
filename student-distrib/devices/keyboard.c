@@ -163,12 +163,9 @@ void keyboard_driver() {
             if(get_buffer_fill() == 0) return;
             // backspace();
             terminal_backspace();
-            //printf("%d",get_buffer_fill());
             return;
         case ENTER: //enter
-            //if(get_buffer_fill() == 128) return;
             putc_terminal('\n', term);
-            //printf("\n");//printf("\n[Terminal]$ ");
             terminal_enter();
             return;
         case TAB:
@@ -177,10 +174,6 @@ void keyboard_driver() {
             putc_terminal(' ', term);
             putc_terminal(' ', term);
             putc_terminal(' ', term);
-            // putc_kbd(' ', get_terminal_idx()); // put 4 spaces for tab
-            // putc_kbd(' ', get_terminal_idx());
-            // putc_kbd(' ', get_terminal_idx());
-            // putc_kbd(' ', get_terminal_idx());
             write_to_terminal(keyboard_map[keycode]);
             return;
         default:
@@ -205,49 +198,34 @@ void keyboard_driver() {
                     {
                         putc_terminal(shift_keyboard_map[keycode], term);
                         write_to_terminal(shift_keyboard_map[keycode]);
-                        //line_buffer[buffer_idx] = shift_keyboard_map[keycode];
-                        //buffer_idx++;
                     }    
                     
                     else
                     {
                         putc_terminal(char_key, term);
                         write_to_terminal(char_key);
-                        // line_buffer[buffer_idx] = char_key;
-                        // buffer_idx++;
                     }    
                         
                     
-                    
+                // Shift key pressed update data status
                 } else if (special_key_flags[SHIFT_INDEX]) {
                     putc_terminal(shift_keyboard_map[keycode], term);
                     write_to_terminal(shift_keyboard_map[keycode]);
-                    // line_buffer[buffer_idx] = shift_keyboard_map[keycode];
-                    // buffer_idx++;
                 }
                 else
                 {
                     putc_terminal(keyboard_map[keycode], term);
                     write_to_terminal(keyboard_map[keycode]);
-                    // line_buffer[buffer_idx] = keyboard_map[keycode];
-                    // buffer_idx++;
                 }
 
             }
             else if(keycode > 58 && keycode < 62){
                 // quick test to detect alt + Function key
                 if (special_key_flags[ALT_INDEX]){
+                    // Setup terminal switch for keyboard input
                     terminal_switch(keycode - 59);
-                    //printf("Switched to terminal ");
-                    //putc_kbd(keyboard_map[2] + keycode - 59);
-                    //write_to_terminal(keyboard_map[2] + keycode - 59);
                 }
             }
-
-            // if(buffer_idx == 80)
-            // {
-            //     printf("\n");
-            // }
                 
             break;
     }
