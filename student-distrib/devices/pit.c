@@ -34,7 +34,7 @@ void init_pit() {
     outb(0x36, PIT_COMMAND);
 
     // Need to set the rate for the pit (2^17 ~= 100ms between each IRQ)
-    int count = 30000;
+    int count = 100;
 
     outb(count & 0xFF, PIT_CHANNEL0_DATA);
     outb(count >> 8, PIT_CHANNEL0_DATA);
@@ -96,17 +96,17 @@ int pit_handler () {
         // send_eoi(0);
 
         schedule_index = get_terminal_idx();
-        temp_terminal_flag = 0;
-
-        // asm volatile (
-        //     "movl %%esp, %0   ;\
-        //     movl %%ebp, %1   ;\
-        //     "
-        //     : "=r" (get_pcb_ptr(get_terminal_arr(schedule_index))->kernel_esp), "=r" (get_pcb_ptr(get_terminal_arr(schedule_index))->kernel_ebp)
-        //     :
-        //     : "memory"
-        // );
+        asm volatile (
+        "movl %%esp, %0   ;\
+         movl %%ebp, %1   ;\
+        "
+        : "=r" (get_curr_pcb_ptr()->kernel_esp), "=r" (get_curr_pcb_ptr()->kernel_ebp)
+        :
+        : "memory"
+        );
         execute((const uint8_t *) "shell");
+
+        return 0;
     }
 
     asm volatile (

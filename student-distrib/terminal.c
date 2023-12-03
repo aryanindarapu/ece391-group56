@@ -130,9 +130,10 @@ int32_t terminal_close(int32_t fd) {
 int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // NOTE: this is a blocking call, so it can't be interrupted
     // printf("ACCESSED TERMINAL READ");
-    sti();
+    //sti();
     first_shell_started = 1;
     int term = terminal_idx;
+    sti();
     while (get_schedule_idx() != terminal_idx || enter_flag_pressed[terminal_idx] != 1){};
     
     // while (term !=get_schedule_idx()){};
@@ -208,14 +209,28 @@ void terminal_switch (int t_idx)
     // save_screen_x[terminal_idx] = get_screen_x();
     // save_screen_y[terminal_idx] = get_screen_y();
 
-    video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
-    memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4000);
+    if(terminal_pids[terminal_idx] != -1) {
+        video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
+        memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4000);
     
-    terminal_idx = t_idx;
+        terminal_idx = t_idx;
+        flush_tlb();
     
-    memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000);
-    video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
-    flush_tlb();
+        memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000);
+        video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
+        flush_tlb();
+    }
+    else {
+        terminal_idx = t_idx;
+        flush_tlb();
+    
+        memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000);
+        video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
+        flush_tlb();
+    }
+
+    // TODO: Potential areas of page faulting
+    
     
     //screen save stuff
     // video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx;
@@ -232,11 +247,14 @@ void terminal_switch (int t_idx)
     
     // set_vid_mem(terminal_idx, terminal_idx);
     
-    set_vid_mem(terminal_idx);
+   
 
     if (terminal_pids[terminal_idx] == -1) {
         clear_terminal(terminal_idx);
         new_terminal_flag = 1; // need to set up new terminal
+    }
+    else {
+        set_vid_mem(terminal_idx);
     }
 
     // send_eoi(1);
