@@ -8,15 +8,15 @@ IMPORTANT: What is important is that if register C is not read after an IRQ 8, t
 
 */
 
+#include "rtc.h"
 #include "i8259.h"
 #include "../lib.h"
 #include "../x86_desc.h"
-#include "rtc.h"
 #include "../syscall_helpers.h"
 
 
-volatile int clock_count;
-static int wait_count;
+volatile int clock_count[3];
+static int wait_count[3];
 
 /*
  *   init_rtc
@@ -51,8 +51,12 @@ void init_rtc() {
     enable_irq(2);
     enable_irq(8);
 
-    clock_count = 0;
-    wait_count = 0;
+    clock_count[0] = 0;
+    clock_count[1] = 0;
+    clock_count[2] = 0;
+    wait_count[0] = 0;
+    wait_count[1] = 0;
+    wait_count[2] = 0;
 }
 
 /*
@@ -66,7 +70,9 @@ void init_rtc() {
 void rtc_handler() {
     //printf("%d\n", clock_count);
     rtc_int_flag = 1;
-    clock_count++;
+    clock_count[0]++;
+    clock_count[1]++;
+    clock_count[2]++;
     
     // if (clock_count == freq)
     // {
@@ -82,8 +88,8 @@ void rtc_handler() {
     outb(0x0C, RTC_PORT_COMMAND);	// select register C
     inb(RTC_PORT_DATA);		        // just throw away contents
     
-    send_eoi(8);
     rtc_int_flag = 0;
+    send_eoi(8);
 }
 
 /* rtc_open
@@ -91,8 +97,10 @@ void rtc_handler() {
  * Return Value: 0
  * Function: sets starting settings */
 int32_t rtc_open(const uint8_t * filename) {
-    wait_count = RTC_MAX_FREQ / RTC_INIT_FREQ;
-    clock_count = 0;
+    cli();
+    wait_count[get_schedule_idx()] = RTC_MAX_FREQ / RTC_INIT_FREQ;
+    clock_count[get_schedule_idx()] = 0;
+    sti();
     // copy stuff and set up dentry for rtc.
     return 0;
 }
@@ -106,8 +114,12 @@ int32_t rtc_open(const uint8_t * filename) {
  *   SIDE EFFECTS: modifies the file descriptor array
  */
 int32_t rtc_close(int32_t fd) {
+    cli();
     pcb_t * pcb = get_curr_pcb_ptr();
     pcb->file_desc_arr[fd].flags = 0;
+    wait_count[get_schedule_idx()] = 0;
+    clock_count[get_schedule_idx()] = 0;
+    sti();
     return 0;
 }
 
@@ -118,9 +130,9 @@ int32_t rtc_close(int32_t fd) {
  * Function: holds and returns when an RTC interupt occurs */
 int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
     sti();
-    while (clock_count <= wait_count); // wait to get response
+    while (clock_count[get_schedule_idx()] <= wait_count[get_schedule_idx()]); // wait to get response
     cli();
-    clock_count = 0; //reset
+    clock_count[get_schedule_idx()] = 0; //reset
     sti();
     while (rtc_int_flag != 0); //wait until not interupting to return
     
@@ -132,13 +144,16 @@ int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
  * Return Value: 0 for sucess -1 for fail
  * Function: writes the input frequency from buf, to set the frequency of RTC interupts */
 int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
+    cli();
     int freq = *(const int *)buf; //load freq
+    // freq *= 8;
     if (freq < 2 || freq > 1024) return -1; // param check
     if (freq && (! (freq & (freq-1)))) { //check power of 2
-        wait_count = RTC_MAX_FREQ/freq; //update settings
-        clock_count = 0;
+        wait_count[get_schedule_idx()] = RTC_MAX_FREQ/freq; //update settings
+        clock_count[get_schedule_idx()] = 0;
         return 0;
     }
+    sti();
     return -1;
 };
 

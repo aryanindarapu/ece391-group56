@@ -114,11 +114,7 @@ int32_t dir_close(int32_t fd) {
  *   SIDE EFFECTS: none
  */
 int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
-    /* Directory read is really what separates file from dir operations 
-        - We need to iterate through the existing dentrys and return them
-          the buffer (ls)
-    */
-    /* 
+   /* 
         Note that we don't care what fd or nbytes are: we already know that dir_read got called which means
         syscall operations table is set to the dir_ops_ptr for this entry, as for nbytes we need to display 
         all of the entry names anyway we nbytes can't be specified by the caller
@@ -133,7 +129,7 @@ int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
 
     /* fill out the buffer based given the number of dentrys from boot_block */
     dentry_t cur_file = boot_block_ptr->dir_entries[pcb->file_desc_arr[fd].file_pos];
-    if (nbytes > FILENAME_SIZE) return -1;
+
     int i;
     for (i = 0; i < nbytes; i++) {
         ((char *) buf)[i] = cur_file.file_name[i];

@@ -11,10 +11,9 @@
 #include "paging.h"
 #include "file_system_driver.h"
 #include "syscall.h"
+#include "terminal.h"
 
 #include "devices/i8259.h"
-#include "devices/keyboard.h"
-#include "devices/rtc.h"
 
 
 #define RUN_TESTS
@@ -22,6 +21,9 @@
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags, bit)   ((flags) & (1 << (bit)))
+
+extern int new_terminal_flag;
+
 
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
@@ -158,24 +160,24 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
-    i8259_init();
-    init_keyboard();
-    init_rtc();
     init_paging();
     init_file_system();
+    init_terminals_vidmaps();
+    clear_terminal(0);
+    clear_terminal(1);
+    clear_terminal(2);
+    i8259_init();
+    sti();
     
-    clear();
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */   
-    sti();
+    
 #ifdef RUN_TESTS
     /* Run tests */
-    launch_tests();
+    // launch_tests();
 #endif
-    /* Execute the first program ("shell") ... */
-    execute((const uint8_t *) "shell");
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
 }

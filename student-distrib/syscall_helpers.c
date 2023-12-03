@@ -154,3 +154,39 @@ void setup_user_page(uint32_t base_31_12) {
     page_dir[USER_MEM_VIRTUAL_ADDR / FOUR_MB] = new_page_dir;
     flush_tlb();
 }
+
+/* 
+ * get_child_pcb
+ *   DESCRIPTION: Gets the child pcb pointer of the given terminal number
+ *   INPUTS: terminal_num - terminal number/index
+ *   OUTPUTS: none
+ *   RETURN VALUE: pcb pointer to end of linked list
+ *   SIDE EFFECTS: none
+*/
+pcb_t * get_child_pcb(int32_t terminal_num)  {
+    pcb_t * curr_pcb = get_pcb_ptr(get_terminal_arr(terminal_num));
+    
+    while (curr_pcb->child_pid != -1) {
+        curr_pcb = get_pcb_ptr(curr_pcb->child_pid);
+    }
+
+    return curr_pcb;
+}
+
+/* 
+ * is_pcb_available
+ *   DESCRIPTION: Determines if a PCB is available, i.e. a process can still be opened
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: 1 if PCB exists, 0 else
+ *   SIDE EFFECTS: none
+*/
+int is_pcb_available() {
+    int i;
+    for(i = 0; i < MAX_NUM_PROGRAMS; i++) {
+        if (pcb_flags[i] == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}

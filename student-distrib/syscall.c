@@ -5,6 +5,11 @@
 #include "lib.h"
 #include "x86_desc.h"
 #include "exceptions.h"
+#include "terminal.h"
+#include "devices/i8259.h"
+
+extern int terminal_idx;
+extern int new_terminal_flag;
 
 /* 
  * execute
@@ -15,7 +20,9 @@
  *   SIDE EFFECTS: sets up user page, changes tss, and initializes a new pcb
  */
 int32_t execute (const uint8_t* command) {
-    if (command == NULL) return -1;
+    if(!is_pcb_available() || command == NULL) return -1;
+    // cli();
+
     int i;
     
     uint8_t filename[128];
@@ -64,12 +71,14 @@ int32_t execute (const uint8_t* command) {
 
     // Set commands
     int offset = i;
-    for (; i < LINE_BUFFER_SIZE; i++) {
+    for (; i < strlen((const int8_t *) command); i++) {
         new_pcb->commands[i - offset] = command[i];
     }
 
-    new_pcb->pid = new_pid_idx; 
+    new_pcb->pid = new_pid_idx;
+    new_pcb->child_pid = -1;  
 
+    // setup ops table
     new_pcb->file_desc_arr[0].ops_ptr = stdin_ops_table;
     new_pcb->file_desc_arr[0].inode = -1;
     new_pcb->file_desc_arr[0].flags = 1;
@@ -79,12 +88,6 @@ int32_t execute (const uint8_t* command) {
     new_pcb->file_desc_arr[1].inode = -1;
     new_pcb->file_desc_arr[1].flags = 1;
     new_pcb->file_desc_arr[1].file_pos = 0;
-
-    if (new_pid_idx == 0) { // i.e. the PCB is for the initial shell
-        new_pcb->parent_pid = -1;
-    } else {
-        new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
-    }
 
     /* Set up 4MB page for user program */
     setup_user_page(((new_pid_idx * FOUR_MB) + EIGHT_MB) / FOUR_KB);
@@ -113,31 +116,72 @@ int32_t execute (const uint8_t* command) {
         "movl %%esp, %%eax   ;\
          movl %%ebp, %%ebx   ;\
         "
-        : "=a" (new_pcb->kernel_esp), "=b" (new_pcb->kernel_ebp)
+        : "=a" (new_pcb->base_esp), "=b" (new_pcb->base_ebp)
         :
         : "memory"
     );
 
-    int32_t output;
+    asm volatile (
+        "movl %%esp, %%eax   ;\
+         movl %%ebp, %%ebx   ;\
+        "
+        : "=a" (new_pcb->kernel_esp), "=b" (new_pcb->kernel_ebp)
+        :
+        : "memory"
+    );
     
-    /* enable interrupts*/
-    // sets up DS, ESP, EFLAGS, CS, EIP onto stack for context switch
+    // check for first three shell inits
+    if (new_terminal_flag) {
+        new_pcb->parent_pid = -1; //set as base process
+        new_terminal_flag = 0; // reset flag
+        set_terminal_arr(new_pid_idx, new_pid_idx);
+        terminal_switch(new_pid_idx);
+        send_eoi(0);
+    } else {
+        new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
+        get_curr_pcb_ptr()->child_pid = new_pid_idx;
+    }
+
+    int32_t output;
+
+    //update kernel esp ebp in pcb 
+    asm volatile (
+        "movl %%esp, %0   ;\
+         movl %%ebp, %1   ;\
+        "
+        : "=r" (new_pcb->kernel_esp), "=r" (new_pcb->kernel_ebp)
+        :
+        : "memory"
+    );
+
+    // set up iret context and jump process
     asm volatile ("\
         andl $0x00FF, %%eax     ;\
         movw %%ax, %%ds         ;\
         pushl %%eax             ;\
         pushl %%ebx             ;\
         pushfl                  ;\
+        popl %%eax              ;\
+        orl $0x200, %%eax       ;\
+        pushl %%eax             ;\
         pushl %%ecx             ;\
         pushl %%edx             ;\
         iret                    ;\
         "
-        : "=a" (output)
+        : 
         : "a" (USER_DS), "b" (user_esp), "c" (USER_CS), "d" (user_eip) 
         : "memory"
     );
 
-    asm volatile("ret_from_halt: ");
+    // get back here from halt
+    asm volatile ("\
+        ret_from_halt:     ;\
+        movl %%eax, %0     ;\
+        "
+        : "=r" (output)
+        : 
+        : "memory"
+    );
 
     if (exception_raised_flag) {
         exception_raised_flag = 0;
@@ -157,10 +201,12 @@ int32_t execute (const uint8_t* command) {
  */
 int32_t halt (uint8_t status) {
     // When closing, do I need to check if current PCB has any child PCBs?
+    // cli();
     pcb_t * pcb = get_curr_pcb_ptr();
-
     /* push user context if its base shell since we have no processes left */
-    if (pcb->pid == 0) {
+    // TODO: change this when dynamically loading shells
+    // Check if the pid is in the current active terminals array
+    if (pcb->pid == get_terminal_arr(0) || pcb->pid == get_terminal_arr(1) || pcb->pid == get_terminal_arr(2)) {
         // recover context from halt(esp, eip, USER_CS, USER_DS);
         // 0x00FF - clears the bottom 8 bytes of the return value
         // 0x0200 - turns on bit of EFLAGS
@@ -171,6 +217,9 @@ int32_t halt (uint8_t status) {
             pushl %%eax             ;\
             pushl %%ebx             ;\
             pushfl                  ;\
+            popl %%eax              ;\
+            orl $0x200, %%eax       ;\
+            pushl %%eax             ;\
             pushl %%ecx             ;\
             pushl %%edx             ;\
             iret                    ;\
@@ -184,24 +233,34 @@ int32_t halt (uint8_t status) {
     /* get pcb from cur pcbs parent PID*/
     pcb_t * parent_pcb = get_pcb_ptr(pcb->parent_pid);
 
-    // release FD array for this pcb
+    parent_pcb->child_pid = -1; // removes the child process
+    // clear old commands
     int i;
+    for (i = 0; i < LINE_BUFFER_SIZE; i++) {
+        pcb->commands[i] = '\0';
+    }
+
+    // release FD array for this pcb
     for (i = 0; i < MAX_FILE_DESC; i++) {
+        if (pcb->file_desc_arr[i].flags) {
+            pcb->file_desc_arr->ops_ptr.close(i);
+        }
+
         pcb->file_desc_arr[i].flags = 0;
     }
 
-    // release 
 
     /* remove current pcb from present flags */
     pcb_flags[pcb->pid] = 0;
+    pcb->pid = -1;
+    pcb->parent_pid = -1;
     
     /* Set TSS again */
     tss.ss0 = (uint16_t) KERNEL_DS; // segment selector for kernel data segment
-    tss.esp0 = (uint32_t) EIGHT_MB - (parent_pcb->pid) * EIGHT_KB - STACK_FENCE_SIZE; 
+    tss.esp0 = (uint32_t) parent_pcb + EIGHT_KB - STACK_FENCE_SIZE;; 
     
     /* Restore parent paging and flush tlb to update paging structure */
     setup_user_page(((parent_pcb->pid  * FOUR_MB) + EIGHT_MB) / FOUR_KB);
-
     /* Save process context (ebp, esp) then return to execute the next process */
     asm volatile ("\
         movl %%ebx, %%ebp      ;\
@@ -210,7 +269,7 @@ int32_t halt (uint8_t status) {
         jmp ret_from_halt      ;\
         "
         : 
-        : "b" (pcb->kernel_ebp), "c" (pcb->kernel_esp), "d" (status)
+        : "b" (pcb->base_ebp), "c" (pcb->base_esp), "d" (status)
     );
 
     // if we get control back then we return fail(we shouldn't ever get control back)
@@ -379,13 +438,8 @@ int32_t vidmap (uint8_t** screen_start) {
 
     if ((uint32_t) screen_start < USER_MEM_VIRTUAL_ADDR || (uint32_t) screen_start > (USER_MEM_VIRTUAL_ADDR + FOUR_MB)) return -1;
 
-    // set up page as 4kb pages
-    video_memory_page_table[USER_VIDEO_MEM_INDEX].p = 1; 
-    video_memory_page_table[USER_VIDEO_MEM_INDEX].us = 1;
-    video_memory_page_table[USER_VIDEO_MEM_INDEX].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
-    flush_tlb();
-
-    *screen_start = (uint8_t *) (USER_VIDEO_MEM_ADDRESS); 
+    // set screenstart to the process's terminal
+    *screen_start = (uint8_t *) (VIDEO + FOUR_KB * (1 + get_schedule_idx())); 
     return 0;
 }
 
