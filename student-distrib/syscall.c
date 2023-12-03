@@ -123,6 +123,15 @@ int32_t execute (const uint8_t* command) {
         :
         : "memory"
     );
+
+    asm volatile (
+        "movl %%esp, %%eax   ;\
+         movl %%ebp, %%ebx   ;\
+        "
+        : "=a" (new_pcb->kernel_esp), "=b" (new_pcb->kernel_ebp)
+        :
+        : "memory"
+    );
     
     // check for first three shell inits
     if (new_terminal_flag) {

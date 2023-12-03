@@ -168,6 +168,12 @@ void entry(unsigned long magic, unsigned long addr) {
     clear_terminal(1);
     clear_terminal(2);
     i8259_init();
+<<<<<<< HEAD
+=======
+    set_vid_mem(0);
+    clear_terminal(0);
+    new_terminal_flag = 1;
+>>>>>>> ba64433c9aaf944e661e9615e1ef8fa5e9b20c3f
     sti();
     
     /* Enable interrupts */

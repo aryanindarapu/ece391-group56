@@ -234,7 +234,23 @@ void terminal_switch (int t_idx)
     flush_tlb();
     memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4000); // copy current to storage
     
-    terminal_idx = t_idx;
+        terminal_idx = t_idx;
+        flush_tlb();
+    
+        memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000);
+        video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
+        flush_tlb();
+    }
+    else {
+        terminal_idx = t_idx;
+        flush_tlb();
+    
+        memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000);
+        video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
+        flush_tlb();
+    }
+
+    // TODO: Potential areas of page faulting
     
     memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000); // copy storage to current
     video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB; // link page
