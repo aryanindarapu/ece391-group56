@@ -338,13 +338,12 @@ void move_screen_up(void) {
 void move_screen_up_terminal(int term)
 {
     int32_t i;
-    cli();
     char* temp_video_mem = (char *)(VIDEO + FOUR_KB * (term+1));
     for (i = 0; i < (NUM_ROWS-1) * NUM_COLS; i++) {
         temp_video_mem[i<<1] = temp_video_mem[(i+NUM_COLS)<<1];
     }
     for(i = 0; i<NUM_COLS; i++) temp_video_mem[((NUM_ROWS-1) * NUM_COLS + i)<<1] = 0;
-    sti();
+    
 }
 
 /* void putc(uint8_t c);
@@ -427,6 +426,8 @@ void putc_terminal(uint8_t c, int term)
     } else if (c == '\0') {
         return;
     } else {
+        if((NUM_COLS * terminal_screen_y[term] + terminal_screen_x[term]) > 4000 || (NUM_COLS * terminal_screen_y[term] + terminal_screen_x[term]) < 0)
+            return;
         *(uint8_t *)(temp_vmem + ((NUM_COLS * terminal_screen_y[term] + terminal_screen_x[term]) << 1)) = c;
         *(uint8_t *)(temp_vmem + ((NUM_COLS * terminal_screen_y[term] + terminal_screen_x[term]) << 1) + 1) = temp_att;
         terminal_screen_x[term]++;

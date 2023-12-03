@@ -225,7 +225,7 @@ int general_protection() {
  *   SIDE EFFECTS: for now just prints the current exception that has occurred
  */ 
 int page_fault() {
-    cli();
+    sti();
     // printf("Page fault occurred\n");
     int term  = get_terminal_idx();
     putc_terminal('p',term);

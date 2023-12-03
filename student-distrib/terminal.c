@@ -58,7 +58,6 @@ void terminal_backspace()
 {
     if(buffer_idx[terminal_idx]==0) return;
     
-    cli();
     int term = terminal_idx;
     backspace(term);
     if(line_buffer[term][buffer_idx[term]] == '\t')
@@ -69,7 +68,7 @@ void terminal_backspace()
     }
     line_buffer[term][buffer_idx[term]-1] = 0;
     buffer_idx[term]--;
-    sti();
+    
 }
 
 /* terminal clear
@@ -130,28 +129,28 @@ int32_t terminal_close(int32_t fd) {
 int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
     // NOTE: this is a blocking call, so it can't be interrupted
     // printf("ACCESSED TERMINAL READ");
-    sti();
     first_shell_started = 1;
     int term = terminal_idx;
+    // sti();
     while (get_schedule_idx() != terminal_idx || enter_flag_pressed[terminal_idx] != 1){};
     
     // while (term !=get_schedule_idx()){};
     
-    cli();
-    line_buffer[terminal_idx][save_buffer_idx[terminal_idx]] = '\n';
-    save_buffer_idx[terminal_idx]++;
-    enter_flag_pressed[terminal_idx] = 0;
+    // cli();
+    line_buffer[term][save_buffer_idx[term]] = '\n';
+    save_buffer_idx[term]++;
+    enter_flag_pressed[term] = 0;
     //save_buffer_idx = buffer_idx;
-    if (nbytes < save_buffer_idx[terminal_idx]) {
-        memcpy(buf, (const void *) line_buffer[terminal_idx], nbytes);
+    if (nbytes < save_buffer_idx[term]) {
+        memcpy(buf, (const void *) line_buffer[term], nbytes);
         return nbytes;
     }
     else
     {
-        memcpy(buf, (const void *) line_buffer[terminal_idx], save_buffer_idx[terminal_idx]);
-        return save_buffer_idx[terminal_idx];
+        memcpy(buf, (const void *) line_buffer[term], save_buffer_idx[term]);
+        return save_buffer_idx[term];
     }
-    sti();
+    // sti();
     // should check for ENTER and BACKSPACE here
     return -1;
 }
@@ -162,9 +161,16 @@ int32_t terminal_read(int32_t fd, void * buf, int32_t nbytes) {
  * Function: prints the chars in input buf to screen */
 int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
     int i;
-    cli();
-    // int term = terminal_idx;
-    int term = get_schedule_idx();
+    int term;
+    if(!is_terminals_initialized())
+    {
+        term = terminal_idx;
+    }
+    else
+    {
+        term = get_schedule_idx();
+    }
+    
     for (i = 0; i < nbytes; i++) {
         if(((char*)buf)[i] == '\t')
         {
@@ -176,8 +182,8 @@ int32_t terminal_write(int32_t fd, const void * buf, int32_t nbytes) {
         else
             putc_terminal(((char*)buf)[i], term);
     }
-    sti();
     return nbytes;
+    
 }
 int get_saved_screen_x(int term)
 {
@@ -202,9 +208,8 @@ void set_saved_screen_y(int term, int y)
 void terminal_switch (int t_idx)
 {
     // if (!temp_terminal_flag) return;
-    cli();
     if(t_idx > 2 || t_idx < 0 || new_terminal_flag == 1) return;
-    if(terminal_pids[t_idx] == -1 && !is_pcb_available()) return;
+    // if(terminal_pids[t_idx] == -1 && !is_pcb_available()) return;
     // save_screen_x[terminal_idx] = get_screen_x();
     // save_screen_y[terminal_idx] = get_screen_y();
 
@@ -234,10 +239,10 @@ void terminal_switch (int t_idx)
     
     set_vid_mem(terminal_idx);
 
-    if (terminal_pids[terminal_idx] == -1) {
-        clear_terminal(terminal_idx);
-        new_terminal_flag = 1; // need to set up new terminal
-    }
+    // if (terminal_pids[terminal_idx] == -1) {
+    //     clear_terminal(terminal_idx);
+    //     new_terminal_flag = 1; // need to set up new terminal
+    // }
 
     // send_eoi(1);
     // sti();

@@ -164,6 +164,9 @@ void entry(unsigned long magic, unsigned long addr) {
     init_paging();
     init_file_system();
     init_terminals_vidmaps();
+    clear_terminal(0);
+    clear_terminal(1);
+    clear_terminal(2);
     i8259_init();
     // set_vid_mem(0);
     // clear_terminal(0);

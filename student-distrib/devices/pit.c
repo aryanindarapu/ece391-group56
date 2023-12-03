@@ -11,7 +11,14 @@ int32_t schedule_index = 0;
 int32_t init_schedule_index = 0;
 extern int new_terminal_flag;
 extern int temp_terminal_flag;
+int terminals_initialized = 0;
+int init_wait_count = 50;
+int pit_wait_count = 0;
 
+int is_terminals_initialized()
+{
+    return terminals_initialized;
+}
 /*
  *  0x40    Channel 0 data port (read/write) for the PIT
  *
@@ -25,9 +32,7 @@ extern int temp_terminal_flag;
 
 
 void init_pit() {
-    // Disable interrupts
-    cli();
-
+    
     // Select channel 0 in the mode/command register (port 0x43)
     // This also sends out the interrupt signal to PIC when count reaches 0
     // Resetting the counter and sending the signal is handled for us
@@ -45,6 +50,8 @@ void init_pit() {
 
 int get_schedule_idx()
 {
+    if(!terminals_initialized)
+        return init_schedule_index;
     return schedule_index;
 }
 
@@ -55,61 +62,37 @@ void set_schedule_idx(int index)
 
 int pit_handler () {
 
-    // send_eoi(0);
-    // return 0;
-    cli();
-    // if (is_started() == 0)
-    // {
-    //     // sti();s
-    //     send_eoi(0);
-    //     return 0;
-    //     //asm volatile ("iret");
-    // }
-
-
-    int num = 4; // NOTE: must be 4, 7, 10, 13, etc.
-
-    if (init_schedule_index == 0 || init_schedule_index == num || init_schedule_index == num * 2) {
-        schedule_index = (init_schedule_index / num) - 1;
-        terminal_switch(init_schedule_index / num);
-        temp_terminal_flag = 0;
-        // asm volatile (
-        //     "movl %%esp, %0   ;\
-        //     movl %%ebp, %1   ;\
-        //     "
-        //     : "=r" (get_pcb_ptr(init_schedule_index)->kernel_esp), "=r" (get_pcb_ptr(init_schedule_index)->kernel_ebp)
-        //     :
-        //     : "memory"
-        // );
-
-        init_schedule_index += 1;
-        execute((const uint8_t *) "shell");
-        return 0;
-    } else if (init_schedule_index == (num * 2) + 1) {
-        terminal_switch(0);
-        init_schedule_index++;
-    } else if (init_schedule_index < num * 2) {
-        init_schedule_index += 1;
+    if(!terminals_initialized)
+    {
+        if(init_schedule_index < 3 && pit_wait_count == init_wait_count)
+        {
+            new_terminal_flag = 1;
+            init_schedule_index ++;
+            pit_wait_count = 0;
+            asm volatile (
+                "movl %%esp, %0   ;\
+                movl %%ebp, %1   ;\
+                "
+                : "=r" (get_curr_pcb_ptr()->kernel_esp), "=r" (get_curr_pcb_ptr()->kernel_ebp)
+                :
+                : "memory"
+            );
+            execute((const uint8_t *) "shell");
+        }
+        else if(init_schedule_index == 3  && pit_wait_count == init_wait_count)
+        {
+            terminal_switch(0);
+            terminals_initialized = 1;
+            schedule_index = 2;
+        }
+        else
+        {
+            pit_wait_count++;
+            send_eoi(0);
+            return 0;
+        }
     }
-
-    // if (new_terminal_flag) {
-    //     // send_eoi(0);
-
-    //     schedule_index = get_terminal_idx();
-    //     temp_terminal_flag = 0;
-
-    //     // asm volatile (
-    //     //     "movl %%esp, %0   ;\
-    //     //     movl %%ebp, %1   ;\
-    //     //     "
-    //     //     : "=r" (get_pcb_ptr(get_terminal_arr(schedule_index))->kernel_esp), "=r" (get_pcb_ptr(get_terminal_arr(schedule_index))->kernel_ebp)
-    //     //     :
-    //     //     : "memory"
-    //     // );
-    //     execute((const uint8_t *) "shell");
-    //     return 0;
-    // }
-
+    
     asm volatile (
         "movl %%esp, %0   ;\
          movl %%ebp, %1   ;\
@@ -118,20 +101,17 @@ int pit_handler () {
         :
         : "memory"
     );
-    //chose which terminal to write too
-    do {
-        schedule_index++;
-        schedule_index %= 3;
-    } while (get_terminal_arr(schedule_index) == -1);
-    // set_vid_mem(schedule_index, schedule_index);//get_terminal_idx());
-    pcb_t * next_pcb = get_child_pcb(schedule_index);
+
+    schedule_index++;
+    schedule_index %= 3;
+
+    pcb_t * next_pcb = get_child_pcb(schedule_index); // bad
     tss.ss0 = (uint16_t) KERNEL_DS;
     tss.esp0 = (uint32_t) next_pcb + EIGHT_KB - STACK_FENCE_SIZE;
-    // set_vid_mem(schedule_index, get_terminal_idx());
-
-    setup_user_page(((next_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
     
-    // moved this down here so page is set up first
+    setup_user_page(((next_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
+    send_eoi(0);
+    
     asm volatile (
         "movl %%eax, %%esp   ;\
          movl %%ebx, %%ebp   ;\
@@ -140,40 +120,11 @@ int pit_handler () {
         : "a" (next_pcb->kernel_esp), "b" (next_pcb->kernel_ebp)
         : "memory"
     );
-    temp_terminal_flag = 1;
-    send_eoi(0);
-    sti();
+    
     return 0;
-    
-    // setup_user_page(((next_pcb->pid * FOUR_MB) + EIGHT_MB) / FOUR_KB);
 
-    // int output;
-    // asm volatile ("\
-    //     andl $0x00FF, %%eax     ;\
-    //     movw %%ax, %%ds         ;\
-    //     pushl %%eax             ;\
-    //     pushl %%ebx             ;\
-    //     pushfl                  ;\
-    //     pushl %%ecx             ;\
-    //     pushl %%edx             ;\
-    //     "
-    //     : "=a" (output)
-    //     : "a" (USER_DS), "b" (next_pcb->user_esp), "c" (USER_CS), "d" (next_pcb->user_eip) 
-    //     : "memory"
-    // );
-    
-    // update pcb for current process's eip esp
-    // jump with process_switch()
-    // set up iret context for rest
-    // send_eoi(0);
-    // return 0;
-    // cli();
-    // process_switch(schedule_index);
-    // schedule_index = (schedule_index + 1) % 3;
-    // sti();
-    // send_eoi(0);
-    // return 0;
-    //process_switch();
 }
+
+
 
 

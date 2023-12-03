@@ -22,7 +22,8 @@ extern int new_terminal_flag;
  */
 int32_t execute (const uint8_t* command) {
     if(!is_pcb_available() || command == NULL) return -1;
-    cli();
+    // cli();
+
     int i;
     
     uint8_t filename[128];
@@ -134,10 +135,12 @@ int32_t execute (const uint8_t* command) {
         : "memory"
     );
     
-    if (new_pid_idx == 0 || new_terminal_flag) {
+    if (new_terminal_flag) {
         new_pcb->parent_pid = -1;
-        set_terminal_arr(terminal_idx, new_pid_idx);
         new_terminal_flag = 0; // reset flag
+        set_terminal_arr(new_pid_idx, new_pid_idx);
+        terminal_switch(new_pid_idx);
+        clear_terminal(new_pid_idx);
         send_eoi(0);
     } else {
         new_pcb->parent_pid = get_curr_pcb_ptr()->pid; // point to parent PCB pointer
@@ -146,7 +149,7 @@ int32_t execute (const uint8_t* command) {
 
     int32_t output;
     /* enable interrupts*/
-    sti();
+    // sti();
     // stack swap
     // asm volatile (
     //     "movl %%eax, %%esp   ;\
@@ -157,17 +160,30 @@ int32_t execute (const uint8_t* command) {
     //     : "memory"
     // );
     // sets up DS, ESP, EFLAGS, CS, EIP onto stack for context switch
+    
+    asm volatile (
+        "movl %%esp, %0   ;\
+         movl %%ebp, %1   ;\
+        "
+        : "=r" (new_pcb->kernel_esp), "=r" (new_pcb->kernel_ebp)
+        :
+        : "memory"
+    );
+
     asm volatile ("\
         andl $0x00FF, %%eax     ;\
         movw %%ax, %%ds         ;\
         pushl %%eax             ;\
         pushl %%ebx             ;\
         pushfl                  ;\
+        popl %%eax              ;\
+        orl $0x200, %%eax       ;\
+        pushl %%eax             ;\
         pushl %%ecx             ;\
         pushl %%edx             ;\
         iret                    ;\
         "
-        :
+        : 
         : "a" (USER_DS), "b" (user_esp), "c" (USER_CS), "d" (user_eip) 
         : "memory"
     );
@@ -186,7 +202,7 @@ int32_t execute (const uint8_t* command) {
         return EXCEPTION_OCCURRED_VAL; 
     }
 
-    sti();
+    // sti();
     return output;
 }
 
@@ -200,7 +216,7 @@ int32_t execute (const uint8_t* command) {
  */
 int32_t halt (uint8_t status) {
     // When closing, do I need to check if current PCB has any child PCBs?
-    cli();
+    // cli();
     pcb_t * pcb = get_curr_pcb_ptr();
     /* push user context if its base shell since we have no processes left */
     // TODO: change this when dynamically loading shells
@@ -216,6 +232,9 @@ int32_t halt (uint8_t status) {
             pushl %%eax             ;\
             pushl %%ebx             ;\
             pushfl                  ;\
+            popl %%eax              ;\
+            orl $0x200, %%eax       ;\
+            pushl %%eax             ;\
             pushl %%ecx             ;\
             pushl %%edx             ;\
             iret                    ;\

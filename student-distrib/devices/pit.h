@@ -15,5 +15,6 @@ int pit_handler();//int eip, int esp);
 void init_pit();
 int get_schedule_idx();
 void set_schedule_idx(int index);
+int is_terminals_initialized();
 
 #endif
