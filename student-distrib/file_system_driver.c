@@ -129,7 +129,7 @@ int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
 
     /* fill out the buffer based given the number of dentrys from boot_block */
     dentry_t cur_file = boot_block_ptr->dir_entries[pcb->file_desc_arr[fd].file_pos];
-    if (nbytes > FILENAME_SIZE) return -1;
+
     int i;
     for (i = 0; i < nbytes; i++) {
         ((char *) buf)[i] = cur_file.file_name[i];
