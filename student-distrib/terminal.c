@@ -219,16 +219,17 @@ void set_saved_screen_y(int term, int y)
 void terminal_switch (int t_idx)
 {
     if(t_idx > 2 || t_idx < 0 || new_terminal_flag == 1) return;
+    int old_vmem_addr = VIDEO / FOUR_KB + 1 + terminal_idx;
+    int new_vmem_addr = VIDEO / FOUR_KB + 1 + t_idx;
 
-
-    video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx; // unlink page
+    video_memory_page_table[old_vmem_addr].base_31_12 = old_vmem_addr; // unlink page
     flush_tlb();
-    memcpy((void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), (void *) VIDEO, 4000); // copy current to storage
+    memcpy((void *) (old_vmem_addr * FOUR_KB), (void *) VIDEO, 4000); // copy current to storage
     
     terminal_idx = t_idx;
 
-    memcpy((void *) VIDEO, (void *) (VIDEO + FOUR_KB * (terminal_idx + 1)), 4000);
-    video_memory_page_table[VIDEO_ADDRESS / FOUR_KB + 1 + terminal_idx].base_31_12 = VIDEO_ADDRESS / FOUR_KB;
+    memcpy((void *) VIDEO, (void *) (new_vmem_addr * FOUR_KB), 4000);
+    video_memory_page_table[new_vmem_addr].base_31_12 = VIDEO / FOUR_KB;
     flush_tlb();
     
     set_vid_mem(terminal_idx); // update cursor this function is stupid
@@ -241,15 +242,15 @@ void terminal_switch (int t_idx)
 void init_terminals_vidmaps()
 {
     // 8kb to 20kb is terminal vmem
-    video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].p = 1; 
-    video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].us = 1;
-    video_memory_page_table[1 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = VIDEO / FOUR_KB; 
-    video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].p = 1; 
-    video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].us = 1;
-    video_memory_page_table[2 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = 2 + (VIDEO_ADDRESS / FOUR_KB);
-    video_memory_page_table[3 + (VIDEO_ADDRESS / FOUR_KB)].p = 1; 
-    video_memory_page_table[3 + (VIDEO_ADDRESS / FOUR_KB)].us = 1;
-    video_memory_page_table[3 + (VIDEO_ADDRESS / FOUR_KB)].base_31_12 = 3 + (VIDEO_ADDRESS / FOUR_KB);
+    video_memory_page_table[1 + (VIDEO / FOUR_KB)].p = 1; 
+    video_memory_page_table[1 + (VIDEO / FOUR_KB)].us = 1;
+    video_memory_page_table[1 + (VIDEO / FOUR_KB)].base_31_12 = VIDEO / FOUR_KB; 
+    video_memory_page_table[2 + (VIDEO / FOUR_KB)].p = 1; 
+    video_memory_page_table[2 + (VIDEO / FOUR_KB)].us = 1;
+    video_memory_page_table[2 + (VIDEO / FOUR_KB)].base_31_12 = 2 + (VIDEO / FOUR_KB);
+    video_memory_page_table[3 + (VIDEO / FOUR_KB)].p = 1; 
+    video_memory_page_table[3 + (VIDEO / FOUR_KB)].us = 1;
+    video_memory_page_table[3 + (VIDEO / FOUR_KB)].base_31_12 = 3 + (VIDEO / FOUR_KB);
     flush_tlb();
 }
 

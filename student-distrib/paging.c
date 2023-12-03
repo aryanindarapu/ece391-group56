@@ -60,7 +60,7 @@ void init_paging () {
 
     /* setup page table for video memory (the one for PDE #0) */
     for (i = 0; i < NUM_ENTRIES; i++) {
-        if(i == VIDEO_ADDRESS / FOUR_KB) {
+        if(i == VIDEO / FOUR_KB) {
             video_memory_page_table[i].p = 1;
         }
         else{
