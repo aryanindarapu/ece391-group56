@@ -1,8 +1,8 @@
-# KerML: A Linux-Based Kernel Simplified With ML
-Built off of UIUC's ECE 391 Kernel OS. The OS was emulated on Qemu on x86-32 archiecture. A demo can be seen here:
+# KerML: Integrating a Linux Kernel with NLP
+Built off of UIUC's ECE 391 Kernel OS. The OS is a based off of Linux (a very early version) and implements several basic systems concepts. It can be emulated on Qemu and uses x86-32 architecture. A demo can be seen here:
 
-## List of Functionalities
-The following functionalities have been implemented during the development of this OS:
+## List of Features
+The following features have been implemented during the development of this OS:
 - Initializing GDT, IDT, and TSS
 - Read-only Ext2-like filesystem
 - Several devices connected to the PIC (including RTC, keyboard, and PIT)
